@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, date, integer } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text().primaryKey(),
@@ -58,4 +58,16 @@ export const verification = pgTable("verification", {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
+});
+
+export const relocation = pgTable("relocation", {
+  id: text("id").primaryKey().notNull(),
+  relocationDate: date().notNull(),
+  relocationYear: integer(),
+  companyName: text().notNull(),
+  employeeRange: text(),
+  companyType: text(),
+  industryCluster: text(),
+  fromLocation: text().array().notNull(), 
+  toLocation: text().array().notNull(),
 });
