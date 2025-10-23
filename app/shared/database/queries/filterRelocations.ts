@@ -1,4 +1,3 @@
-import { sql } from "drizzle-orm";
 import { db } from "../index.ts";
 
 export async function filterRelocations(filters: {
@@ -9,18 +8,11 @@ export async function filterRelocations(filters: {
     toLocation?: string[];
 }) {
     const where = {
-        AND: [
-            ...(filters.years?.length ? [{ relocationYear: { in: filters.years } }] : []),
-            ...(filters.companyTypes?.length ? [{ companyType: { in: filters.companyTypes } }] : []),
-            ...(filters.industryClusters?.length ? [{ industryCluster: { in: filters.industryClusters } }] : []),
-            ...(filters.fromLocation?.length ? filters.fromLocation.map((value) => ({ 
-                RAW: (table: { fromLocation: any; }) => sql`${value} = ANY(${table.fromLocation})`
-            })) : []),
-            ...(filters.toLocation?.length ? filters.toLocation.map((value) => ({ 
-                RAW: (table: { toLocation: any; }) => sql`${value} = ANY(${table.toLocation})`
-            })) : [])
-        ]
-        
+        relocationYear: { in: filters.years },
+        companyType: { in: filters.companyTypes },
+        industryCluster: { in: filters.industryClusters },
+        fromLocation: { arrayContains: filters.fromLocation },
+        toLocation: { arrayContains: filters.toLocation },
     } 
     const result = await db.query.relocation.findMany({where});
     return result;
