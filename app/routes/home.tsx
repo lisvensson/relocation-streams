@@ -1,4 +1,3 @@
-import { Link } from "react-router";
 import { userSessionContext } from "~/context/userSessionContext";
 
 export async function loader({ context }: { context: any }) {

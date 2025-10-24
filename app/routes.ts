@@ -5,5 +5,6 @@ export default [
     route("api/auth/*", "routes/auth.ts"),
     layout("./routes/shell.tsx", [
         index("routes/home.tsx"),
+        route("relocations", "./routes/Relocations.tsx"),
     ])
 ] satisfies RouteConfig;
