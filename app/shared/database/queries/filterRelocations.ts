@@ -11,8 +11,8 @@ export async function filterRelocations(filters: {
         relocationYear: filters.years?.length ? { in: filters.years } : undefined,
         companyType: filters.companyTypes?.length ? { in: filters.companyTypes } : undefined,
         industryCluster: filters.industryClusters?.length ? { in: filters.industryClusters } : undefined,
-        fromLocation: filters.fromLocation?.[0] ? { arrayContains: filters.fromLocation } : undefined,
-        toLocation: filters.toLocation?.[0] ? { arrayContains: filters.toLocation } : undefined,
+        fromLocation: filters.fromLocation?.filter(Boolean).length ? { arrayContains: filters.fromLocation.filter(Boolean) } : undefined,
+        toLocation: filters.toLocation?.filter(Boolean).length ? { arrayContains: filters.toLocation.filter(Boolean) } : undefined,
     }; 
     const result = await db.query.relocation.findMany({where});
     return result;

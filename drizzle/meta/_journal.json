@@ -15,6 +15,13 @@
       "when": 1760704186809,
       "tag": "0001_reflective_bishop",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1761310688470,
+      "tag": "0002_unusual_skreet",
+      "breakpoints": true
     }
   ]
 }

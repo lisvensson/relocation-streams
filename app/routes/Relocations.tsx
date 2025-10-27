@@ -16,15 +16,13 @@ export async function loader({ request }: Route.LoaderArgs) {
     const years = searchParams.getAll("years").map(Number);
     const companyTypes = searchParams.getAll("companyTypes").map(String);
     const industryClusters = searchParams.getAll("industryClusters").map(String);
-    const fromLocation = searchParams.getAll("fromLocation").map(String);
-    const toLocation = searchParams.getAll("toLocation").map(String);
+    const location = searchParams.getAll("location").map(String);
 
     const filters = {
         years: years,
         companyTypes: companyTypes,
         industryClusters: industryClusters,
-        fromLocation: fromLocation,
-        toLocation: toLocation,
+        toLocation: location    
     };
 
     console.log(filters)
@@ -49,7 +47,7 @@ export default function Relocations({ loaderData }: Route.ComponentProps) {
                             type="checkbox"
                             name="years"
                             value={year}
-                            defaultChecked={searchParams.getAll("years").includes(String(year))}
+                            defaultChecked={searchParams.has("years", String(year))}
                             className="mr-2"
                         />
                         {year}
@@ -64,7 +62,7 @@ export default function Relocations({ loaderData }: Route.ComponentProps) {
                             type="checkbox"
                             name="companyTypes"
                             value={type}
-                            defaultChecked={searchParams.getAll("companyTypes").includes(String(type))}
+                            defaultChecked={searchParams.has("companyTypes", type)}
                             className="mr-2"
                         />
                         {type}
@@ -79,7 +77,7 @@ export default function Relocations({ loaderData }: Route.ComponentProps) {
                             type="checkbox"
                             name="industryClusters"
                             value={cluster}
-                            defaultChecked={searchParams.getAll("industryClusters").includes(String(cluster))}
+                            defaultChecked={searchParams.has("industryClusters", cluster)}
                             className="mr-2"
                         />
                         {cluster}
@@ -87,25 +85,10 @@ export default function Relocations({ loaderData }: Route.ComponentProps) {
                     ))}
                 </fieldset>
                 <fieldset className="border border-gray-300 rounded-md p-4">
-                    <legend className="font-semibold mb-2">Från område</legend>
+                    <legend className="font-semibold mb-2">Område</legend>
                     <select
-                        name="fromLocation"
-                        defaultValue={searchParams.get("fromLocation") ?? ""}
-                        className="w-full p-2 border border-gray-300 rounded-md"
-                    >
-                        <option value="">Välj område</option>
-                        {filterOptions.locations.map((location) => (
-                        <option key={location} value={location}>
-                            {location}
-                        </option>
-                        ))}
-                    </select>
-                </fieldset>
-                <fieldset className="border border-gray-300 rounded-md p-4">
-                    <legend className="font-semibold mb-2">Till område</legend>
-                    <select
-                        name="toLocation"
-                        defaultValue={searchParams.get("toLocation") ?? ""}
+                        name="location"
+                        defaultValue={searchParams.get("location") ?? ""}
                         className="w-full p-2 border border-gray-300 rounded-md"
                     >
                         <option value="">Välj område</option>

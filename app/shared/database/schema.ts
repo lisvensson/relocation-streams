@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { pgTable, text, timestamp, boolean, date, integer } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -63,8 +64,7 @@ export const verification = pgTable("verification", {
 export const relocation = pgTable("relocation", {
   id: text("id").primaryKey().notNull(),
   relocationDate: date().notNull(),
-  relocationYear: integer(),
-  companyName: text().notNull(),
+  relocationYear: integer().generatedAlwaysAs(sql`EXTRACT(YEAR FROM relocation_date)`),
   employeeRange: text(),
   companyType: text(),
   industryCluster: text(),
