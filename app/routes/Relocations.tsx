@@ -1,6 +1,20 @@
 import { Form, useSearchParams } from "react-router";
 import type { Route } from "./+types/Relocations";
 import { filterRelocations } from "~/shared/database/queries/filterRelocations";
+import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "~/components/ui/chart";
+import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+
+function createChartConfig(diagram: {
+    axis: { y: { label: string; dataKey: string } };
+}): Record<string, { label: string; color: string }> {
+    return {
+        [diagram.axis.y.dataKey]: {
+            label: diagram.axis.y.label,
+            color: "var(--chart-1)",
+        },
+    }
+}
 
 export async function loader({ request }: Route.LoaderArgs) {
     const filterOptions = {
@@ -28,12 +42,40 @@ export async function loader({ request }: Route.LoaderArgs) {
     console.log(filters)
 
     const result = await filterRelocations(filters);
-    return { filterOptions, success: true, result };
+
+    const yearMap = new Map();
+
+    for (const item of result) {
+        const year = item.relocationYear;
+        if (year != null) {
+            yearMap.set(year, (yearMap.get(year) || 0) + 1);
+        }
+    };
+
+    const chartData = Array.from(yearMap, ([year, relocations]) => ({
+        year,
+        relocations,
+    })).sort((a, b) => (a.year) - (b.year));
+
+    const diagram = {
+        title: `Flyttar per år till ${location}`,
+        type: "bar",
+        axis: {
+            x: { label: "År", dataKey: "year" },
+            y: { label: "Antal flyttar", dataKey: "relocations" },
+        },
+       chartData,
+    };
+
+    const chartConfig = createChartConfig(diagram);
+    console.log("diagram: ", diagram);
+    console.log("chartConfig: ", chartConfig);
+    return { filterOptions, success: true, result, diagram, chartConfig};
 }
 
 export default function Relocations({ loaderData }: Route.ComponentProps) {
     const [searchParams] = useSearchParams();
-    const { filterOptions, success, result } = loaderData;
+    const { filterOptions, success, result, diagram, chartConfig } = loaderData;
 
     return (
         <div className="max-w-xl mx-auto px-4 py-8 font-sans">
@@ -120,6 +162,42 @@ export default function Relocations({ loaderData }: Route.ComponentProps) {
             )}
             {success && result.length === 0 && (
                 <p className="mt-6 text-gray-500">Inga resultat hittades.</p>
+            )}
+            {success && diagram?.chartData?.length > 0 && (
+                <Card className="mt-10">
+                    <CardHeader className="mb-10">
+                        <CardTitle>{diagram.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ChartContainer config={chartConfig}>
+                            <BarChart data={diagram.chartData}>
+                                <CartesianGrid vertical={false} />
+                                <YAxis
+                                    dataKey={diagram.axis.y.dataKey}
+                                    tickLine={false}
+                                    tickMargin={10}
+                                    axisLine={false}
+                                />
+                                <XAxis
+                                    dataKey={diagram.axis.x.dataKey}
+                                    tickLine={false}
+                                    tickMargin={10}
+                                    axisLine={false}
+                                />
+                                <ChartTooltip
+                                    cursor={false}
+                                    content={<ChartTooltipContent/>}
+                                />
+                                <ChartLegend content={<ChartLegendContent />} />
+                                <Bar
+                                    dataKey={diagram.axis.y.dataKey}
+                                    fill={chartConfig.relocations.color}
+                                    radius={8}
+                                />
+                            </BarChart>
+                        </ChartContainer>
+                    </CardContent>            
+                </Card>
             )}
         </div>
     );
