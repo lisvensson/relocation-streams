@@ -16,8 +16,8 @@ export async function countRelocationsBy(column: PgColumn, filters: FilterType) 
         filters.years?.length ? inArray(relocation.relocationYear, filters.years) : undefined,
         filters.companyTypes?.length ? inArray(relocation.companyType, filters.companyTypes) : undefined,
         filters.industryClusters?.length ? inArray(relocation.industryCluster, filters.industryClusters) : undefined,
-        filters.fromLocation?.length ? arrayContains(relocation.toLocation, filters.fromLocation) : undefined,
-        filters.toLocation?.length ? arrayContains(relocation.toLocation, filters.toLocation) : undefined
+        filters.fromLocation?.filter(Boolean).length ? arrayContains(relocation.toLocation, filters.fromLocation.filter(Boolean)) : undefined,
+        filters.toLocation?.filter(Boolean).length ? arrayContains(relocation.toLocation, filters.toLocation.filter(Boolean)) : undefined
     );
 
     const result = await db
