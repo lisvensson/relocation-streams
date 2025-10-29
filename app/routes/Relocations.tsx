@@ -1,9 +1,10 @@
 import { Form, useSearchParams } from "react-router";
 import type { Route } from "./+types/Relocations";
-import { filterRelocations } from "~/shared/database/queries/filterRelocations";
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "~/components/ui/chart";
-import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { countRelocationsBy } from "~/shared/database/queries/countRelocationsBy";
+import { relocation } from "~/shared/database/schema";
 
 function createChartConfig(diagram: {
     axis: { y: { label: string; dataKey: string } };
@@ -22,6 +23,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         companyTypes: ["AB", "EF", "HB"],
         industryClusters: ["AI", "Design", "Healthcare", "IT", "Tech"],
         locations: ["Eskilstuna", "Stockholm", "Göteborg", "Örebro", "Gävle"],
+        //locations: ["Kalmar län", "Örebro län", "Skåne län", "Stockholms län", "Uppsala län", "Västra Götalands län"]
     };
 
     const url = new URL(request.url);
@@ -41,21 +43,15 @@ export async function loader({ request }: Route.LoaderArgs) {
 
     console.log(filters)
 
-    const result = await filterRelocations(filters);
+    const result = await countRelocationsBy(relocation.relocationYear, filters);
+    console.log("Result: ", result)
 
-    const yearMap = new Map();
-
-    for (const item of result) {
-        const year = item.relocationYear;
-        if (year != null) {
-            yearMap.set(year, (yearMap.get(year) || 0) + 1);
-        }
-    };
-
-    const chartData = Array.from(yearMap, ([year, relocations]) => ({
-        year,
-        relocations,
-    })).sort((a, b) => (a.year) - (b.year));
+    const chartData = result.map((r) => {
+        return {
+            year: r.key, 
+            relocations: r.value
+        }   
+    })
 
     const diagram = {
         title: `Flyttar per år till ${location}`,
@@ -70,6 +66,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     const chartConfig = createChartConfig(diagram);
     console.log("diagram: ", diagram);
     console.log("chartConfig: ", chartConfig);
+    console.log("chartData", diagram.chartData);
+
     return { filterOptions, success: true, result, diagram, chartConfig};
 }
 
