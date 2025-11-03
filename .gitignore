@@ -2,6 +2,7 @@
 .env
 /node_modules/
 docker-compose.yml
+/data/
 
 # React Router
 /.react-router/

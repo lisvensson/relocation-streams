@@ -1,28 +1,31 @@
-import { Form, Link, useNavigate } from "react-router";
-import { authClient } from "~/shared/auth/client";
+import { Form, Link, useNavigate } from 'react-router'
+import { authClient } from '~/shared/auth/client'
 
 type Props = {
-  isLoggedIn: boolean;
-};
+  isLoggedIn: boolean
+}
 
 export default function Navbar({ isLoggedIn }: Props) {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const handleSignOut = async () => {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          navigate("/");
+          navigate('/')
         },
       },
     })
   }
-  
+
   return (
     <nav className="bg-white border-b border-gray-200 px-4 py-3">
       <div className="max-w-5xl mx-auto flex items-center justify-between">
         <div className="flex-1">
-          <Link to="/" className="text-lg font-semibold text-indigo-600 hover:text-indigo-800">
+          <Link
+            to="/"
+            className="text-lg font-semibold text-indigo-600 hover:text-indigo-800"
+          >
             Hem
           </Link>
         </div>
@@ -31,8 +34,8 @@ export default function Navbar({ isLoggedIn }: Props) {
             <Form
               method="post"
               onSubmit={(event) => {
-                event.preventDefault(); 
-                handleSignOut();
+                event.preventDefault()
+                handleSignOut()
               }}
             >
               <button
@@ -43,12 +46,15 @@ export default function Navbar({ isLoggedIn }: Props) {
               </button>
             </Form>
           ) : (
-            <Link to="/signin" className="text-sm font-medium text-indigo-600 hover:text-indigo-800">
+            <Link
+              to="/signin"
+              className="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+            >
               Logga in
             </Link>
           )}
         </div>
       </div>
     </nav>
-  );
+  )
 }

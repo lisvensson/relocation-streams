@@ -1,7 +1,15 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, date, integer } from "drizzle-orm/pg-core";
+import { sql } from 'drizzle-orm'
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  date,
+  integer,
+  uuid,
+} from 'drizzle-orm/pg-core'
 
-export const user = pgTable("user", {
+export const user = pgTable('user', {
   id: text().primaryKey(),
   name: text().notNull(),
   email: text().notNull().unique(),
@@ -12,9 +20,9 @@ export const user = pgTable("user", {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
-});
+})
 
-export const session = pgTable("session", {
+export const session = pgTable('session', {
   id: text().primaryKey(),
   expiresAt: timestamp().notNull(),
   token: text().notNull().unique(),
@@ -26,16 +34,16 @@ export const session = pgTable("session", {
   userAgent: text(),
   userId: text()
     .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-});
+    .references(() => user.id, { onDelete: 'cascade' }),
+})
 
-export const account = pgTable("account", {
+export const account = pgTable('account', {
   id: text().primaryKey(),
   accountId: text().notNull(),
   providerId: text().notNull(),
   userId: text()
     .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
+    .references(() => user.id, { onDelete: 'cascade' }),
   accessToken: text(),
   refreshToken: text(),
   idToken: text(),
@@ -47,9 +55,9 @@ export const account = pgTable("account", {
   updatedAt: timestamp()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
-});
+})
 
-export const verification = pgTable("verification", {
+export const verification = pgTable('verification', {
   id: text().primaryKey(),
   identifier: text().notNull(),
   value: text().notNull(),
@@ -59,15 +67,23 @@ export const verification = pgTable("verification", {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
-});
+})
 
-export const relocation = pgTable("relocation", {
-  id: text("id").primaryKey().notNull(),
+export const relocation = pgTable('relocation', {
+  id: uuid().notNull(),
   relocationDate: date().notNull(),
-  relocationYear: integer().generatedAlwaysAs(sql`EXTRACT(YEAR FROM relocation_date)`),
+  relocationYear: integer().generatedAlwaysAs(
+    sql`EXTRACT(YEAR FROM relocation_date)`
+  ),
   employeeRange: text(),
   companyType: text(),
   industryCluster: text(),
-  fromLocation: text().array().notNull(), 
+  fromLocation: text().array().notNull(),
   toLocation: text().array().notNull(),
-});
+  fromPostalArea: text(),
+  toPostalArea: text(),
+  fromMunicipality: text(),
+  toMunicipality: text(),
+  fromCounty: text(),
+  toCounty: text(),
+})
