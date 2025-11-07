@@ -10,11 +10,13 @@ export type DiagramFilter = {
 
 export type Diagram = {
   title: string
-  type: 'composed'
-  axis: {
-    x: { label: string; dataKey: string }
-    y: { label: string }
-  }
+  type: string
+  axis:
+    | {
+        x: { label: string; dataKey: string }
+        y: { label: string }
+      }
+    | {}
   parts: DiagramPart[]
   chartData: Record<string, string | number>[]
 }
@@ -32,4 +34,16 @@ export type DiagramPart =
       dataKey: string
       positiveColor: string
       negativeColor: string
+    }
+  | {
+      type: 'line'
+      label: string
+      dataKey: string
+      color: string
+    }
+  | {
+      type: 'pie'
+      dataKey: string
+      nameKey: string
+      color: string[]
     }
