@@ -7,6 +7,7 @@ import {
   date,
   integer,
   uuid,
+  index,
 } from 'drizzle-orm/pg-core'
 
 export const user = pgTable('user', {
@@ -69,21 +70,31 @@ export const verification = pgTable('verification', {
     .notNull(),
 })
 
-export const relocation = pgTable('relocation', {
-  id: uuid().notNull(),
-  relocationDate: date().notNull(),
-  relocationYear: integer().generatedAlwaysAs(
-    sql`EXTRACT(YEAR FROM relocation_date)`
-  ),
-  employeeRange: text(),
-  companyType: text(),
-  industryCluster: text(),
-  fromLocation: text().array().notNull(),
-  toLocation: text().array().notNull(),
-  fromPostalArea: text(),
-  toPostalArea: text(),
-  fromMunicipality: text(),
-  toMunicipality: text(),
-  fromCounty: text(),
-  toCounty: text(),
-})
+export const relocation = pgTable(
+  'relocation',
+  {
+    id: uuid().notNull(),
+    relocationDate: date().notNull(),
+    relocationYear: integer().generatedAlwaysAs(
+      sql`EXTRACT(YEAR FROM relocation_date)`
+    ),
+    employeeRange: text(),
+    companyType: text(),
+    industryCluster: text(),
+    fromLocation: text().array().notNull(),
+    toLocation: text().array().notNull(),
+    fromPostalArea: text(),
+    toPostalArea: text(),
+    fromMunicipality: text(),
+    toMunicipality: text(),
+    fromCounty: text(),
+    toCounty: text(),
+  },
+  (table) => {
+    return [
+      index().on(table.fromMunicipality),
+      index().on(table.fromLocation),
+      index().on(table.toLocation),
+    ]
+  }
+)

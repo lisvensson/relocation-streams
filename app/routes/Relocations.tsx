@@ -31,8 +31,10 @@ import {
 } from '~/components/charts/barCharts'
 import {
   relocationsFromByYearLineChart,
+  relocationsFromByYearToLocationVolumeLineChart,
   relocationsToAndFromLineChart,
   relocationsToByYearByEmployeeRangeVolumeLineChart,
+  relocationsToByYearFromLocationVolumeLineChart,
   relocationsToByYearVolumeLineChart,
 } from '~/components/charts/lineCharts'
 import { relocationsIndustryClusterPieChart } from '~/components/charts/pieCharts'
@@ -123,8 +125,10 @@ export async function loader({ request }: Route.LoaderArgs) {
   const diagrams = await Promise.all([
     relocationsToByYearBarChart(filters),
     relocationsToByYearVolumeLineChart(filters),
+    relocationsToByYearFromLocationVolumeLineChart(filters),
     relocationsFromByYearBarChart(filters),
     relocationsFromByYearLineChart(filters),
+    relocationsFromByYearToLocationVolumeLineChart(filters),
     relocationsToAndFromLineChart(filters),
     netMovesByYearBarChart(filters),
     netMovesTotalBarChart(filters),

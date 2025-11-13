@@ -1,5 +1,4 @@
 import { and, arrayContains, count, inArray, asc, sql } from 'drizzle-orm'
-import { entry } from 'virtual:react-router/server-build'
 import type {
   Diagram,
   DiagramGenerator,
@@ -7,6 +6,10 @@ import type {
 } from '~/models/diagramModels'
 import { db } from '~/shared/database'
 import { relocation } from '~/shared/database/schema'
+
+const uniqueValues = (values) => {
+  return Array.from(new Set(values))
+}
 
 //Flyttar per år till location volym line chart
 export const relocationsToByYearVolumeLineChart: DiagramGenerator = async (
@@ -65,6 +68,103 @@ export const relocationsToByYearVolumeLineChart: DiagramGenerator = async (
   return diagram
 }
 
+//Inflyttar per år från plats till ${location} volym line chart
+export const relocationsToByYearFromLocationVolumeLineChart: DiagramGenerator =
+  async (filters) => {
+    const where = and(
+      filters.years?.length
+        ? inArray(relocation.relocationYear, filters.years)
+        : undefined,
+      filters.employeeRange?.length
+        ? inArray(relocation.employeeRange, filters.employeeRange)
+        : undefined,
+      filters.companyTypes?.length
+        ? inArray(relocation.companyType, filters.companyTypes)
+        : undefined,
+      filters.industryClusters?.length
+        ? inArray(relocation.industryCluster, filters.industryClusters)
+        : undefined,
+      filters.location?.length
+        ? arrayContains(relocation.toLocation, [filters.location])
+        : undefined
+    )
+
+    const result = await db
+      .select({ key: relocation.relocationYear, value: count() })
+      .from(relocation)
+      .where(where)
+      .groupBy(relocation.relocationYear)
+      .orderBy(asc(relocation.relocationYear))
+
+    const resultByLocation = await db
+      .select({
+        key: relocation.relocationYear,
+        fromLocation: relocation.fromMunicipality,
+        value: count(),
+      })
+      .from(relocation)
+      .where(where)
+      .groupBy(relocation.relocationYear, relocation.fromMunicipality)
+      .orderBy(asc(relocation.relocationYear))
+
+    const resultTotalFromLocation = await db
+      .select({
+        fromLocation: relocation.fromMunicipality,
+        value: count(),
+      })
+      .from(relocation)
+      .where(where)
+      .groupBy(relocation.fromMunicipality)
+
+    resultTotalFromLocation.sort((a, b) => b.value - a.value)
+    const topLocations = resultTotalFromLocation.slice(0, 10)
+
+    const years = result.map((r) => r.key)
+
+    const chartData = []
+
+    for (const year of years) {
+      const yearData = {
+        year: year,
+        totalRelocations: result.find((row) => row.key === year)?.value ?? 0,
+      }
+
+      const filteredRows = resultByLocation.filter((row) => row.key === year)
+      for (const row of filteredRows) {
+        yearData[row.fromLocation] = row.value
+      }
+      chartData.push(yearData)
+    }
+
+    const locationNames = topLocations.map((r) => r.fromLocation)
+    const uniqueLocationNames = uniqueValues(locationNames)
+
+    const parts = []
+
+    for (const name of uniqueLocationNames) {
+      const part = {
+        type: 'line',
+        label: `Till ${name}`,
+        dataKey: name,
+        color: 'var(--chart-2)',
+      }
+      parts.push(part)
+    }
+
+    const diagram: Diagram = {
+      title: `Inflyttar per år från plats till ${filters.location} (volym)`,
+      type: 'line',
+      axis: {
+        x: { label: 'År', dataKey: 'year' },
+        y: { label: 'Antal flyttar' },
+      },
+      parts,
+      chartData,
+    }
+
+    return diagram
+  }
+
 //Flyttar per år från location volym line chart
 export const relocationsFromByYearLineChart: DiagramGenerator = async (
   filters
@@ -121,6 +221,103 @@ export const relocationsFromByYearLineChart: DiagramGenerator = async (
 
   return diagram
 }
+
+//Utflyttar per år till plats från ${location} volym line chart
+export const relocationsFromByYearToLocationVolumeLineChart: DiagramGenerator =
+  async (filters) => {
+    const where = and(
+      filters.years?.length
+        ? inArray(relocation.relocationYear, filters.years)
+        : undefined,
+      filters.employeeRange?.length
+        ? inArray(relocation.employeeRange, filters.employeeRange)
+        : undefined,
+      filters.companyTypes?.length
+        ? inArray(relocation.companyType, filters.companyTypes)
+        : undefined,
+      filters.industryClusters?.length
+        ? inArray(relocation.industryCluster, filters.industryClusters)
+        : undefined,
+      filters.location?.length
+        ? arrayContains(relocation.fromLocation, [filters.location])
+        : undefined
+    )
+
+    const result = await db
+      .select({ key: relocation.relocationYear, value: count() })
+      .from(relocation)
+      .where(where)
+      .groupBy(relocation.relocationYear)
+      .orderBy(asc(relocation.relocationYear))
+
+    const resultByLocation = await db
+      .select({
+        key: relocation.relocationYear,
+        toLocation: relocation.toMunicipality,
+        value: count(),
+      })
+      .from(relocation)
+      .where(where)
+      .groupBy(relocation.relocationYear, relocation.toMunicipality)
+      .orderBy(asc(relocation.relocationYear))
+
+    const resultTotalToLocation = await db
+      .select({
+        toLocation: relocation.toMunicipality,
+        value: count(),
+      })
+      .from(relocation)
+      .where(where)
+      .groupBy(relocation.toMunicipality)
+
+    resultTotalToLocation.sort((a, b) => b.value - a.value)
+    const topLocations = resultTotalToLocation.slice(0, 10)
+
+    const years = result.map((r) => r.key)
+
+    const chartData = []
+
+    for (const year of years) {
+      const yearData = {
+        year: year,
+        totalRelocations: result.find((row) => row.key === year)?.value ?? 0,
+      }
+
+      const filteredRows = resultByLocation.filter((row) => row.key === year)
+      for (const row of filteredRows) {
+        yearData[row.toLocation] = row.value
+      }
+      chartData.push(yearData)
+    }
+
+    const locationNames = topLocations.map((r) => r.toLocation)
+    const uniqueLocationNames = uniqueValues(locationNames)
+
+    const parts = []
+
+    for (const name of uniqueLocationNames) {
+      const part = {
+        type: 'line',
+        label: `Till ${name}`,
+        dataKey: name,
+        color: 'var(--chart-2)',
+      }
+      parts.push(part)
+    }
+
+    const diagram: Diagram = {
+      title: `Utflyttar per år till plats från ${filters.location} (volym)`,
+      type: 'line',
+      axis: {
+        x: { label: 'År', dataKey: 'year' },
+        y: { label: 'Antal flyttar' },
+      },
+      parts,
+      chartData,
+    }
+
+    return diagram
+  }
 
 //Flyttar per år till och från location volym line chart
 export const relocationsToAndFromLineChart: DiagramGenerator = async (
@@ -252,29 +449,37 @@ export const relocationsToByYearByEmployeeRangeVolumeLineChart: DiagramGenerator
         )
       )
 
-    const groupByYear: Record<number, Record<string, number | string>> = {}
+    const years = result.map((r) => r.key)
 
-    for (const item of result) {
-      console.log(item)
-      const { key, size, value } = item
-      if (key && size != null) {
-        if (!groupByYear[key]) {
-          groupByYear[key] = { year: key }
-        }
-        groupByYear[key][size] = value
+    const chartData = []
+
+    for (const year of years) {
+      const yearData = {
+        year: year,
+        relocations: result.find((row) => row.key === year)?.value ?? 0,
       }
+
+      const filteredRows = result.filter((row) => row.key === year)
+      for (const row of filteredRows) {
+        yearData[row.size] = row.value
+      }
+      chartData.push(yearData)
     }
 
-    const chartData = Object.values(groupByYear)
+    const employeeRanges = result.map((r) => r.size)
+    const uniqueEmployeeRanges = uniqueValues(employeeRanges)
 
-    const parts = [...new Set(result.map((r) => r.size as string))].map(
-      (size, i): DiagramPart => ({
+    const parts = []
+
+    for (const range of uniqueEmployeeRanges) {
+      const part = {
         type: 'line',
-        label: size,
-        dataKey: size,
-        color: `var(--chart-${(i % 10) + 1})`,
-      })
-    )
+        label: `${range} anställda`,
+        dataKey: range,
+        color: 'var(--chart-2)',
+      }
+      parts.push(part)
+    }
 
     const diagram: Diagram = {
       title: `Storlek på inflyttade företag per år till ${filters.location}`,
