@@ -23,6 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import type { Diagram } from '~/models/diagramModels'
 import {
   netMovesByYearBarChart,
+  netMovesTotalBarChart,
   relocationsEmployeeRangeBarChart,
   relocationsFromByYearBarChart,
   relocationsIndustryClusterBarChart,
@@ -31,7 +32,8 @@ import {
 import {
   relocationsFromByYearLineChart,
   relocationsToAndFromLineChart,
-  relocationsToByYearLineChart,
+  relocationsToByYearByEmployeeRangeVolumeLineChart,
+  relocationsToByYearVolumeLineChart,
 } from '~/components/charts/lineCharts'
 import { relocationsIndustryClusterPieChart } from '~/components/charts/pieCharts'
 
@@ -120,12 +122,14 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   const diagrams = await Promise.all([
     relocationsToByYearBarChart(filters),
-    relocationsToByYearLineChart(filters),
+    relocationsToByYearVolumeLineChart(filters),
     relocationsFromByYearBarChart(filters),
     relocationsFromByYearLineChart(filters),
     relocationsToAndFromLineChart(filters),
     netMovesByYearBarChart(filters),
+    netMovesTotalBarChart(filters),
     relocationsEmployeeRangeBarChart(filters),
+    relocationsToByYearByEmployeeRangeVolumeLineChart(filters),
     relocationsIndustryClusterBarChart(filters),
     relocationsIndustryClusterPieChart(filters),
   ])
