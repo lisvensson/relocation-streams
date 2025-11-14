@@ -32,12 +32,16 @@ export const relocationsToByYearBarChart: DiagramGenerator = async (
     .groupBy(relocation.relocationYear)
     .orderBy(asc(relocation.relocationYear))
 
-  const chartData = result.map((r) => {
-    return {
-      year: r.key as number,
-      relocations: r.value,
+  const years = result.map((r) => r.key)
+  const chartData: Record<string, string | number>[] = []
+
+  for (const year of years) {
+    const yearData = {
+      year: year ?? 0,
+      totalRelocations: result.find((row) => row.key === year)?.value ?? 0,
     }
-  })
+    chartData.push(yearData)
+  }
 
   const diagram: Diagram = {
     title: `Flyttar per år till ${filters.location}`,
@@ -50,7 +54,7 @@ export const relocationsToByYearBarChart: DiagramGenerator = async (
       {
         type: 'bar',
         label: `Till ${filters.location}`,
-        dataKey: 'relocations',
+        dataKey: 'totalRelocations',
         color: 'var(--chart-1)',
       },
     ],
@@ -88,12 +92,16 @@ export const relocationsFromByYearBarChart: DiagramGenerator = async (
     .groupBy(relocation.relocationYear)
     .orderBy(asc(relocation.relocationYear))
 
-  const chartData = result.map((r) => {
-    return {
-      year: r.key as number,
-      relocations: r.value,
+  const years = result.map((r) => r.key)
+  const chartData: Record<string, string | number>[] = []
+
+  for (const year of years) {
+    const yearData = {
+      year: year ?? 0,
+      totalRelocations: result.find((row) => row.key === year)?.value ?? 0,
     }
-  })
+    chartData.push(yearData)
+  }
 
   const diagram: Diagram = {
     title: `Flyttar per år från ${filters.location}`,
@@ -106,7 +114,7 @@ export const relocationsFromByYearBarChart: DiagramGenerator = async (
       {
         type: 'bar',
         label: `Från ${filters.location}`,
-        dataKey: 'relocations',
+        dataKey: 'totalRelocations',
         color: 'var(--chart-1)',
       },
     ],
@@ -155,31 +163,35 @@ export const netMovesByYearBarChart: DiagramGenerator = async (filters) => {
   )
 
   const resultTo = await db
-    .select({ keyTo: relocation.relocationYear, valueTo: count() })
+    .select({ key: relocation.relocationYear, value: count() })
     .from(relocation)
     .where(whereTo)
     .groupBy(relocation.relocationYear)
     .orderBy(asc(relocation.relocationYear))
 
   const resultFrom = await db
-    .select({ keyFrom: relocation.relocationYear, valueFrom: count() })
+    .select({ key: relocation.relocationYear, value: count() })
     .from(relocation)
     .where(whereFrom)
     .groupBy(relocation.relocationYear)
     .orderBy(asc(relocation.relocationYear))
 
-  const chartData = resultTo.map((r) => {
-    const year = r.keyTo as number
-    const toCount = r.valueTo
-    const fromCount =
-      resultFrom.find((f) => f.keyFrom === r.keyTo)?.valueFrom ?? 0
-    return {
-      year,
+  const yearsTo = resultTo.map((r) => r.key)
+  const yearsFrom = resultFrom.map((r) => r.key)
+
+  const chartData: Record<string, string | number>[] = []
+
+  for (const year of yearsTo && yearsFrom) {
+    const toCount = resultTo.find((row) => row.key === year)?.value ?? 0
+    const fromCount = resultFrom.find((row) => row.key === year)?.value ?? 0
+    const yearData = {
+      year: year ?? 0,
       toCount,
       fromCount,
       diffCount: toCount - fromCount,
     }
-  })
+    chartData.push(yearData)
+  }
 
   const diagram: Diagram = {
     title: `Nettoflyttar per år ${filters.location}`,
@@ -193,13 +205,13 @@ export const netMovesByYearBarChart: DiagramGenerator = async (filters) => {
         type: 'bar',
         dataKey: 'toCount',
         label: `Till ${filters.location}`,
-        color: 'var(--chart-2)',
+        color: 'var(--chart-1)',
       },
       {
         type: 'bar',
         dataKey: 'fromCount',
         label: `Från ${filters.location}`,
-        color: 'var(--chart-1)',
+        color: 'var(--chart-11)',
       },
       {
         type: 'diffbar',
@@ -254,30 +266,28 @@ export const netMovesTotalBarChart: DiagramGenerator = async (filters) => {
   )
 
   const resultTo = await db
-    .select({ valueTo: count() })
+    .select({ value: count() })
     .from(relocation)
     .where(whereTo)
 
   const resultFrom = await db
-    .select({ valueFrom: count() })
+    .select({ value: count() })
     .from(relocation)
     .where(whereFrom)
 
-  const toCount = resultTo[0]?.valueTo ?? 0
-  const fromCount = resultFrom[0]?.valueFrom ?? 0
-  const diffCount = toCount - fromCount
+  const chartData: Record<string, string | number>[] = []
 
-  const chartData =
-    toCount === 0 && fromCount === 0
-      ? []
-      : [
-          {
-            location: filters.location,
-            toCount,
-            fromCount,
-            diffCount,
-          },
-        ]
+  const toCount = resultTo[0]?.value ?? 0
+  const fromCount = resultFrom[0]?.value ?? 0
+
+  const relocationsData = {
+    location: filters.location,
+    toCount,
+    fromCount,
+    diffCount: toCount - fromCount,
+  }
+
+  chartData.push(relocationsData)
 
   const diagram: Diagram = {
     title: `Nettoflyttar totalt ${filters.location}`,
@@ -291,13 +301,13 @@ export const netMovesTotalBarChart: DiagramGenerator = async (filters) => {
         type: 'bar',
         dataKey: 'toCount',
         label: `Till ${filters.location}`,
-        color: 'var(--chart-2)',
+        color: 'var(--chart-1)',
       },
       {
         type: 'bar',
         dataKey: 'fromCount',
         label: `Från ${filters.location}`,
-        color: 'var(--chart-1)',
+        color: 'var(--chart-11)',
       },
       {
         type: 'diffbar',
@@ -344,12 +354,15 @@ export const relocationsEmployeeRangeBarChart: DiagramGenerator = async (
       asc(sql`CAST(SPLIT_PART(${relocation.employeeRange}, '-', 1) AS INTEGER)`)
     )
 
-  const chartData = result.map((r) => {
-    return {
-      employeeRange: r.key as string,
-      relocations: r.value,
+  const chartData: Record<string, string | number>[] = []
+
+  for (const row of result) {
+    const relocationsData = {
+      employeeRange: row.key ?? 0,
+      totalRelocations: row.value ?? 0,
     }
-  })
+    chartData.push(relocationsData)
+  }
 
   const diagram: Diagram = {
     title: `Storlek på inflyttade företag till ${filters.location}`,
@@ -362,7 +375,7 @@ export const relocationsEmployeeRangeBarChart: DiagramGenerator = async (
       {
         type: 'bar',
         label: `Till ${filters.location}`,
-        dataKey: 'relocations',
+        dataKey: 'totalRelocations',
         color: 'var(--chart-1)',
       },
     ],
@@ -401,12 +414,15 @@ export const relocationsIndustryClusterBarChart: DiagramGenerator = async (
     .groupBy(relocation.industryCluster)
     .orderBy(desc(count()))
 
-  const chartData = result.map((r) => {
-    return {
-      industryCluster: r.key as string,
-      relocations: r.value,
+  const chartData: Record<string, string | number>[] = []
+
+  for (const row of result) {
+    const relocationsData = {
+      industryCluster: row.key ?? 0,
+      totalRelocations: row.value ?? 0,
     }
-  })
+    chartData.push(relocationsData)
+  }
 
   const diagram: Diagram = {
     title: `Inflyttande kluster till ${filters.location}`,
@@ -419,7 +435,7 @@ export const relocationsIndustryClusterBarChart: DiagramGenerator = async (
       {
         type: 'bar',
         label: `Till ${filters.location}`,
-        dataKey: 'relocations',
+        dataKey: 'totalRelocations',
         color: 'var(--chart-1)',
       },
     ],

@@ -33,10 +33,15 @@ export const relocationsIndustryClusterPieChart: DiagramGenerator = async (
     .orderBy(desc(count()))
     .limit(10)
 
-  const chartData = result.map((r) => ({
-    industryCluster: r.key as string,
-    relocations: r.value,
-  }))
+  const chartData: Record<string, string | number>[] = []
+
+  for (const row of result) {
+    const relocationsData = {
+      industryCluster: row.key ?? 0,
+      totalRelocations: row.value ?? 0,
+    }
+    chartData.push(relocationsData)
+  }
 
   const diagram: Diagram = {
     title: `Inflyttande kluster till ${filters.location}`,
@@ -45,7 +50,7 @@ export const relocationsIndustryClusterPieChart: DiagramGenerator = async (
     parts: [
       {
         type: 'pie',
-        dataKey: 'relocations',
+        dataKey: 'totalRelocations',
         nameKey: 'industryCluster',
         color: [
           '#172554',
