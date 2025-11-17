@@ -178,7 +178,6 @@ export const netMovesByYearBarChart: DiagramGenerator = async (filters) => {
 
   const yearsTo = resultTo.map((r) => r.key)
   const yearsFrom = resultFrom.map((r) => r.key)
-
   const chartData: Record<string, string | number>[] = []
 
   for (const year of yearsTo && yearsFrom) {
@@ -276,7 +275,6 @@ export const netMovesTotalBarChart: DiagramGenerator = async (filters) => {
     .where(whereFrom)
 
   const chartData: Record<string, string | number>[] = []
-
   const toCount = resultTo[0]?.value ?? 0
   const fromCount = resultFrom[0]?.value ?? 0
 

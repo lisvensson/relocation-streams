@@ -31,9 +31,12 @@ import {
 } from '~/components/charts/barCharts'
 import {
   relocationsFromByYearLineChart,
+  relocationsFromByYearToLocationPercentLineChart,
   relocationsFromByYearToLocationVolumeLineChart,
   relocationsToAndFromLineChart,
+  relocationsToByYearByEmployeeRangePercentLineChart,
   relocationsToByYearByEmployeeRangeVolumeLineChart,
+  relocationsToByYearFromLocationPercentLineChart,
   relocationsToByYearFromLocationVolumeLineChart,
   relocationsToByYearVolumeLineChart,
 } from '~/components/charts/lineCharts'
@@ -131,9 +134,12 @@ export async function loader({ request }: Route.LoaderArgs) {
     netMovesByYearBarChart(filters),
     netMovesTotalBarChart(filters),
     relocationsToByYearFromLocationVolumeLineChart(filters),
+    relocationsToByYearFromLocationPercentLineChart(filters),
     relocationsFromByYearToLocationVolumeLineChart(filters),
+    relocationsFromByYearToLocationPercentLineChart(filters),
     relocationsEmployeeRangeBarChart(filters),
     relocationsToByYearByEmployeeRangeVolumeLineChart(filters),
+    relocationsToByYearByEmployeeRangePercentLineChart(filters),
     relocationsIndustryClusterBarChart(filters),
     relocationsIndustryClusterPieChart(filters),
   ])
