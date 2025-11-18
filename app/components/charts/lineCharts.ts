@@ -664,13 +664,12 @@ export const relocationsToByYearByEmployeeRangeVolumeLineChart: DiagramGenerator
         )
       )
 
-    const years = result.map((r) => r.key)
+    const years = uniqueValues(result.map((r) => r.key))
     const chartData: Record<string, string | number>[] = []
 
     for (const year of years) {
       const yearData = {
         year: year ?? 0,
-        totalRelocations: result.find((row) => row.key === year)?.value ?? 0,
       }
 
       const filteredRows = result.filter((row) => row.key === year)
@@ -697,7 +696,7 @@ export const relocationsToByYearByEmployeeRangeVolumeLineChart: DiagramGenerator
     }
 
     const diagram: Diagram = {
-      title: `Storlek på inflyttade företag per år till ${filters.location}`,
+      title: `Storlek på inflyttade företag per år till ${filters.location} (volym)`,
       type: 'line',
       axis: {
         x: { label: 'År', dataKey: 'year' },
@@ -747,13 +746,12 @@ export const relocationsToByYearByEmployeeRangePercentLineChart: DiagramGenerato
         )
       )
 
-    const years = result.map((r) => r.key)
+    const years = uniqueValues(result.map((r) => r.key))
     const chartData: Record<string, string | number>[] = []
 
     for (const year of years) {
       const yearData = {
         year: year ?? 0,
-        totalRelocations: result.find((row) => row.key === year)?.value ?? 0,
       }
 
       const filteredRows = result.filter((row) => row.key === year)
@@ -786,7 +784,7 @@ export const relocationsToByYearByEmployeeRangePercentLineChart: DiagramGenerato
     }
 
     const diagram: Diagram = {
-      title: `Storlek på inflyttade företag per år till ${filters.location}`,
+      title: `Storlek på inflyttade företag per år till ${filters.location} (procent)`,
       type: 'line',
       axis: {
         x: { label: 'År', dataKey: 'year' },
