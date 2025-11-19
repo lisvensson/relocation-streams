@@ -124,6 +124,138 @@ export const relocationsFromByYearBarChart: DiagramGenerator = async (
   return diagram
 }
 
+//Inflyttar totalt per år till ${location} (volym) bar chart
+export const relocationsToFromLocationTotalVolumeBarChart: DiagramGenerator =
+  async (filters) => {
+    const where = and(
+      filters.years?.length
+        ? inArray(relocation.relocationYear, filters.years)
+        : undefined,
+      filters.employeeRange?.length
+        ? inArray(relocation.employeeRange, filters.employeeRange)
+        : undefined,
+      filters.companyTypes?.length
+        ? inArray(relocation.companyType, filters.companyTypes)
+        : undefined,
+      filters.industryClusters?.length
+        ? inArray(relocation.industryCluster, filters.industryClusters)
+        : undefined,
+      filters.location?.length
+        ? arrayContains(relocation.toLocation, [filters.location])
+        : undefined
+    )
+
+    const result = await db
+      .select({
+        fromLocation: relocation.fromMunicipality,
+        value: count(),
+      })
+      .from(relocation)
+      .where(where)
+      .groupBy(relocation.fromMunicipality)
+
+    result.sort((a, b) => b.value - a.value)
+    const topLocations = result.slice(0, 10)
+
+    const chartData: Record<string, string | number>[] = []
+
+    for (const row of topLocations) {
+      const relocationsData = {
+        fromLocation: `Från ${row.fromLocation}`,
+        totalRelocations: row.value,
+      }
+      chartData.push(relocationsData)
+    }
+
+    const parts = [
+      {
+        type: 'bar',
+        label: 'Antal inflyttar',
+        dataKey: 'totalRelocations',
+        color: 'var(--chart-1)',
+      },
+    ]
+
+    const diagram: Diagram = {
+      title: `Inflyttar totalt till ${filters.location}`,
+      type: 'barBig',
+      axis: {
+        x: { label: 'Från kommun', dataKey: 'fromLocation' },
+        y: { label: 'Antal flyttar' },
+      },
+      parts,
+      chartData,
+    }
+
+    return diagram
+  }
+
+//Utflyttar totalt per år till ${location} (volym) bar chart
+export const relocationsFromToLocationTotalVolumeBarChart: DiagramGenerator =
+  async (filters) => {
+    const where = and(
+      filters.years?.length
+        ? inArray(relocation.relocationYear, filters.years)
+        : undefined,
+      filters.employeeRange?.length
+        ? inArray(relocation.employeeRange, filters.employeeRange)
+        : undefined,
+      filters.companyTypes?.length
+        ? inArray(relocation.companyType, filters.companyTypes)
+        : undefined,
+      filters.industryClusters?.length
+        ? inArray(relocation.industryCluster, filters.industryClusters)
+        : undefined,
+      filters.location?.length
+        ? arrayContains(relocation.fromLocation, [filters.location])
+        : undefined
+    )
+
+    const result = await db
+      .select({
+        toLocation: relocation.toMunicipality,
+        value: count(),
+      })
+      .from(relocation)
+      .where(where)
+      .groupBy(relocation.toMunicipality)
+
+    result.sort((a, b) => b.value - a.value)
+    const topLocations = result.slice(0, 10)
+
+    const chartData: Record<string, string | number>[] = []
+
+    for (const row of topLocations) {
+      const relocationsData = {
+        toLocation: `Till ${row.toLocation}`,
+        totalRelocations: row.value,
+      }
+      chartData.push(relocationsData)
+    }
+
+    const parts = [
+      {
+        type: 'bar',
+        label: 'Antal inflyttar',
+        dataKey: 'totalRelocations',
+        color: 'var(--chart-1)',
+      },
+    ]
+
+    const diagram: Diagram = {
+      title: `Utflyttar totalt från ${filters.location}`,
+      type: 'barBig',
+      axis: {
+        x: { label: 'Från kommun', dataKey: 'toLocation' },
+        y: { label: 'Antal flyttar' },
+      },
+      parts,
+      chartData,
+    }
+
+    return diagram
+  }
+
 //Nettoflyttar per år bar chart
 export const netMovesByYearBarChart: DiagramGenerator = async (filters) => {
   const whereTo = and(

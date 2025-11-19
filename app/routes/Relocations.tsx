@@ -26,8 +26,10 @@ import {
   netMovesTotalBarChart,
   relocationsEmployeeRangeBarChart,
   relocationsFromByYearBarChart,
+  relocationsFromToLocationTotalVolumeBarChart,
   relocationsIndustryClusterBarChart,
   relocationsToByYearBarChart,
+  relocationsToFromLocationTotalVolumeBarChart,
 } from '~/components/charts/barCharts'
 import {
   relocationsFromByYearLineChart,
@@ -40,7 +42,11 @@ import {
   relocationsToByYearFromLocationVolumeLineChart,
   relocationsToByYearVolumeLineChart,
 } from '~/components/charts/lineCharts'
-import { relocationsIndustryClusterPieChart } from '~/components/charts/pieCharts'
+import {
+  relocationsFromToLocationTotalVolumePieChart,
+  relocationsIndustryClusterPieChart,
+  relocationsToFromLocationTotalVolumePieChart,
+} from '~/components/charts/pieCharts'
 
 function addChartConfig(diagram: Diagram) {
   const chartConfig = {
@@ -135,8 +141,12 @@ export async function loader({ request }: Route.LoaderArgs) {
     netMovesTotalBarChart(filters),
     relocationsToByYearFromLocationVolumeLineChart(filters),
     relocationsToByYearFromLocationPercentLineChart(filters),
+    relocationsToFromLocationTotalVolumeBarChart(filters),
+    relocationsToFromLocationTotalVolumePieChart(filters),
     relocationsFromByYearToLocationVolumeLineChart(filters),
     relocationsFromByYearToLocationPercentLineChart(filters),
+    relocationsFromToLocationTotalVolumeBarChart(filters),
+    relocationsFromToLocationTotalVolumePieChart(filters),
     relocationsEmployeeRangeBarChart(filters),
     relocationsToByYearByEmployeeRangeVolumeLineChart(filters),
     relocationsToByYearByEmployeeRangePercentLineChart(filters),
@@ -162,7 +172,7 @@ export default function Relocations({ loaderData }: Route.ComponentProps) {
       <Form
         method="get"
         className="flex flex-col gap-6"
-        onChange={(e) => submit(e.currentTarget)}
+        onChange={(e) => submit(e.currentTarget, { preventScrollReset: true })}
       >
         <fieldset className="border border-gray-300 rounded-md p-4">
           <legend className="font-semibold mb-2">Flyttår</legend>
