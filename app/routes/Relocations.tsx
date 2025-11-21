@@ -43,8 +43,10 @@ import {
   relocationsToByYearVolumeLineChart,
 } from '~/components/charts/lineCharts'
 import {
+  relocationsFromToLocationTotalPercentPieChart,
   relocationsFromToLocationTotalVolumePieChart,
   relocationsIndustryClusterPieChart,
+  relocationsToFromLocationTotalPercentPieChart,
   relocationsToFromLocationTotalVolumePieChart,
 } from '~/components/charts/pieCharts'
 
@@ -143,10 +145,12 @@ export async function loader({ request }: Route.LoaderArgs) {
     relocationsToByYearFromLocationPercentLineChart(filters),
     relocationsToFromLocationTotalVolumeBarChart(filters),
     relocationsToFromLocationTotalVolumePieChart(filters),
+    relocationsToFromLocationTotalPercentPieChart(filters),
     relocationsFromByYearToLocationVolumeLineChart(filters),
     relocationsFromByYearToLocationPercentLineChart(filters),
     relocationsFromToLocationTotalVolumeBarChart(filters),
     relocationsFromToLocationTotalVolumePieChart(filters),
+    relocationsFromToLocationTotalPercentPieChart(filters),
     relocationsEmployeeRangeBarChart(filters),
     relocationsToByYearByEmployeeRangeVolumeLineChart(filters),
     relocationsToByYearByEmployeeRangePercentLineChart(filters),

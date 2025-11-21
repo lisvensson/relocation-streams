@@ -1,5 +1,9 @@
 import { and, arrayContains, count, inArray, asc, sql, desc } from 'drizzle-orm'
-import type { Diagram, DiagramGenerator } from '~/models/diagramModels'
+import type {
+  Diagram,
+  DiagramGenerator,
+  DiagramPart,
+} from '~/models/diagramModels'
 import { db } from '~/shared/database'
 import { relocation } from '~/shared/database/schema'
 
@@ -124,7 +128,7 @@ export const relocationsFromByYearBarChart: DiagramGenerator = async (
   return diagram
 }
 
-//Inflyttar totalt per år till ${location} (volym) bar chart
+//Inflyttar totalt till ${location} (volym) bar chart
 export const relocationsToFromLocationTotalVolumeBarChart: DiagramGenerator =
   async (filters) => {
     const where = and(
@@ -167,7 +171,7 @@ export const relocationsToFromLocationTotalVolumeBarChart: DiagramGenerator =
       chartData.push(relocationsData)
     }
 
-    const parts = [
+    const parts: DiagramPart[] = [
       {
         type: 'bar',
         label: 'Antal inflyttar',
@@ -177,7 +181,7 @@ export const relocationsToFromLocationTotalVolumeBarChart: DiagramGenerator =
     ]
 
     const diagram: Diagram = {
-      title: `Inflyttar totalt till ${filters.location}`,
+      title: `Inflyttar totalt till ${filters.location} (volym)`,
       type: 'barBig',
       axis: {
         x: { label: 'Från kommun', dataKey: 'fromLocation' },
@@ -190,7 +194,7 @@ export const relocationsToFromLocationTotalVolumeBarChart: DiagramGenerator =
     return diagram
   }
 
-//Utflyttar totalt per år till ${location} (volym) bar chart
+//Utflyttar totalt till ${location} (volym) bar chart
 export const relocationsFromToLocationTotalVolumeBarChart: DiagramGenerator =
   async (filters) => {
     const where = and(
@@ -233,7 +237,7 @@ export const relocationsFromToLocationTotalVolumeBarChart: DiagramGenerator =
       chartData.push(relocationsData)
     }
 
-    const parts = [
+    const parts: DiagramPart[] = [
       {
         type: 'bar',
         label: 'Antal inflyttar',
@@ -243,7 +247,7 @@ export const relocationsFromToLocationTotalVolumeBarChart: DiagramGenerator =
     ]
 
     const diagram: Diagram = {
-      title: `Utflyttar totalt från ${filters.location}`,
+      title: `Utflyttar totalt från ${filters.location} (volym)`,
       type: 'barBig',
       axis: {
         x: { label: 'Från kommun', dataKey: 'toLocation' },
