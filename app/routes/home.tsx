@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import { userSessionContext } from '~/context/userSessionContext'
 
 export async function loader({ context }: { context: any }) {
@@ -13,6 +14,14 @@ export default function Home({ loaderData }: { loaderData: any }) {
         <h1 className="text-3xl font-bold text-gray-900 mb-4">
           Välkommen {loaderData.userName}!
         </h1>
+        <div className="flex flex-col gap-4">
+          <Link
+            to="/relocations"
+            className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
+          >
+            Se flyttströmmar
+          </Link>
+        </div>
       </div>
     </div>
   )
