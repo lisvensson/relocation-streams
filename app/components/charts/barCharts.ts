@@ -48,7 +48,7 @@ export const relocationsToByYearBarChart: DiagramGenerator = async (
   }
 
   const diagram: Diagram = {
-    title: `Flyttar per år till ${filters.location}`,
+    title: `Flyttar per år till ${filters.location} (volym)`,
     type: 'bar',
     axis: {
       x: { label: 'År', dataKey: 'year' },
@@ -108,7 +108,7 @@ export const relocationsFromByYearBarChart: DiagramGenerator = async (
   }
 
   const diagram: Diagram = {
-    title: `Flyttar per år från ${filters.location}`,
+    title: `Flyttar per år från ${filters.location} (volym)`,
     type: 'bar',
     axis: {
       x: { label: 'År', dataKey: 'year' },
@@ -329,7 +329,7 @@ export const netMovesByYearBarChart: DiagramGenerator = async (filters) => {
   }
 
   const diagram: Diagram = {
-    title: `Nettoflyttar per år ${filters.location}`,
+    title: `Nettoflyttar per år ${filters.location} (volym)`,
     type: 'bar',
     axis: {
       x: { label: 'År', dataKey: 'year' },
@@ -424,7 +424,7 @@ export const netMovesTotalBarChart: DiagramGenerator = async (filters) => {
   chartData.push(relocationsData)
 
   const diagram: Diagram = {
-    title: `Nettoflyttar totalt ${filters.location}`,
+    title: `Nettoflyttar totalt ${filters.location} (volym)`,
     type: 'bar',
     axis: {
       x: { label: 'Plats', dataKey: 'location' },
@@ -499,7 +499,7 @@ export const relocationsEmployeeRangeBarChart: DiagramGenerator = async (
   }
 
   const diagram: Diagram = {
-    title: `Storlek på inflyttade företag till ${filters.location}`,
+    title: `Storlek på inflyttade företag till ${filters.location} (volym)`,
     type: 'bar',
     axis: {
       x: { label: 'Antal anställda', dataKey: 'employeeRange' },
@@ -559,7 +559,7 @@ export const relocationsIndustryClusterBarChart: DiagramGenerator = async (
   }
 
   const diagram: Diagram = {
-    title: `Inflyttande kluster till ${filters.location}`,
+    title: `Inflyttande kluster till ${filters.location} (volym)`,
     type: 'barBig',
     axis: {
       x: { label: 'Industrikluster', dataKey: 'industryCluster' },

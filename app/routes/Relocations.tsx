@@ -32,6 +32,8 @@ import {
   relocationsToFromLocationTotalVolumeBarChart,
 } from '~/components/charts/barCharts'
 import {
+  relocationsFromByYearByEmployeeRangePercentLineChart,
+  relocationsFromByYearByEmployeeRangeVolumeLineChart,
   relocationsFromByYearLineChart,
   relocationsFromByYearToLocationPercentLineChart,
   relocationsFromByYearToLocationVolumeLineChart,
@@ -154,6 +156,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     relocationsEmployeeRangeBarChart(filters),
     relocationsToByYearByEmployeeRangeVolumeLineChart(filters),
     relocationsToByYearByEmployeeRangePercentLineChart(filters),
+    relocationsFromByYearByEmployeeRangeVolumeLineChart(filters),
+    relocationsFromByYearByEmployeeRangePercentLineChart(filters),
     relocationsIndustryClusterBarChart(filters),
     relocationsIndustryClusterPieChart(filters),
   ])

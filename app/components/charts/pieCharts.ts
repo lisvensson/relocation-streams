@@ -354,7 +354,7 @@ export const relocationsIndustryClusterPieChart: DiagramGenerator = async (
   }
 
   const diagram: Diagram = {
-    title: `Inflyttande kluster till ${filters.location}`,
+    title: `Inflyttande kluster till ${filters.location} (volym)`,
     type: 'pie',
     axis: {},
     parts: [
