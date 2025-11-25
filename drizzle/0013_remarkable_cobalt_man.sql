@@ -1,0 +1,1 @@
+CREATE INDEX "relocation_relocation_date_index" ON "relocation" USING btree ("relocation_date");

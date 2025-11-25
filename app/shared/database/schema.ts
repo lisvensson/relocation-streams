@@ -92,9 +92,14 @@ export const relocation = pgTable(
   },
   (table) => {
     return [
-      index().on(table.fromMunicipality),
       index().on(table.fromLocation),
       index().on(table.toLocation),
+      index().on(table.fromPostalArea),
+      index().on(table.toPostalArea),
+      index().on(table.fromMunicipality),
+      index().on(table.toMunicipality),
+      index().on(table.fromCounty),
+      index().on(table.toCounty),
     ]
   }
 )
