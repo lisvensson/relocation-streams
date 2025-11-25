@@ -19,10 +19,13 @@ export async function action({ request }: Route.ActionArgs) {
       headers: response.headers,
     })
   }
-  return response
+
+  if (response.status === 400) {
+    return { error: 'Fel kod. Försök igen.' }
+  }
 }
 
-export default function SignInOTP() {
+export default function SignInOTP({ actionData }: Route.ComponentProps) {
   const [searchParams] = useSearchParams()
   const email = searchParams.get('email') ?? ''
   const otp = searchParams.get('otp') ?? ''
@@ -36,7 +39,9 @@ export default function SignInOTP() {
         <p className="text-gray-600 mb-6">
           Ange koden du fått skickad till din e-postadress.
         </p>
-
+        {actionData?.error && (
+          <div className="text-red-600">{actionData.error}</div>
+        )}
         <Form method="post" className="mt-4">
           <Input type="hidden" name="email" value={email} />
           <Input

@@ -45,7 +45,7 @@ export default function SignIn() {
               className="w-full px-3 py-2 border rounded-md"
             />
             <Button type="submit" className="w-full">
-              Logga in med e-post
+              Logga in
             </Button>
           </Form>
           {/* Inloggning med Microsoft */}
