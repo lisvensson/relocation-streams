@@ -1,16 +1,16 @@
-import 'dotenv/config';
-import { defineConfig } from 'drizzle-kit';
+import 'dotenv/config'
+import { defineConfig } from 'drizzle-kit'
 
-if (!process.env.POSTGRES_URL) {
-  throw Error("POSTGRES_URL is required");
+if (!process.env.DATABASE_URL) {
+  throw Error('DATABASE_URL is required')
 }
 
 export default defineConfig({
-  dbCredentials: { url: process.env.POSTGRES_URL },
+  dbCredentials: { url: process.env.DATABASE_URL },
   out: './drizzle',
   schema: './app/shared/database/schema.ts',
   dialect: 'postgresql',
-  casing: "snake_case",
+  casing: 'snake_case',
   verbose: true,
   strict: true,
-});
+})
