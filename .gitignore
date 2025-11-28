@@ -3,6 +3,7 @@
 /node_modules/
 docker-compose.yml
 /data/
+/bin/
 
 # React Router
 /.react-router/

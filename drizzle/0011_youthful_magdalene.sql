@@ -1,1 +1,0 @@
-DROP INDEX "relocation_to_municipality_index";

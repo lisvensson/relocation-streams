@@ -1,5 +1,5 @@
 {
-  "id": "889b16a1-7b58-4f1b-ae4d-ee69be8afab7",
+  "id": "72c5d233-bdc0-427b-96a5-fa2542feefe2",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -104,6 +104,228 @@
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.relocation": {
+      "name": "relocation",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "relocation_date": {
+          "name": "relocation_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "relocation_year": {
+          "name": "relocation_year",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "EXTRACT(YEAR FROM relocation_date)",
+            "type": "stored"
+          }
+        },
+        "employee_range": {
+          "name": "employee_range",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "company_type": {
+          "name": "company_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "industry_cluster": {
+          "name": "industry_cluster",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "from_location": {
+          "name": "from_location",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "to_location": {
+          "name": "to_location",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "from_postal_area": {
+          "name": "from_postal_area",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "to_postal_area": {
+          "name": "to_postal_area",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "from_municipality": {
+          "name": "from_municipality",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "to_municipality": {
+          "name": "to_municipality",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "from_county": {
+          "name": "from_county",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "to_county": {
+          "name": "to_county",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "relocation_from_location_index": {
+          "name": "relocation_from_location_index",
+          "columns": [
+            {
+              "expression": "from_location",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "relocation_to_location_index": {
+          "name": "relocation_to_location_index",
+          "columns": [
+            {
+              "expression": "to_location",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "relocation_from_postal_area_index": {
+          "name": "relocation_from_postal_area_index",
+          "columns": [
+            {
+              "expression": "from_postal_area",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "relocation_to_postal_area_index": {
+          "name": "relocation_to_postal_area_index",
+          "columns": [
+            {
+              "expression": "to_postal_area",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "relocation_from_municipality_index": {
+          "name": "relocation_from_municipality_index",
+          "columns": [
+            {
+              "expression": "from_municipality",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "relocation_to_municipality_index": {
+          "name": "relocation_to_municipality_index",
+          "columns": [
+            {
+              "expression": "to_municipality",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "relocation_from_county_index": {
+          "name": "relocation_from_county_index",
+          "columns": [
+            {
+              "expression": "from_county",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "relocation_to_county_index": {
+          "name": "relocation_to_county_index",
+          "columns": [
+            {
+              "expression": "to_county",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},

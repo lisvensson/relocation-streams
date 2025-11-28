@@ -19,7 +19,6 @@ export const auth = betterAuth({
       async sendVerificationOTP({ email, otp, type }) {
         let subject = ''
         let html = ''
-        const loginUrl = `http://localhost:5173/signin/otp?email=${email}&otp=${otp}`
 
         if (type === 'sign-in') {
           subject = 'Din engångskod för inloggning'
@@ -27,7 +26,6 @@ export const auth = betterAuth({
             <div>
               <p>Hej!</p>
               <p><strong>Din engångskod för inloggning är:</strong> ${otp}</p>
-              <p><a href="${loginUrl}">Klicka här för att logga in direkt</a></p>
             </div>
           `
           console.log(`Engångskod för inloggning: ${otp} skickas till ${email}`)

@@ -1,1 +1,0 @@
-DROP INDEX "relocation_relocation_year_index";
