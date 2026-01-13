@@ -5,8 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1764325107837,
-      "tag": "0000_flowery_king_cobra",
+      "when": 1768299973170,
+      "tag": "0000_common_star_brand",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1768310808111,
+      "tag": "0001_crazy_the_hunter",
       "breakpoints": true
     }
   ]

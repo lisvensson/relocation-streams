@@ -1,6 +1,6 @@
 {
-  "id": "6f0222be-d047-46de-a94d-7f1b46a4eb94",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "88bc858e-11ac-4c44-8001-0a2ab9d20f32",
+  "prevId": "6f0222be-d047-46de-a94d-7f1b46a4eb94",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -204,6 +204,66 @@
         }
       },
       "indexes": {
+        "relocation_relocation_year_index": {
+          "name": "relocation_relocation_year_index",
+          "columns": [
+            {
+              "expression": "relocation_year",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "relocation_employee_range_index": {
+          "name": "relocation_employee_range_index",
+          "columns": [
+            {
+              "expression": "employee_range",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "relocation_company_type_index": {
+          "name": "relocation_company_type_index",
+          "columns": [
+            {
+              "expression": "company_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "relocation_industry_cluster_index": {
+          "name": "relocation_industry_cluster_index",
+          "columns": [
+            {
+              "expression": "industry_cluster",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "relocation_from_location_gin": {
           "name": "relocation_from_location_gin",
           "columns": [
