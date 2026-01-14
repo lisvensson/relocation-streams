@@ -51,6 +51,13 @@ import {
   relocationsToFromLocationTotalPercentPieChart,
   relocationsToFromLocationTotalVolumePieChart,
 } from '~/components/charts/pieCharts'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '~/components/ui/accordion'
+import { Button } from '~/components/ui/button'
 
 function addChartConfig(diagram: Diagram) {
   const chartConfig = {
@@ -64,6 +71,7 @@ function addChartConfig(diagram: Diagram) {
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
+  const start = performance.now()
   const filterOptions = {
     years: [
       2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025,
@@ -162,6 +170,11 @@ export async function loader({ request }: Route.LoaderArgs) {
     relocationsIndustryClusterPieChart(filters),
   ])
 
+  const end = performance.now()
+  const duration = end - start
+
+  console.log(`Loader time: ${duration.toFixed(2)} ms`)
+
   return {
     filterOptions,
     success: true,
@@ -175,116 +188,141 @@ export default function Relocations({ loaderData }: Route.ComponentProps) {
   const submit = useSubmit()
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-8 font-sans">
-      <h1 className="text-2xl font-bold mb-6">Filtrera relocationer</h1>
-      <Form
-        method="get"
-        className="flex flex-col gap-6"
-        onChange={(e) => submit(e.currentTarget, { preventScrollReset: true })}
-      >
-        <fieldset className="border border-gray-300 rounded-md p-4">
-          <legend className="font-semibold mb-2">Flyttår</legend>
-          {filterOptions.years.map((year) => (
-            <label key={year} className="block mb-2">
-              <input
-                type="checkbox"
-                name="years"
-                value={year}
-                defaultChecked={searchParams.has('years', String(year))}
-                className="mr-2"
-              />
-              {year}
-            </label>
-          ))}
-        </fieldset>
-        <fieldset className="border border-gray-300 rounded-md p-4">
-          <legend className="font-semibold mb-2">Antal anställda</legend>
-          {filterOptions.employeeRanges.map((range) => (
-            <label key={range} className="block mb-2">
-              <input
-                type="checkbox"
-                name="employeeRange"
-                value={range}
-                defaultChecked={searchParams.has('employeeRange', range)}
-                className="mr-2"
-              />
-              {range}
-            </label>
-          ))}
-        </fieldset>
-        <fieldset className="border border-gray-300 rounded-md p-4">
-          <legend className="font-semibold mb-2">Företagsform</legend>
-          {filterOptions.companyTypes.map((type) => (
-            <label key={type} className="block mb-2">
-              <input
-                type="checkbox"
-                name="companyTypes"
-                value={type}
-                defaultChecked={searchParams.has('companyTypes', type)}
-                className="mr-2"
-              />
-              {type}
-            </label>
-          ))}
-        </fieldset>
-        <fieldset className="border border-gray-300 rounded-md p-4">
-          <legend className="font-semibold mb-2">Kluster</legend>
-          {filterOptions.industryClusters.map((cluster) => (
-            <label key={cluster} className="block mb-2">
-              <input
-                type="checkbox"
-                name="industryClusters"
-                value={cluster}
-                defaultChecked={searchParams.has('industryClusters', cluster)}
-                className="mr-2"
-              />
-              {cluster}
-            </label>
-          ))}
-        </fieldset>
-        <fieldset className="border border-gray-300 rounded-md p-4">
-          <legend className="font-semibold mb-2">Område</legend>
-          <select
-            name="location"
-            defaultValue={searchParams.get('location') ?? ''}
-            className="w-full p-2 border border-gray-300 rounded-md"
-          >
-            <option value="">Välj område</option>
-            {filterOptions.locations.map((location) => (
-              <option key={location} value={location}>
-                {location}
-              </option>
-            ))}
-          </select>
-        </fieldset>
-        <button
-          type="submit"
-          className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
+    <div className="flex">
+      <aside className="w-75 border-r p-4">
+        <Form
+          method="get"
+          className="flex flex-col"
+          onChange={(e) =>
+            submit(e.currentTarget, { preventScrollReset: true })
+          }
         >
-          Filtrera
-        </button>
-      </Form>
+          <Accordion type="multiple" className="space-y-4">
+            <AccordionItem value="years">
+              <AccordionTrigger className="pr-4">Flyttår</AccordionTrigger>
+              <AccordionContent>
+                {filterOptions.years.map((year) => (
+                  <label key={year} className="block mb-2">
+                    <input
+                      type="checkbox"
+                      name="years"
+                      value={year}
+                      defaultChecked={searchParams.has('years', String(year))}
+                      className="mr-2"
+                    />
+                    {year}
+                  </label>
+                ))}
+              </AccordionContent>
+            </AccordionItem>
 
-      {diagrams.map((diagram, index) => (
-        <Card key={`${diagram.title}-${index}`} className="mt-10">
-          <CardHeader className="mb-10">
-            <CardTitle>{diagram.title}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {diagram?.chartData?.length > 0 ? (
-              <ChartContainer config={diagram.chartConfig}>
-                {chartByType[diagram.type]({
-                  data: diagram.chartData,
-                  axis: diagram.axis,
-                  parts: diagram.parts,
-                })}
-              </ChartContainer>
-            ) : (
-              <p>Nope sorry</p>
-            )}
-          </CardContent>
-        </Card>
-      ))}
+            <AccordionItem value="employeeRange">
+              <AccordionTrigger className="pr-4">
+                Antal anställda
+              </AccordionTrigger>
+              <AccordionContent>
+                {filterOptions.employeeRanges.map((range) => (
+                  <label key={range} className="block mb-2">
+                    <input
+                      type="checkbox"
+                      name="employeeRange"
+                      value={range}
+                      defaultChecked={searchParams.has('employeeRange', range)}
+                      className="mr-2"
+                    />
+                    {range}
+                  </label>
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="companyTypes">
+              <AccordionTrigger className="pr-4">Företagsform</AccordionTrigger>
+              <AccordionContent>
+                {filterOptions.companyTypes.map((type) => (
+                  <label key={type} className="block mb-2">
+                    <input
+                      type="checkbox"
+                      name="companyTypes"
+                      value={type}
+                      defaultChecked={searchParams.has('companyTypes', type)}
+                      className="mr-2"
+                    />
+                    {type}
+                  </label>
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="industryClusters">
+              <AccordionTrigger className="pr-4">Kluster</AccordionTrigger>
+              <AccordionContent>
+                {filterOptions.industryClusters.map((cluster) => (
+                  <label key={cluster} className="block mb-2">
+                    <input
+                      type="checkbox"
+                      name="industryClusters"
+                      value={cluster}
+                      defaultChecked={searchParams.has(
+                        'industryClusters',
+                        cluster
+                      )}
+                      className="mr-2"
+                    />
+                    {cluster}
+                  </label>
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="location">
+              <AccordionTrigger className="pr-4">Område</AccordionTrigger>
+              <AccordionContent>
+                <select
+                  name="location"
+                  defaultValue={searchParams.get('location') ?? ''}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                >
+                  <option value="">Välj område</option>
+                  {filterOptions.locations.map((location) => (
+                    <option key={location} value={location}>
+                      {location}
+                    </option>
+                  ))}
+                </select>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+          <Button type="submit" className="mt-4 w-full">
+            Filtrera
+          </Button>
+        </Form>
+      </aside>
+
+      <main className="flex p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {diagrams.map((diagram, index) => (
+            <Card key={`${diagram.title}-${index}`}>
+              <CardHeader className="mb-10">
+                <CardTitle>{diagram.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {diagram?.chartData?.length > 0 ? (
+                  <ChartContainer config={diagram.chartConfig}>
+                    {chartByType[diagram.type]({
+                      data: diagram.chartData,
+                      axis: diagram.axis,
+                      parts: diagram.parts,
+                    })}
+                  </ChartContainer>
+                ) : (
+                  <p>Nope sorry</p>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </main>
     </div>
   )
 }
