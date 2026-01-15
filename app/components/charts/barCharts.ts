@@ -128,7 +128,7 @@ export const relocationsFromByYearVolumeBarChart: DiagramGenerator = async (
   return diagram
 }
 
-//Inflyttar totalt till ${location} (volym) bar chart
+//Inflyttar till ${location} per område (volym) bar chart
 export const relocationsToFromLocationTotalVolumeBarChart: DiagramGenerator =
   async (filters) => {
     const where = and(
@@ -181,7 +181,7 @@ export const relocationsToFromLocationTotalVolumeBarChart: DiagramGenerator =
     ]
 
     const diagram: Diagram = {
-      title: `Inflyttar totalt till ${filters.location} (volym)`,
+      title: `Inflyttar till ${filters.location} per område (volym)`,
       type: 'barBig',
       axis: {
         x: { label: 'Från kommun', dataKey: 'fromLocation' },
@@ -194,7 +194,7 @@ export const relocationsToFromLocationTotalVolumeBarChart: DiagramGenerator =
     return diagram
   }
 
-//Utflyttar totalt till ${location} (volym) bar chart
+//Utflyttar från ${location} per område (volym) bar chart
 export const relocationsFromToLocationTotalVolumeBarChart: DiagramGenerator =
   async (filters) => {
     const where = and(
@@ -247,7 +247,7 @@ export const relocationsFromToLocationTotalVolumeBarChart: DiagramGenerator =
     ]
 
     const diagram: Diagram = {
-      title: `Utflyttar totalt från ${filters.location} (volym)`,
+      title: `Utflyttar från ${filters.location} per område (volym)`,
       type: 'barBig',
       axis: {
         x: { label: 'Från kommun', dataKey: 'toLocation' },

@@ -3,7 +3,7 @@ import type { Diagram, DiagramGenerator } from '~/models/diagramModels'
 import { db } from '~/shared/database'
 import { relocation } from '~/shared/database/schema'
 
-//Inflyttar totalt till ${location} (volym) pie chart
+//Inflyttar till ${location} per område (volym) pie chart
 export const relocationsToFromLocationTotalVolumePieChart: DiagramGenerator =
   async (filters) => {
     const where = and(
@@ -47,7 +47,7 @@ export const relocationsToFromLocationTotalVolumePieChart: DiagramGenerator =
     }
 
     const diagram: Diagram = {
-      title: `Inflyttar totalt till ${filters.location} (volym)`,
+      title: `Inflyttar till ${filters.location} per område (volym)`,
       type: 'pie',
       axis: {},
       parts: [
@@ -75,7 +75,7 @@ export const relocationsToFromLocationTotalVolumePieChart: DiagramGenerator =
     return diagram
   }
 
-//Inflyttar totalt till ${location} (procent) pie chart
+//Inflyttar till ${location} per område (procent) pie chart
 export const relocationsToFromLocationTotalPercentPieChart: DiagramGenerator =
   async (filters) => {
     const where = and(
@@ -124,7 +124,7 @@ export const relocationsToFromLocationTotalPercentPieChart: DiagramGenerator =
     }
 
     const diagram: Diagram = {
-      title: `Inflyttar totalt till ${filters.location} (procent)`,
+      title: `Inflyttar till ${filters.location} per område (procent)`,
       type: 'pie',
       axis: {},
       parts: [
@@ -152,7 +152,7 @@ export const relocationsToFromLocationTotalPercentPieChart: DiagramGenerator =
     return diagram
   }
 
-//Utflyttar totalt till ${location} (volym) pie chart
+//Utflyttar från ${location} per område (volym)  pie chart
 export const relocationsFromToLocationTotalVolumePieChart: DiagramGenerator =
   async (filters) => {
     const where = and(
@@ -196,7 +196,7 @@ export const relocationsFromToLocationTotalVolumePieChart: DiagramGenerator =
     }
 
     const diagram: Diagram = {
-      title: `Utflyttar totalt från ${filters.location} (volym)`,
+      title: `Utflyttar från ${filters.location} per område (volym)`,
       type: 'pie',
       axis: {},
       parts: [
@@ -224,7 +224,7 @@ export const relocationsFromToLocationTotalVolumePieChart: DiagramGenerator =
     return diagram
   }
 
-//Utflyttar totalt till ${location} (procent) pie chart
+//Utflyttar från ${location} per område (procent) pie chart
 export const relocationsFromToLocationTotalPercentPieChart: DiagramGenerator =
   async (filters) => {
     const where = and(
@@ -273,7 +273,7 @@ export const relocationsFromToLocationTotalPercentPieChart: DiagramGenerator =
     }
 
     const diagram: Diagram = {
-      title: `Utflyttar totalt från ${filters.location} (procent)`,
+      title: `Utflyttar från ${filters.location} per område (procent)`,
       type: 'pie',
       axis: {},
       parts: [
