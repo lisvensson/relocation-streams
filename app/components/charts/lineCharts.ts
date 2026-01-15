@@ -69,7 +69,7 @@ export const relocationsToByYearVolumeLineChart: DiagramGenerator = async (
 }
 
 //Flyttar per år från ${location} (volym) line chart
-export const relocationsFromByYearLineChart: DiagramGenerator = async (
+export const relocationsFromByYearVolumeLineChart: DiagramGenerator = async (
   filters
 ) => {
   const where = and(
@@ -130,7 +130,7 @@ export const relocationsFromByYearLineChart: DiagramGenerator = async (
 }
 
 //Flyttar per år till och från location (volym) line chart
-export const relocationsToAndFromLineChart: DiagramGenerator = async (
+export const relocationsToAndFromVolumeLineChart: DiagramGenerator = async (
   filters
 ) => {
   const whereTo = and(

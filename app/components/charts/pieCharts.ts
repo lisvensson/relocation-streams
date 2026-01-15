@@ -49,10 +49,7 @@ export const relocationsToFromLocationTotalVolumePieChart: DiagramGenerator =
     const diagram: Diagram = {
       title: `Inflyttar totalt till ${filters.location} (volym)`,
       type: 'pie',
-      axis: {
-        x: { label: 'Från kommun', dataKey: 'fromLocation' },
-        y: { label: 'Antal flyttar' },
-      },
+      axis: {},
       parts: [
         {
           type: 'pie',
@@ -129,10 +126,7 @@ export const relocationsToFromLocationTotalPercentPieChart: DiagramGenerator =
     const diagram: Diagram = {
       title: `Inflyttar totalt till ${filters.location} (procent)`,
       type: 'pie',
-      axis: {
-        x: { label: 'Från kommun', dataKey: 'fromLocation' },
-        y: { label: 'Andel av inflytt (%)' },
-      },
+      axis: {},
       parts: [
         {
           type: 'pie',
@@ -204,10 +198,7 @@ export const relocationsFromToLocationTotalVolumePieChart: DiagramGenerator =
     const diagram: Diagram = {
       title: `Utflyttar totalt från ${filters.location} (volym)`,
       type: 'pie',
-      axis: {
-        x: { label: 'Från kommun', dataKey: 'toLocation' },
-        y: { label: 'Antal flyttar' },
-      },
+      axis: {},
       parts: [
         {
           type: 'pie',
@@ -284,10 +275,7 @@ export const relocationsFromToLocationTotalPercentPieChart: DiagramGenerator =
     const diagram: Diagram = {
       title: `Utflyttar totalt från ${filters.location} (procent)`,
       type: 'pie',
-      axis: {
-        x: { label: 'Från kommun', dataKey: 'toLocation' },
-        y: { label: 'Andel av utflytt (%)' },
-      },
+      axis: {},
       parts: [
         {
           type: 'pie',
@@ -313,71 +301,70 @@ export const relocationsFromToLocationTotalPercentPieChart: DiagramGenerator =
     return diagram
   }
 
-//Inflyttande kluster pie chart
-export const relocationsIndustryClusterPieChart: DiagramGenerator = async (
-  filters
-) => {
-  const where = and(
-    filters.years?.length
-      ? inArray(relocation.relocationYear, filters.years)
-      : undefined,
-    filters.employeeRange?.length
-      ? inArray(relocation.employeeRange, filters.employeeRange)
-      : undefined,
-    filters.companyTypes?.length
-      ? inArray(relocation.companyType, filters.companyTypes)
-      : undefined,
-    filters.industryClusters?.length
-      ? inArray(relocation.industryCluster, filters.industryClusters)
-      : undefined,
-    filters.location?.length
-      ? arrayContains(relocation.toLocation, [filters.location])
-      : undefined
-  )
+//Inflyttande kluster (volym) pie chart
+export const relocationsIndustryClusterVolumePieChart: DiagramGenerator =
+  async (filters) => {
+    const where = and(
+      filters.years?.length
+        ? inArray(relocation.relocationYear, filters.years)
+        : undefined,
+      filters.employeeRange?.length
+        ? inArray(relocation.employeeRange, filters.employeeRange)
+        : undefined,
+      filters.companyTypes?.length
+        ? inArray(relocation.companyType, filters.companyTypes)
+        : undefined,
+      filters.industryClusters?.length
+        ? inArray(relocation.industryCluster, filters.industryClusters)
+        : undefined,
+      filters.location?.length
+        ? arrayContains(relocation.toLocation, [filters.location])
+        : undefined
+    )
 
-  const result = await db
-    .select({ key: relocation.industryCluster, value: count() })
-    .from(relocation)
-    .where(where)
-    .groupBy(relocation.industryCluster)
-    .orderBy(desc(count()))
-    .limit(10)
+    const result = await db
+      .select({ key: relocation.industryCluster, value: count() })
+      .from(relocation)
+      .where(where)
+      .groupBy(relocation.industryCluster)
+      .orderBy(desc(count()))
+      .limit(10)
 
-  const chartData: Record<string, string | number>[] = []
+    const chartData: Record<string, string | number>[] = []
 
-  for (const row of result) {
-    const relocationsData = {
-      industryCluster: row.key ?? 0,
-      totalRelocations: row.value ?? 0,
+    for (const row of result) {
+      const relocationsData = {
+        industryCluster: row.key ?? 0,
+        totalRelocations: row.value ?? 0,
+      }
+      chartData.push(relocationsData)
     }
-    chartData.push(relocationsData)
-  }
 
-  const diagram: Diagram = {
-    title: `Inflyttande kluster till ${filters.location} (volym)`,
-    type: 'pie',
-    axis: {},
-    parts: [
-      {
-        type: 'pie',
-        dataKey: 'totalRelocations',
-        nameKey: 'industryCluster',
-        color: [
-          '#172554',
-          '#1e3a8a',
-          '#1e40af',
-          '#1d4ed8',
-          '#2563eb',
-          '#3b82f6',
-          '#60a5fa',
-          '#93c5fd',
-          '#bfdbfe',
-          '#dbeafe',
-        ],
-      },
-    ],
-    chartData,
-  }
+    const diagram: Diagram = {
+      title: `Inflyttande kluster till ${filters.location} (volym)`,
+      type: 'pie',
+      axis: {},
+      parts: [
+        {
+          type: 'pie',
+          dataKey: 'totalRelocations',
+          nameKey: 'industryCluster',
+          color: [
+            '#172554',
+            '#1e3a8a',
+            '#1e40af',
+            '#1d4ed8',
+            '#2563eb',
+            '#3b82f6',
+            '#60a5fa',
+            '#93c5fd',
+            '#bfdbfe',
+            '#dbeafe',
+          ],
+        },
+      ],
+      chartData,
+    }
 
-  return diagram
-}
+    return diagram
+  }

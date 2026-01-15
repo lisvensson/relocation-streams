@@ -7,8 +7,8 @@ import type {
 import { db } from '~/shared/database'
 import { relocation } from '~/shared/database/schema'
 
-//Flyttar per år till location bar chart
-export const relocationsToByYearBarChart: DiagramGenerator = async (
+//Flyttar per år till ${location} bar chart
+export const relocationsToByYearVolumeBarChart: DiagramGenerator = async (
   filters
 ) => {
   const where = and(
@@ -67,8 +67,8 @@ export const relocationsToByYearBarChart: DiagramGenerator = async (
   return diagram
 }
 
-//Flyttar per år från location bar chart
-export const relocationsFromByYearBarChart: DiagramGenerator = async (
+//Flyttar per år från ${location} bar chart
+export const relocationsFromByYearVolumeBarChart: DiagramGenerator = async (
   filters
 ) => {
   const where = and(
@@ -260,8 +260,10 @@ export const relocationsFromToLocationTotalVolumeBarChart: DiagramGenerator =
     return diagram
   }
 
-//Nettoflyttar per år bar chart
-export const netMovesByYearBarChart: DiagramGenerator = async (filters) => {
+//Nettoflyttar per år (volym) bar chart
+export const netMovesByYearVolumeBarChart: DiagramGenerator = async (
+  filters
+) => {
   const whereTo = and(
     filters.years?.length
       ? inArray(relocation.relocationYear, filters.years)
@@ -362,8 +364,10 @@ export const netMovesByYearBarChart: DiagramGenerator = async (filters) => {
   return diagram
 }
 
-//Nettoflyttar totalt bar chart
-export const netMovesTotalBarChart: DiagramGenerator = async (filters) => {
+//Nettoflyttar totalt (volym) bar chart
+export const netMovesTotalVolumeBarChart: DiagramGenerator = async (
+  filters
+) => {
   const whereTo = and(
     filters.years?.length
       ? inArray(relocation.relocationYear, filters.years)
@@ -457,124 +461,187 @@ export const netMovesTotalBarChart: DiagramGenerator = async (filters) => {
   return diagram
 }
 
-//Storlek på inflyttade bolag bar chart
-export const relocationsEmployeeRangeBarChart: DiagramGenerator = async (
-  filters
-) => {
-  const where = and(
-    filters.years?.length
-      ? inArray(relocation.relocationYear, filters.years)
-      : undefined,
-    filters.employeeRange?.length
-      ? inArray(relocation.employeeRange, filters.employeeRange)
-      : undefined,
-    filters.companyTypes?.length
-      ? inArray(relocation.companyType, filters.companyTypes)
-      : undefined,
-    filters.industryClusters?.length
-      ? inArray(relocation.industryCluster, filters.industryClusters)
-      : undefined,
-    filters.location?.length
-      ? arrayContains(relocation.toLocation, [filters.location])
-      : undefined
-  )
-
-  const result = await db
-    .select({ key: relocation.employeeRange, value: count() })
-    .from(relocation)
-    .where(where)
-    .groupBy(relocation.employeeRange)
-    .orderBy(
-      asc(sql`CAST(SPLIT_PART(${relocation.employeeRange}, '-', 1) AS INTEGER)`)
+//Storlek på inflyttade bolag (volym) bar chart
+export const relocationsToEmployeeRangeVolumeBarChart: DiagramGenerator =
+  async (filters) => {
+    const where = and(
+      filters.years?.length
+        ? inArray(relocation.relocationYear, filters.years)
+        : undefined,
+      filters.employeeRange?.length
+        ? inArray(relocation.employeeRange, filters.employeeRange)
+        : undefined,
+      filters.companyTypes?.length
+        ? inArray(relocation.companyType, filters.companyTypes)
+        : undefined,
+      filters.industryClusters?.length
+        ? inArray(relocation.industryCluster, filters.industryClusters)
+        : undefined,
+      filters.location?.length
+        ? arrayContains(relocation.toLocation, [filters.location])
+        : undefined
     )
 
-  const chartData: Record<string, string | number>[] = []
+    const result = await db
+      .select({ key: relocation.employeeRange, value: count() })
+      .from(relocation)
+      .where(where)
+      .groupBy(relocation.employeeRange)
+      .orderBy(
+        asc(
+          sql`CAST(SPLIT_PART(${relocation.employeeRange}, '-', 1) AS INTEGER)`
+        )
+      )
 
-  for (const row of result) {
-    const relocationsData = {
-      employeeRange: row.key ?? 0,
-      totalRelocations: row.value ?? 0,
+    const chartData: Record<string, string | number>[] = []
+
+    for (const row of result) {
+      const relocationsData = {
+        employeeRange: row.key ?? 0,
+        totalRelocations: row.value ?? 0,
+      }
+      chartData.push(relocationsData)
     }
-    chartData.push(relocationsData)
-  }
 
-  const diagram: Diagram = {
-    title: `Storlek på inflyttade företag till ${filters.location} (volym)`,
-    type: 'bar',
-    axis: {
-      x: { label: 'Antal anställda', dataKey: 'employeeRange' },
-      y: { label: 'Antal flyttar' },
-    },
-    parts: [
-      {
-        type: 'bar',
-        label: `Till ${filters.location}`,
-        dataKey: 'totalRelocations',
-        color: 'var(--chart-1)',
+    const diagram: Diagram = {
+      title: `Storlek på inflyttade företag till ${filters.location} (volym)`,
+      type: 'bar',
+      axis: {
+        x: { label: 'Antal anställda', dataKey: 'employeeRange' },
+        y: { label: 'Antal flyttar' },
       },
-    ],
-    chartData,
-  }
-
-  return diagram
-}
-
-//Inflyttande kluster bar chart
-export const relocationsIndustryClusterBarChart: DiagramGenerator = async (
-  filters
-) => {
-  const where = and(
-    filters.years?.length
-      ? inArray(relocation.relocationYear, filters.years)
-      : undefined,
-    filters.employeeRange?.length
-      ? inArray(relocation.employeeRange, filters.employeeRange)
-      : undefined,
-    filters.companyTypes?.length
-      ? inArray(relocation.companyType, filters.companyTypes)
-      : undefined,
-    filters.industryClusters?.length
-      ? inArray(relocation.industryCluster, filters.industryClusters)
-      : undefined,
-    filters.location?.length
-      ? arrayContains(relocation.toLocation, [filters.location])
-      : undefined
-  )
-
-  const result = await db
-    .select({ key: relocation.industryCluster, value: count() })
-    .from(relocation)
-    .where(where)
-    .groupBy(relocation.industryCluster)
-    .orderBy(desc(count()))
-
-  const chartData: Record<string, string | number>[] = []
-
-  for (const row of result) {
-    const relocationsData = {
-      industryCluster: row.key ?? 0,
-      totalRelocations: row.value ?? 0,
+      parts: [
+        {
+          type: 'bar',
+          label: `Till ${filters.location}`,
+          dataKey: 'totalRelocations',
+          color: 'var(--chart-1)',
+        },
+      ],
+      chartData,
     }
-    chartData.push(relocationsData)
+
+    return diagram
   }
 
-  const diagram: Diagram = {
-    title: `Inflyttande kluster till ${filters.location} (volym)`,
-    type: 'barBig',
-    axis: {
-      x: { label: 'Industrikluster', dataKey: 'industryCluster' },
-      y: { label: 'Antal flyttar' },
-    },
-    parts: [
-      {
-        type: 'bar',
-        label: `Till ${filters.location}`,
-        dataKey: 'totalRelocations',
-        color: 'var(--chart-1)',
+//Storlek på utflyttade bolag (volym) bar chart
+export const relocationsFromEmployeeRangeVolumeBarChart: DiagramGenerator =
+  async (filters) => {
+    const where = and(
+      filters.years?.length
+        ? inArray(relocation.relocationYear, filters.years)
+        : undefined,
+      filters.employeeRange?.length
+        ? inArray(relocation.employeeRange, filters.employeeRange)
+        : undefined,
+      filters.companyTypes?.length
+        ? inArray(relocation.companyType, filters.companyTypes)
+        : undefined,
+      filters.industryClusters?.length
+        ? inArray(relocation.industryCluster, filters.industryClusters)
+        : undefined,
+      filters.location?.length
+        ? arrayContains(relocation.fromLocation, [filters.location])
+        : undefined
+    )
+
+    const result = await db
+      .select({ key: relocation.employeeRange, value: count() })
+      .from(relocation)
+      .where(where)
+      .groupBy(relocation.employeeRange)
+      .orderBy(
+        asc(
+          sql`CAST(SPLIT_PART(${relocation.employeeRange}, '-', 1) AS INTEGER)`
+        )
+      )
+
+    const chartData: Record<string, string | number>[] = []
+
+    for (const row of result) {
+      const relocationsData = {
+        employeeRange: row.key ?? 0,
+        totalRelocations: row.value ?? 0,
+      }
+      chartData.push(relocationsData)
+    }
+
+    const diagram: Diagram = {
+      title: `Storlek på utflyttade företag till ${filters.location} (volym)`,
+      type: 'bar',
+      axis: {
+        x: { label: 'Antal anställda', dataKey: 'employeeRange' },
+        y: { label: 'Antal flyttar' },
       },
-    ],
-    chartData,
+      parts: [
+        {
+          type: 'bar',
+          label: `Till ${filters.location}`,
+          dataKey: 'totalRelocations',
+          color: 'var(--chart-1)',
+        },
+      ],
+      chartData,
+    }
+
+    return diagram
   }
 
-  return diagram
-}
+//Inflyttande kluster (volym) bar chart
+export const relocationsIndustryClusterVolumeBarChart: DiagramGenerator =
+  async (filters) => {
+    const where = and(
+      filters.years?.length
+        ? inArray(relocation.relocationYear, filters.years)
+        : undefined,
+      filters.employeeRange?.length
+        ? inArray(relocation.employeeRange, filters.employeeRange)
+        : undefined,
+      filters.companyTypes?.length
+        ? inArray(relocation.companyType, filters.companyTypes)
+        : undefined,
+      filters.industryClusters?.length
+        ? inArray(relocation.industryCluster, filters.industryClusters)
+        : undefined,
+      filters.location?.length
+        ? arrayContains(relocation.toLocation, [filters.location])
+        : undefined
+    )
+
+    const result = await db
+      .select({ key: relocation.industryCluster, value: count() })
+      .from(relocation)
+      .where(where)
+      .groupBy(relocation.industryCluster)
+      .orderBy(desc(count()))
+
+    const chartData: Record<string, string | number>[] = []
+
+    for (const row of result) {
+      const relocationsData = {
+        industryCluster: row.key ?? 0,
+        totalRelocations: row.value ?? 0,
+      }
+      chartData.push(relocationsData)
+    }
+
+    const diagram: Diagram = {
+      title: `Inflyttande kluster till ${filters.location} (volym)`,
+      type: 'barBig',
+      axis: {
+        x: { label: 'Industrikluster', dataKey: 'industryCluster' },
+        y: { label: 'Antal flyttar' },
+      },
+      parts: [
+        {
+          type: 'bar',
+          label: `Till ${filters.location}`,
+          dataKey: 'totalRelocations',
+          color: 'var(--chart-1)',
+        },
+      ],
+      chartData,
+    }
+
+    return diagram
+  }

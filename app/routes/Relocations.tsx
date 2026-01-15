@@ -22,22 +22,23 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import type { Diagram } from '~/models/diagramModels'
 import {
-  netMovesByYearBarChart,
-  netMovesTotalBarChart,
-  relocationsEmployeeRangeBarChart,
-  relocationsFromByYearBarChart,
+  netMovesByYearVolumeBarChart,
+  netMovesTotalVolumeBarChart,
+  relocationsToEmployeeRangeVolumeBarChart,
+  relocationsFromByYearVolumeBarChart,
   relocationsFromToLocationTotalVolumeBarChart,
-  relocationsIndustryClusterBarChart,
-  relocationsToByYearBarChart,
+  relocationsIndustryClusterVolumeBarChart,
+  relocationsToByYearVolumeBarChart,
   relocationsToFromLocationTotalVolumeBarChart,
+  relocationsFromEmployeeRangeVolumeBarChart,
 } from '~/components/charts/barCharts'
 import {
   relocationsFromByYearByEmployeeRangePercentLineChart,
   relocationsFromByYearByEmployeeRangeVolumeLineChart,
-  relocationsFromByYearLineChart,
+  relocationsFromByYearVolumeLineChart,
   relocationsFromByYearToLocationPercentLineChart,
   relocationsFromByYearToLocationVolumeLineChart,
-  relocationsToAndFromLineChart,
+  relocationsToAndFromVolumeLineChart,
   relocationsToByYearByEmployeeRangePercentLineChart,
   relocationsToByYearByEmployeeRangeVolumeLineChart,
   relocationsToByYearFromLocationPercentLineChart,
@@ -47,7 +48,7 @@ import {
 import {
   relocationsFromToLocationTotalPercentPieChart,
   relocationsFromToLocationTotalVolumePieChart,
-  relocationsIndustryClusterPieChart,
+  relocationsIndustryClusterVolumePieChart,
   relocationsToFromLocationTotalPercentPieChart,
   relocationsToFromLocationTotalVolumePieChart,
 } from '~/components/charts/pieCharts'
@@ -144,13 +145,13 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 
   const diagrams = await Promise.all([
-    relocationsToByYearBarChart(filters),
+    relocationsToByYearVolumeBarChart(filters),
     relocationsToByYearVolumeLineChart(filters),
-    relocationsFromByYearBarChart(filters),
-    relocationsFromByYearLineChart(filters),
-    relocationsToAndFromLineChart(filters),
-    netMovesByYearBarChart(filters),
-    netMovesTotalBarChart(filters),
+    relocationsFromByYearVolumeBarChart(filters),
+    relocationsFromByYearVolumeLineChart(filters),
+    relocationsToAndFromVolumeLineChart(filters),
+    netMovesByYearVolumeBarChart(filters),
+    netMovesTotalVolumeBarChart(filters),
     relocationsToByYearFromLocationVolumeLineChart(filters),
     relocationsToByYearFromLocationPercentLineChart(filters),
     relocationsToFromLocationTotalVolumeBarChart(filters),
@@ -161,13 +162,14 @@ export async function loader({ request }: Route.LoaderArgs) {
     relocationsFromToLocationTotalVolumeBarChart(filters),
     relocationsFromToLocationTotalVolumePieChart(filters),
     relocationsFromToLocationTotalPercentPieChart(filters),
-    relocationsEmployeeRangeBarChart(filters),
+    relocationsToEmployeeRangeVolumeBarChart(filters),
     relocationsToByYearByEmployeeRangeVolumeLineChart(filters),
     relocationsToByYearByEmployeeRangePercentLineChart(filters),
+    relocationsFromEmployeeRangeVolumeBarChart(filters),
     relocationsFromByYearByEmployeeRangeVolumeLineChart(filters),
     relocationsFromByYearByEmployeeRangePercentLineChart(filters),
-    relocationsIndustryClusterBarChart(filters),
-    relocationsIndustryClusterPieChart(filters),
+    relocationsIndustryClusterVolumeBarChart(filters),
+    relocationsIndustryClusterVolumePieChart(filters),
   ])
 
   const end = performance.now()
@@ -293,13 +295,14 @@ export default function Relocations({ loaderData }: Route.ComponentProps) {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
+
           <Button type="submit" className="mt-4 w-full">
             Filtrera
           </Button>
         </Form>
       </aside>
 
-      <main className="flex p-6">
+      <main className="flex-1 p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {diagrams.map((diagram, index) => (
             <Card key={`${diagram.title}-${index}`}>
