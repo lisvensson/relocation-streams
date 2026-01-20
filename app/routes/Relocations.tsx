@@ -59,6 +59,25 @@ import {
   AccordionTrigger,
 } from '~/components/ui/accordion'
 import { Button } from '~/components/ui/button'
+import { db } from '~/shared/database'
+import { relocation } from '~/shared/database/schema'
+import { union } from 'drizzle-orm/pg-core'
+import { useState } from 'react'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '~/components/ui/popover'
+import { Check, ChevronsUpDown } from 'lucide-react'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '~/components/ui/command'
+import { cn } from '~/lib/utils'
 
 function addChartConfig(diagram: Diagram) {
   const chartConfig = {
@@ -73,6 +92,39 @@ function addChartConfig(diagram: Diagram) {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const start = performance.now()
+
+  const locations = await union(
+    db
+      .selectDistinct({
+        postalArea: relocation.toPostalArea,
+        municipality: relocation.toMunicipality,
+        county: relocation.toCounty,
+      })
+      .from(relocation),
+    db
+      .selectDistinct({
+        postalArea: relocation.fromPostalArea,
+        municipality: relocation.fromMunicipality,
+        county: relocation.fromCounty,
+      })
+      .from(relocation)
+  )
+
+  const allLocations = Array.from(
+    new Set(
+      [
+        ...locations.map((r) => r.postalArea ?? ''),
+        ...locations.map((r) => r.municipality ?? ''),
+        ...locations.map((r) => r.county ?? ''),
+      ].map((locations) =>
+        locations
+          .split(' ')
+          .map((r) => r.charAt(0).toUpperCase() + r.slice(1))
+          .join(' ')
+      )
+    )
+  ).sort((a, b) => a.localeCompare(b))
+
   const filterOptions = {
     years: [
       2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025,
@@ -123,7 +175,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       'Utbildning',
       'Vård',
     ],
-    locations: ['Eskilstuna', 'Stockholm', 'Göteborg', 'Örebro', 'Gävle'],
+    locations: allLocations,
   }
 
   const url = new URL(request.url)
@@ -188,6 +240,8 @@ export default function Relocations({ loaderData }: Route.ComponentProps) {
   const [searchParams] = useSearchParams()
   const { filterOptions, diagrams } = loaderData
   const submit = useSubmit()
+  const [open, setOpen] = useState(false)
+  const [value, setValue] = useState(searchParams.get('location') ?? '')
 
   return (
     <div className="flex">
@@ -280,18 +334,50 @@ export default function Relocations({ loaderData }: Route.ComponentProps) {
             <AccordionItem value="location">
               <AccordionTrigger className="pr-4">Område</AccordionTrigger>
               <AccordionContent>
-                <select
-                  name="location"
-                  defaultValue={searchParams.get('location') ?? ''}
-                  className="w-full p-2 border border-gray-300 rounded-md"
-                >
-                  <option value="">Välj område</option>
-                  {filterOptions.locations.map((location) => (
-                    <option key={location} value={location}>
-                      {location}
-                    </option>
-                  ))}
-                </select>
+                <Popover open={open} onOpenChange={setOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={open}
+                      className="w-full justify-between"
+                    >
+                      {value || 'Välj område'}
+                      <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+
+                  <PopoverContent className="w-full p-2">
+                    <Command>
+                      <CommandInput placeholder="Sök område..." />
+                      <CommandList>
+                        <CommandEmpty>Inga träffar</CommandEmpty>
+                        <CommandGroup>
+                          {filterOptions.locations.map((loc) => (
+                            <CommandItem
+                              key={loc}
+                              value={loc}
+                              onSelect={(currentValue) => {
+                                setValue(
+                                  currentValue === value ? '' : currentValue
+                                )
+                                setOpen(false)
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  value === loc ? 'opacity-100' : 'opacity-0'
+                                )}
+                              />
+                              {loc}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <input type="hidden" name="location" value={value} />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
