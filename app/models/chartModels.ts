@@ -4,8 +4,7 @@ type Category =
   | 'employeeRange'
   | 'industryCluster'
   | 'companyType'
-  | 'postalAreaCode'
-  | 'postalAreaName'
+  | 'postalArea'
   | 'municipality'
   | 'county'
 
