@@ -1,5 +1,5 @@
-import { buildNetFlowChart } from '../../components/buildCharts/buildNetFlowChart.ts'
-import type { Filter, NetFlowChartConfig } from '../../models/chartModels'
+import { buildNetFlowChart } from '../buildCharts/buildNetFlowChart.ts'
+import type { Filter, NetFlowChartConfig } from '../../../models/chartModels.ts'
 
 const area = 'eskilstuna'
 

@@ -1,5 +1,8 @@
-import { buildTemporalChart } from '../../components/buildCharts/buildTemporalChart.ts'
-import type { Filter, TemporalChartConfig } from '../../models/chartModels'
+import { buildTemporalChart } from '../buildCharts/buildTemporalChart.ts'
+import type {
+  Filter,
+  TemporalChartConfig,
+} from '../../../models/chartModels.ts'
 
 const area = 'eskilstuna'
 

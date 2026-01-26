@@ -1,5 +1,8 @@
-import { buildCategoryChart } from '../../components/buildCharts/buildCategoryChart.ts'
-import type { Filter, CategoryChartConfig } from '../../models/chartModels'
+import { buildCategoryChart } from '../buildCharts/buildCategoryChart.ts'
+import type {
+  Filter,
+  CategoryChartConfig,
+} from '../../../models/chartModels.ts'
 
 const area = 'eskilstuna'
 

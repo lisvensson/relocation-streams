@@ -4,9 +4,9 @@ import type {
   ChartModel,
   Filter,
   TemporalCategoryChartConfig,
-} from '../../models/chartModels.ts'
-import { db } from '../../shared/database/index.ts'
-import { relocation } from '../../shared/database/schema.ts'
+} from '../../../models/chartModels.ts'
+import { db } from '../index.ts'
+import { relocation } from '../schema.ts'
 
 type BuildTemporalCategoryChartFunction = (
   area: string,

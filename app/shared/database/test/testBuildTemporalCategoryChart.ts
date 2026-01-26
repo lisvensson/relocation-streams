@@ -1,8 +1,8 @@
-import { buildTemporalCategoryChart } from '../../components/buildCharts/buildTemporalCategoryChart.ts'
+import { buildTemporalCategoryChart } from '../buildCharts/buildTemporalCategoryChart.ts'
 import type {
   Filter,
   TemporalCategoryChartConfig,
-} from '../../models/chartModels.ts'
+} from '../../../models/chartModels.ts'
 
 const area = 'stockholm'
 
