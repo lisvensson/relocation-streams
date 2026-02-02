@@ -2,7 +2,7 @@ import { buildTemporalCategoryChart } from '../buildCharts/buildTemporalCategory
 import type {
   Filter,
   TemporalCategoryChartConfig,
-} from '../../../models/chartModels.ts'
+} from '../models/chartModels.ts'
 
 const area = 'stockholm'
 
@@ -21,12 +21,17 @@ const filters: Filter[] = [
 
 const chartConfig: TemporalCategoryChartConfig = {
   type: 'temporal+category',
-  title: 'Flyttar per år och kategori',
+  title: 'Inflytt/utflytt per år och kategori',
   measure: 'outflow',
+  uiSettings: {
+    containerSize: 'medium',
+    legendPlacement: 'bottom',
+    tablePlacement: 'hidden',
+  },
   category: 'municipality',
-  maxNumberOfCategories: 10,
-  combineRemainingCategories: false,
-  measureCalculation: 'percent',
+  maxNumberOfCategories: 5,
+  combineRemainingCategories: true,
+  measureCalculation: 'volume', //volume eller percent
 }
 
 async function testBuildTemporalCategoryChart() {

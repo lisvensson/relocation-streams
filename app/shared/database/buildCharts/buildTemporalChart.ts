@@ -4,9 +4,10 @@ import type {
   TemporalChartConfig,
   ChartModel,
   ChartDataPoint,
-} from '../../../models/chartModels.ts'
+} from '../models/chartModels.ts'
 import { db } from '../index.ts'
 import { relocation } from '../schema.ts'
+import { generateChartTitle } from '../utils/generateChartTitle.ts'
 
 type BuildTemporalChartFunction = (
   area: string,
@@ -50,19 +51,21 @@ export const buildTemporalChart: BuildTemporalChartFunction = async (
 
   const data: ChartDataPoint[] = []
 
+  const dimensionKey = 'year'
+
   for (const row of result) {
     const relocationsData = {
-      dimension: String(row.year),
+      [dimensionKey]: String(row.year),
       [measure]: Number(row.value),
     }
     data.push(relocationsData)
   }
 
   return {
-    title: chartConfig.title,
+    title: generateChartTitle(chartConfig, area),
     type: 'column',
     measure,
-    dimension: 'year',
+    dimension: dimensionKey,
     series: [measure],
     data,
   }

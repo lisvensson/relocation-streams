@@ -71,7 +71,6 @@ export type TemporalDimension = 'year' | 'month' | 'week'
 export type Dimension = TemporalDimension | Category
 export type ChartType = 'column' | 'bar' | 'pie' | 'line'
 export type ChartDataPoint = {
-  dimension: string
   [key: string]: number | string | null | undefined
 }
 

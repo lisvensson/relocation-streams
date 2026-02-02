@@ -4,9 +4,10 @@ import type {
   ChartModel,
   Filter,
   NetFlowChartConfig,
-} from '../../../models/chartModels.ts'
+} from '../models/chartModels.ts'
 import { db } from '../index.ts'
 import { relocation } from '../schema.ts'
+import { generateChartTitle } from '../utils/generateChartTitle.ts'
 
 type BuildNetFlowChartFunction = (
   area: string,
@@ -19,7 +20,7 @@ export const buildNetFlowChart: BuildNetFlowChartFunction = async (
   filters,
   chartConfig
 ) => {
-  console.log(area, filters, chartConfig)
+  console.log({ area, filters, chartConfig })
 
   const inflowValue = relocation.toLocation
   const outflowValue = relocation.fromLocation
@@ -69,11 +70,13 @@ export const buildNetFlowChart: BuildNetFlowChartFunction = async (
 
   const data: ChartDataPoint[] = []
 
+  const dimensionKey = 'year'
+
   for (const year of yearsTo && yearsFrom) {
     const inflow = inflowResult.find((r) => r.dimension === year)?.value ?? 0
     const outflow = outflowResult.find((r) => r.dimension === year)?.value ?? 0
     const relocationsData = {
-      dimension: String(year),
+      [dimensionKey]: String(year),
       inflow,
       outflow,
       net: inflow - outflow,
@@ -82,7 +85,7 @@ export const buildNetFlowChart: BuildNetFlowChartFunction = async (
   }
 
   return {
-    title: chartConfig.title,
+    title: generateChartTitle(chartConfig, area),
     type: 'column',
     measure: 'inflow',
     dimension: 'year',

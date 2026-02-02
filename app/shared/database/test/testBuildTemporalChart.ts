@@ -1,10 +1,7 @@
 import { buildTemporalChart } from '../buildCharts/buildTemporalChart.ts'
-import type {
-  Filter,
-  TemporalChartConfig,
-} from '../../../models/chartModels.ts'
+import type { Filter, TemporalChartConfig } from '../models/chartModels.ts'
 
-const area = 'eskilstuna'
+const area = 'stockholm'
 
 const filters: Filter[] = [
   {
@@ -20,10 +17,9 @@ const filters: Filter[] = [
 ]
 
 const chartConfig: TemporalChartConfig = {
-  title: 'Utflytt per år',
+  title: 'Inflytt/utflytt per år',
   type: 'temporal',
-  measure: 'outflow',
-  filters,
+  measure: 'inflow',
   uiSettings: {
     containerSize: 'medium',
     legendPlacement: 'bottom',

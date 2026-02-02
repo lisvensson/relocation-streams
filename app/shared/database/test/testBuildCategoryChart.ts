@@ -1,10 +1,7 @@
 import { buildCategoryChart } from '../buildCharts/buildCategoryChart.ts'
-import type {
-  Filter,
-  CategoryChartConfig,
-} from '../../../models/chartModels.ts'
+import type { Filter, CategoryChartConfig } from '../models/chartModels.ts'
 
-const area = 'eskilstuna'
+const area = 'stockholm'
 
 const filters: Filter[] = [
   {
@@ -20,13 +17,18 @@ const filters: Filter[] = [
 ]
 
 const chartConfig: CategoryChartConfig = {
-  title: 'Fördelning per kategori',
+  title: 'Inflytt per kategori',
   type: 'category',
-  measure: 'inflow',
+  measure: 'outflow',
+  uiSettings: {
+    containerSize: 'medium',
+    legendPlacement: 'bottom',
+    tablePlacement: 'hidden',
+  },
   category: 'industryCluster',
-  maxNumberOfCategories: 5,
+  maxNumberOfCategories: 10,
   combineRemainingCategories: true,
-  chartType: 'bar',
+  chartType: 'bar', // pie eller bar
 }
 
 async function testBuildCategoryChart() {

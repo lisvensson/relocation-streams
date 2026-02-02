@@ -1,7 +1,7 @@
 import { buildNetFlowChart } from '../buildCharts/buildNetFlowChart.ts'
-import type { Filter, NetFlowChartConfig } from '../../../models/chartModels.ts'
+import type { Filter, NetFlowChartConfig } from '../models/chartModels.ts'
 
-const area = 'eskilstuna'
+const area = 'stockholm'
 
 const filters: Filter[] = [
   {
@@ -18,7 +18,7 @@ const filters: Filter[] = [
 
 const chartConfig: NetFlowChartConfig = {
   type: 'netflow',
-  title: 'Nettoflyttar per år',
+  title: 'Nettoflytt per år',
 }
 
 async function testBuildNetFlowChart() {

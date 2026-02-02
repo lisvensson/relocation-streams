@@ -1,0 +1,137 @@
+import type { ChartModel } from '~/shared/database/models/chartModels'
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '~/components/ui/chart'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  XAxis,
+  YAxis,
+} from 'recharts'
+
+export default function ChartRenderer({
+  type,
+  title,
+  dimension,
+  series,
+  data,
+}: ChartModel) {
+  const config = Object.fromEntries(
+    series.map((s, i) => [s, { label: s, color: `var(--chart-${i + 1})` }])
+  )
+
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+
+      <CardContent>
+        <ChartContainer config={config}>
+          {type === 'column' ? (
+            <BarChart data={data} layout="horizontal">
+              <CartesianGrid vertical={false} />
+              <YAxis tickLine={false} tickMargin={10} axisLine={false} />
+              <XAxis
+                dataKey={dimension}
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+              />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              <ChartLegend />
+              {series.map((s, i) => (
+                <Bar
+                  key={s}
+                  dataKey={s}
+                  fill={`var(--chart-${i + 1})`}
+                  radius={8}
+                />
+              ))}
+            </BarChart>
+          ) : type === 'bar' ? (
+            <BarChart data={data} layout="vertical">
+              <CartesianGrid vertical={false} />
+              <YAxis
+                type="category"
+                dataKey={dimension}
+                width={150}
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+              />
+              <XAxis
+                type="number"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+              />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              <ChartLegend />
+              {series.map((s, i) => (
+                <Bar
+                  key={s}
+                  dataKey={s}
+                  fill={`var(--chart-${i + 1})`}
+                  radius={8}
+                />
+              ))}
+            </BarChart>
+          ) : type === 'line' ? (
+            <LineChart data={data}>
+              <CartesianGrid vertical={false} />
+              <YAxis tickLine={false} tickMargin={10} axisLine={false} />
+              <XAxis
+                dataKey={dimension}
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+              />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              <ChartLegend />
+              {series.map((s, i) => (
+                <Line
+                  key={s}
+                  dataKey={s}
+                  stroke={`var(--chart-${i + 1})`}
+                  strokeWidth={2}
+                  dot={false}
+                />
+              ))}
+            </LineChart>
+          ) : type === 'pie' ? (
+            <PieChart>
+              <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+              <Pie data={data} dataKey={series[0]} nameKey={dimension} label>
+                {data.map((_, i) => (
+                  <Cell key={i} fill={`var(--chart-${(i % 11) + 1})`} />
+                ))}
+              </Pie>
+            </PieChart>
+          ) : (
+            <div>Inga diagram tillgängliga</div>
+          )}
+        </ChartContainer>
+      </CardContent>
+    </Card>
+  )
+}

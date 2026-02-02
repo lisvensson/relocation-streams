@@ -12,5 +12,7 @@ export default [
   layout('./routes/shell.tsx', [
     index('routes/home.tsx'),
     route('relocations', './routes/Relocations.tsx'),
+    route('testchart', './routes/TestChart.tsx'),
+    route('skapa-diagram', './routes/BuildChart.tsx'),
   ]),
 ] satisfies RouteConfig

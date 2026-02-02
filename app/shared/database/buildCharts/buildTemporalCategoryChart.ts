@@ -4,9 +4,10 @@ import type {
   ChartModel,
   Filter,
   TemporalCategoryChartConfig,
-} from '../../../models/chartModels.ts'
+} from '../models/chartModels.ts'
 import { db } from '../index.ts'
 import { relocation } from '../schema.ts'
+import { generateChartTitle } from '../utils/generateChartTitle.ts'
 
 type BuildTemporalCategoryChartFunction = (
   area: string,
@@ -16,7 +17,7 @@ type BuildTemporalCategoryChartFunction = (
 
 export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
   async (area, filters, chartConfig) => {
-    console.log(area, filters, chartConfig)
+    console.log({ area, filters, chartConfig })
 
     const {
       measure,
@@ -85,9 +86,9 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
     const years = Array.from(new Set(result.map((r) => r.year)))
 
     const data: ChartDataPoint[] = []
-
+    const dimensionKey = 'year'
     for (const year of years) {
-      const point: ChartDataPoint = { dimension: String(year) }
+      const point: ChartDataPoint = { [dimensionKey]: String(year) }
       let otherSum = 0
 
       for (const row of result) {
@@ -112,14 +113,15 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
         let total = 0
 
         for (const key in point) {
-          if (key !== 'dimension') {
+          if (key !== dimensionKey) {
             total += Number(point[key])
           }
         }
 
         for (const key in point) {
-          if (key !== 'dimension') {
-            point[key] = total === 0 ? 0 : (Number(point[key]) / total) * 100
+          if (key !== dimensionKey) {
+            point[key] =
+              total === 0 ? 0 : Math.round((Number(point[key]) / total) * 100)
           }
         }
       }
@@ -130,10 +132,10 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
       : topCategories
 
     return {
-      title: chartConfig.title,
+      title: generateChartTitle(chartConfig, area),
       type: 'line',
       measure,
-      dimension: 'year',
+      dimension: dimensionKey,
       series,
       data,
     }

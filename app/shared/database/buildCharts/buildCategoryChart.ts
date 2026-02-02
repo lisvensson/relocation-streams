@@ -4,9 +4,10 @@ import type {
   ChartDataPoint,
   ChartModel,
   Filter,
-} from '../../../models/chartModels.ts'
+} from '../models/chartModels.ts'
 import { db } from '../index.ts'
 import { relocation } from '../schema.ts'
+import { generateChartTitle } from '../utils/generateChartTitle.ts'
 
 type buildCategoryChartFunction = (
   area: string,
@@ -19,7 +20,7 @@ export const buildCategoryChart: buildCategoryChartFunction = async (
   filters,
   chartConfig
 ) => {
-  console.log(area, filters, chartConfig)
+  console.log({ area, filters, chartConfig })
 
   const {
     measure,
@@ -76,19 +77,21 @@ export const buildCategoryChart: buildCategoryChartFunction = async (
 
   const data: ChartDataPoint[] = []
 
+  const dimensionKey = category
+
   for (const row of rows) {
     const relocationsData = {
-      dimension: row.dimension,
+      [dimensionKey]: row.dimension,
       [measure]: row.value,
     }
     data.push(relocationsData)
   }
 
   return {
-    title: chartConfig.title,
+    title: generateChartTitle(chartConfig, area),
     type: chartType,
     measure,
-    dimension: category,
+    dimension: dimensionKey,
     series: [measure],
     data,
   }
