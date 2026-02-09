@@ -13,6 +13,6 @@ export default [
     index('routes/home.tsx'),
     route('relocations', './routes/Relocations.tsx'),
     route('testchart', './routes/TestChart.tsx'),
-    route('skapa-diagram', './routes/BuildChart.tsx'),
+    route('skapa-rapport', './routes/CreateReport.tsx'),
   ]),
 ] satisfies RouteConfig
