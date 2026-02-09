@@ -10,7 +10,7 @@ import { relocation } from '../schema.ts'
 import { generateChartTitle } from '../utils/generateChartTitle.ts'
 
 type BuildNetFlowChartFunction = (
-  area: string,
+  area: string | undefined,
   filters: Filter[],
   chartConfig: NetFlowChartConfig
 ) => Promise<ChartModel>
@@ -26,23 +26,17 @@ export const buildNetFlowChart: BuildNetFlowChartFunction = async (
   const outflowValue = relocation.fromLocation
 
   const whereInflow = and(
-    ...filters.map((f) => {
-      if (f.operator === 'in') {
-        return inArray(relocation[f.key], f.value)
-      }
-      return undefined
-    }),
-    arrayContains(inflowValue, [area])
+    ...filters.map((f) =>
+      f.operator === 'in' ? inArray(relocation[f.key], f.value) : undefined
+    ),
+    area ? arrayContains(inflowValue, [area]) : undefined
   )
 
   const whereOutflow = and(
-    ...filters.map((f) => {
-      if (f.operator === 'in') {
-        return inArray(relocation[f.key], f.value)
-      }
-      return undefined
-    }),
-    arrayContains(outflowValue, [area])
+    ...filters.map((f) =>
+      f.operator === 'in' ? inArray(relocation[f.key], f.value) : undefined
+    ),
+    area ? arrayContains(outflowValue, [area]) : undefined
   )
 
   const inflowResult = await db

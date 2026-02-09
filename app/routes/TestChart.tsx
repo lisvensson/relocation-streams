@@ -1,4 +1,4 @@
-import ChartRenderer from '~/components/charts/chartRenderer'
+import ChartRenderer from '~/components/charts/ChartRenderer'
 import type { ChartModel } from '~/shared/database/models/chartModels'
 
 export default function TestChart() {

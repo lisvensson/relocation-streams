@@ -2,7 +2,7 @@ import type { ChartConfig } from '~/shared/database/models/chartModels'
 
 export function generateChartTitle(
   chartConfig: ChartConfig,
-  area: string
+  area: string | undefined
 ): string {
   const { type, measure, measureCalculation } = chartConfig
 
