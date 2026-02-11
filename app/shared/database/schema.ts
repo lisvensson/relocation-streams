@@ -8,6 +8,7 @@ import {
   integer,
   uuid,
   index,
+  jsonb,
 } from 'drizzle-orm/pg-core'
 
 export const user = pgTable('user', {
@@ -107,3 +108,10 @@ export const relocation = pgTable(
     ]
   }
 )
+
+export const savedCharts = pgTable('saved_charts', {
+  id: uuid()
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  config: jsonb().notNull(),
+})

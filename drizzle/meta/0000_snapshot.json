@@ -1,5 +1,5 @@
 {
-  "id": "6f0222be-d047-46de-a94d-7f1b46a4eb94",
+  "id": "06db22ed-e137-411b-8659-6c9fe842af3a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -204,6 +204,66 @@
         }
       },
       "indexes": {
+        "relocation_relocation_year_index": {
+          "name": "relocation_relocation_year_index",
+          "columns": [
+            {
+              "expression": "relocation_year",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "relocation_employee_range_index": {
+          "name": "relocation_employee_range_index",
+          "columns": [
+            {
+              "expression": "employee_range",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "relocation_company_type_index": {
+          "name": "relocation_company_type_index",
+          "columns": [
+            {
+              "expression": "company_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "relocation_industry_cluster_index": {
+          "name": "relocation_industry_cluster_index",
+          "columns": [
+            {
+              "expression": "industry_cluster",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "relocation_from_location_gin": {
           "name": "relocation_from_location_gin",
           "columns": [
@@ -325,6 +385,32 @@
           "with": {}
         }
       },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.saved_charts": {
+      "name": "saved_charts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "config": {
+          "name": "config",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
