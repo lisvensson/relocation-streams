@@ -15,7 +15,7 @@ import {
 } from '~/components/ui/select'
 import { Input } from '~/components/ui/input'
 import { Checkbox } from '~/components/ui/checkbox'
-import { Form, useSubmit } from 'react-router'
+import { Form, useSearchParams, useSubmit } from 'react-router'
 import ChartRenderer from '~/components/charts/ChartRenderer'
 import type { ChartModel, Filter } from '~/shared/database/models/chartModels'
 import { useState } from 'react'
@@ -38,6 +38,16 @@ export function ChartBuilder({ chart, location, filters }: ChartBuilderProps) {
     useState(false)
   const [chartType, setChartType] = useState<string>('')
   const [measureCalculation, setMeasureCalculation] = useState<string>('')
+  const [searchParams] = useSearchParams()
+  const chartParams = [
+    'type',
+    'measure',
+    'category',
+    'maxNumberOfCategories',
+    'combineRemainingCategories',
+    'chartType',
+    'measureCalculation',
+  ]
 
   return (
     <Sheet>
@@ -49,12 +59,23 @@ export function ChartBuilder({ chart, location, filters }: ChartBuilderProps) {
         <div className="mt-6 flex gap-8">
           <div className="w-75 border-r p-4">
             <Form
-              method="post"
+              method="get"
               className="space-y-6 mt-6"
               onChange={(e) =>
                 submit(e.currentTarget, { preventScrollReset: true })
               }
             >
+              {Array.from(searchParams.entries())
+                .filter(([key]) => !chartParams.includes(key))
+                .map(([key, value]) => (
+                  <input
+                    key={`${key}-${value}`}
+                    type="hidden"
+                    name={key}
+                    value={value}
+                  />
+                ))}
+
               {/* type */}
               <div>
                 <label className="block mb-1 font-medium">Välj diagram</label>
@@ -222,18 +243,6 @@ export function ChartBuilder({ chart, location, filters }: ChartBuilderProps) {
                   )}
                 </div>
               )}
-
-              <input
-                type="hidden"
-                name="location"
-                value={location.toLowerCase()}
-              />
-              <input
-                type="hidden"
-                name="filters"
-                value={JSON.stringify(filters)}
-              />
-
               <SheetFooter className="mt-6">
                 <SheetClose asChild></SheetClose>
                 <Button type="submit">Visa diagram</Button>
@@ -245,17 +254,7 @@ export function ChartBuilder({ chart, location, filters }: ChartBuilderProps) {
               <>
                 <ChartRenderer {...chart} />
                 <Form method="post" className="mt-6">
-                  <input type="hidden" name="addChart" value="true" />
-                  <input
-                    type="hidden"
-                    name="location"
-                    value={location.toLowerCase()}
-                  />
-                  <input
-                    type="hidden"
-                    name="filters"
-                    value={JSON.stringify(filters)}
-                  />
+                  <input type="hidden" name="intent" value="addChart" />
                   <input type="hidden" name="type" value={type} />
                   <input type="hidden" name="measure" value={measure} />
                   <input type="hidden" name="category" value={category} />
@@ -275,7 +274,9 @@ export function ChartBuilder({ chart, location, filters }: ChartBuilderProps) {
                     name="measureCalculation"
                     value={measureCalculation}
                   />
-                  <Button type="submit">Lägg till diagram i rapporten</Button>
+                  <SheetClose asChild>
+                    <Button type="submit">Lägg till diagram i rapporten</Button>
+                  </SheetClose>
                 </Form>
               </>
             )}
