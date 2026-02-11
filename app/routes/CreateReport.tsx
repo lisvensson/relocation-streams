@@ -9,7 +9,7 @@ import { Button } from '~/components/ui/button'
 import { db } from '~/shared/database'
 import { relocation } from '~/shared/database/schema'
 import { union } from 'drizzle-orm/pg-core'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { Route } from './+types/CreateReport'
 import { LocationSelector } from '~/components/charts/LocationSelector'
 import { FilterSelector } from '~/components/charts/FilterSelector'
@@ -142,27 +142,15 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   const result = await buildNetFlowChart(location, filters, netflowConfig)
 
-  const end = performance.now()
-  console.log(`Loader time: ${(end - start).toFixed(2)} ms`)
-
-  return {
-    filterOptions,
-    filters,
-    result,
-  }
-}
-
-export async function action({ request }: Route.ActionArgs) {
-  const formData = await request.formData()
-  const location = formData.get('location')
-  const filters = JSON.parse(formData.get('filters') as string)
-  const type = formData.get('type')
-  const measure = formData.get('measure')
-  const category = formData.get('category')
-  const maxNumberOfCategories = formData.get('maxNumberOfCategories')
-  const combineRemainingCategories = formData.get('combineRemainingCategories')
-  const chartType = formData.get('chartType')
-  const measureCalculation = formData.get('measureCalculation')
+  const type = searchParams.get('type')
+  const measure = searchParams.get('measure')
+  const category = searchParams.get('category')
+  const maxNumberOfCategories = searchParams.get('maxNumberOfCategories')
+  const combineRemainingCategories = searchParams.get(
+    'combineRemainingCategories'
+  )
+  const chartType = searchParams.get('chartType')
+  const measureCalculation = searchParams.get('measureCalculation')
 
   const chartConfig = {
     type,
@@ -196,18 +184,20 @@ export async function action({ request }: Route.ActionArgs) {
     preview = await buildTemporalCategoryChart(location, filters, chartConfig)
   }
 
+  const end = performance.now()
+  console.log(`Loader time: ${(end - start).toFixed(2)} ms`)
+
   return {
+    filterOptions,
+    filters,
+    result,
     preview,
   }
 }
 
-export default function CreateReport({
-  loaderData,
-  actionData,
-}: Route.ComponentProps) {
+export default function CreateReport({ loaderData }: Route.ComponentProps) {
   const [searchParams] = useSearchParams()
-  const { filterOptions, filters, result } = loaderData
-  const preview = actionData?.preview ?? null
+  const { filterOptions, filters, result, preview } = loaderData
   const [location, setLocation] = useState(searchParams.get('location') ?? '')
 
   return (
