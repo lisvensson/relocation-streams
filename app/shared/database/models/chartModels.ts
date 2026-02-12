@@ -59,6 +59,7 @@ export type ChartConfig =
   | NetFlowChartConfig
 
 export type ChartModel = {
+  id?: string
   title: string
   type: ChartType
   measure: Measure // ??

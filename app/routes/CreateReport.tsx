@@ -7,7 +7,7 @@ import {
 } from '~/components/ui/accordion'
 import { Button } from '~/components/ui/button'
 import { db } from '~/shared/database'
-import { relocation } from '~/shared/database/schema'
+import { relocation, savedCharts } from '~/shared/database/schema'
 import { union } from 'drizzle-orm/pg-core'
 import { useState } from 'react'
 import type { Route } from './+types/CreateReport'
@@ -24,6 +24,7 @@ import { ChartBuilder } from '~/components/charts/ChartBuilder'
 import { buildTemporalChart } from '~/shared/database/buildCharts/buildTemporalChart'
 import { buildCategoryChart } from '~/shared/database/buildCharts/buildCategoryChart'
 import { buildTemporalCategoryChart } from '~/shared/database/buildCharts/buildTemporalCategoryChart'
+import ChartRenderer from '~/components/charts/ChartRenderer'
 
 export async function loader({ request }: Route.LoaderArgs) {
   const start = performance.now()
@@ -184,6 +185,35 @@ export async function loader({ request }: Route.LoaderArgs) {
     preview = await buildTemporalCategoryChart(location, filters, chartConfig)
   }
 
+  const savedChart = await db.select().from(savedCharts)
+
+  const charts = await Promise.all(
+    savedChart.map(async (chart) => {
+      const config = chart.config
+
+      if (config.type === 'temporal') {
+        const buildChart = await buildTemporalChart(location, filters, config)
+        return { id: chart.id, ...buildChart }
+      }
+
+      if (config.type === 'category') {
+        const buildChart = await buildCategoryChart(location, filters, config)
+        return { id: chart.id, ...buildChart }
+      }
+
+      if (config.type === 'temporal+category') {
+        const buildChart = await buildTemporalCategoryChart(
+          location,
+          filters,
+          config
+        )
+        return { id: chart.id, ...buildChart }
+      }
+
+      return null
+    })
+  )
+
   const end = performance.now()
   console.log(`Loader time: ${(end - start).toFixed(2)} ms`)
 
@@ -192,12 +222,35 @@ export async function loader({ request }: Route.LoaderArgs) {
     filters,
     result,
     preview,
+    charts,
   }
+}
+
+export async function action({ request }: Route.ActionArgs) {
+  const formData = await request.formData()
+  const intent = formData.get('intent')
+
+  if (intent === 'addChart') {
+    const config = {
+      type: formData.get('type'),
+      measure: formData.get('measure'),
+      category: formData.get('category'),
+      maxNumberOfCategories: Number(formData.get('maxNumberOfCategories')),
+      combineRemainingCategories:
+        formData.get('combineRemainingCategories') === 'on',
+      chartType: formData.get('chartType'),
+      measureCalculation: formData.get('measureCalculation'),
+    }
+
+    return await db.insert(savedCharts).values({ config })
+  }
+
+  return null
 }
 
 export default function CreateReport({ loaderData }: Route.ComponentProps) {
   const [searchParams] = useSearchParams()
-  const { filterOptions, filters, result, preview } = loaderData
+  const { filterOptions, filters, result, preview, charts } = loaderData
   const [location, setLocation] = useState(searchParams.get('location') ?? '')
 
   return (
@@ -268,8 +321,13 @@ export default function CreateReport({ loaderData }: Route.ComponentProps) {
         </Form>
       </aside>
       <div className="flex-1 p-6">
-        <NetFlowChart data={result} />
         <ChartBuilder chart={preview} location={location} filters={filters} />
+        <NetFlowChart data={result} />
+        <div className="space-y-6 mt-8">
+          {charts.map((chart) => (
+            <ChartRenderer key={chart?.id} {...chart} />
+          ))}
+        </div>
       </div>
     </div>
   )
