@@ -10,7 +10,7 @@ import { relocation } from '../schema.ts'
 import { generateChartTitle } from '../utils/generateChartTitle.ts'
 
 type BuildTemporalChartFunction = (
-  area: string,
+  area: string | undefined,
   filters: Filter[],
   chartConfig: TemporalChartConfig
 ) => Promise<ChartModel>
@@ -30,13 +30,10 @@ export const buildTemporalChart: BuildTemporalChartFunction = async (
   }[measure]
 
   const where = and(
-    ...filters.map((f) => {
-      if (f.operator === 'in') {
-        return inArray(relocation[f.key], f.value)
-      }
-      return undefined
-    }),
-    arrayContains(measureValue, [area])
+    ...filters.map((f) =>
+      f.operator === 'in' ? inArray(relocation[f.key], f.value) : undefined
+    ),
+    area ? arrayContains(measureValue, [area]) : undefined
   )
 
   const result = await db
