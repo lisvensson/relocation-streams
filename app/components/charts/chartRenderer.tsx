@@ -18,7 +18,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { TrashIcon } from 'lucide-react'
+import { Trash2Icon } from 'lucide-react'
 import { Form } from 'react-router'
 
 import { Button } from '@base-ui/react'
@@ -39,7 +39,7 @@ export default function ChartRenderer({
   return (
     <Card className="w-full relative">
       {id && (
-        <div className="absolute top-3 right-3 flex gap-2 z-10">
+        <div className="absolute top-3 right-3 flex gap-2">
           <ChartEditor chartId={id} />
 
           <Form method="post">
@@ -49,7 +49,7 @@ export default function ChartRenderer({
               type="submit"
               className="text-muted-foreground hover:text-red-500 transition"
             >
-              <TrashIcon className="size-4" />
+              <Trash2Icon className="size-4" />
             </Button>
           </Form>
         </div>
