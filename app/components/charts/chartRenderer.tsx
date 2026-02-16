@@ -23,6 +23,18 @@ import { Form } from 'react-router'
 
 import { Button } from '@base-ui/react'
 import { ChartEditor } from './ChartEditor'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../ui/alert-dialog'
 
 export default function ChartRenderer({
   id,
@@ -42,16 +54,35 @@ export default function ChartRenderer({
         <div className="absolute top-3 right-3 flex gap-2">
           <ChartEditor chartId={id} />
 
-          <Form method="post">
-            <input type="hidden" name="intent" value="deleteChart" />
-            <input type="hidden" name="id" value={id} />
-            <Button
-              type="submit"
-              className="text-muted-foreground hover:text-red-500 transition"
-            >
-              <Trash2Icon className="size-4" />
-            </Button>
-          </Form>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button className="text-muted-foreground hover:text-red-500 transition">
+                <Trash2Icon className="size-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent size="sm">
+              <AlertDialogHeader>
+                <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
+                  <Trash2Icon />
+                </AlertDialogMedia>
+                <AlertDialogTitle>Radera diagram?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Detta går inte att ångra. Diagrammet tas bort permanent från
+                  rapporten.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel variant="outline">Avbryt</AlertDialogCancel>
+                <AlertDialogAction variant="destructive" asChild>
+                  <Form method="post">
+                    <input type="hidden" name="intent" value="deleteChart" />
+                    <input type="hidden" name="id" value={id} />
+                    <Button type="submit">Radera</Button>
+                  </Form>
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       )}
 
