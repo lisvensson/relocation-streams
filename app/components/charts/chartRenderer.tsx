@@ -18,8 +18,14 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import { TrashIcon } from 'lucide-react'
+import { Form } from 'react-router'
+
+import { Button } from '@base-ui/react'
+import { ChartEditor } from './ChartEditor'
 
 export default function ChartRenderer({
+  id,
   type,
   title,
   dimension,
@@ -31,7 +37,24 @@ export default function ChartRenderer({
   )
 
   return (
-    <Card className="w-full">
+    <Card className="w-full relative">
+      {id && (
+        <div className="absolute top-3 right-3 flex gap-2 z-10">
+          <ChartEditor chartId={id} />
+
+          <Form method="post">
+            <input type="hidden" name="intent" value="deleteChart" />
+            <input type="hidden" name="id" value={id} />
+            <Button
+              type="submit"
+              className="text-muted-foreground hover:text-red-500 transition"
+            >
+              <TrashIcon className="size-4" />
+            </Button>
+          </Form>
+        </div>
+      )}
+
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
