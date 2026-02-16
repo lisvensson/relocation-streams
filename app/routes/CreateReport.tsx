@@ -1,4 +1,4 @@
-import { Form, useSearchParams } from 'react-router'
+import { Form, redirect, useSearchParams } from 'react-router'
 import {
   Accordion,
   AccordionContent,
@@ -25,6 +25,7 @@ import { buildTemporalChart } from '~/shared/database/buildCharts/buildTemporalC
 import { buildCategoryChart } from '~/shared/database/buildCharts/buildCategoryChart'
 import { buildTemporalCategoryChart } from '~/shared/database/buildCharts/buildTemporalCategoryChart'
 import ChartRenderer from '~/components/charts/ChartRenderer'
+import { eq } from 'drizzle-orm'
 
 export async function loader({ request }: Route.LoaderArgs) {
   const start = performance.now()
@@ -193,12 +194,12 @@ export async function loader({ request }: Route.LoaderArgs) {
 
       if (config.type === 'temporal') {
         const buildChart = await buildTemporalChart(location, filters, config)
-        return { id: chart.id, ...buildChart }
+        return { id: chart.id, ...buildChart, config }
       }
 
       if (config.type === 'category') {
         const buildChart = await buildCategoryChart(location, filters, config)
-        return { id: chart.id, ...buildChart }
+        return { id: chart.id, ...buildChart, config }
       }
 
       if (config.type === 'temporal+category') {
@@ -207,7 +208,7 @@ export async function loader({ request }: Route.LoaderArgs) {
           filters,
           config
         )
-        return { id: chart.id, ...buildChart }
+        return { id: chart.id, ...buildChart, config }
       }
 
       return null
@@ -229,6 +230,16 @@ export async function loader({ request }: Route.LoaderArgs) {
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData()
   const intent = formData.get('intent')
+  const chartSettingParams = [
+    'type',
+    'measure',
+    'category',
+    'maxNumberOfCategories',
+    'combineRemainingCategories',
+    'chartType',
+    'measureCalculation',
+  ]
+  let url = new URL(request.url)
 
   if (intent === 'addChart') {
     const config = {
@@ -242,7 +253,44 @@ export async function action({ request }: Route.ActionArgs) {
       measureCalculation: formData.get('measureCalculation'),
     }
 
-    return await db.insert(savedCharts).values({ config })
+    await db.insert(savedCharts).values({ config })
+
+    chartSettingParams.forEach((p) => url.searchParams.delete(p))
+    return redirect(url.toString())
+  }
+
+  if (intent === 'updateChart') {
+    const chartId = formData.get('id')
+    if (typeof chartId !== 'string') {
+      throw new Error('Invalid chart id')
+    }
+
+    const config = {
+      type: formData.get('type'),
+      measure: formData.get('measure'),
+      category: formData.get('category'),
+      maxNumberOfCategories: Number(formData.get('maxNumberOfCategories')),
+      combineRemainingCategories:
+        formData.get('combineRemainingCategories') === 'on',
+      chartType: formData.get('chartType'),
+      measureCalculation: formData.get('measureCalculation'),
+    }
+
+    await db
+      .update(savedCharts)
+      .set({ config })
+      .where(eq(savedCharts.id, chartId))
+
+    chartSettingParams.forEach((p) => url.searchParams.delete(p))
+    return redirect(url.toString())
+  }
+
+  if (intent === 'deleteChart') {
+    const chartId = formData.get('id')
+
+    if (typeof chartId === 'string') {
+      return await db.delete(savedCharts).where(eq(savedCharts.id, chartId))
+    }
   }
 
   return null
@@ -250,7 +298,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function CreateReport({ loaderData }: Route.ComponentProps) {
   const [searchParams] = useSearchParams()
-  const { filterOptions, filters, result, preview, charts } = loaderData
+  const { filterOptions, result, preview, charts } = loaderData
   const [location, setLocation] = useState(searchParams.get('location') ?? '')
 
   return (
@@ -321,7 +369,7 @@ export default function CreateReport({ loaderData }: Route.ComponentProps) {
         </Form>
       </aside>
       <div className="flex-1 p-6">
-        <ChartBuilder chart={preview} location={location} filters={filters} />
+        <ChartBuilder chart={preview} />
         <NetFlowChart data={result} />
         <div className="space-y-6 mt-8">
           {charts.map((chart) => (
