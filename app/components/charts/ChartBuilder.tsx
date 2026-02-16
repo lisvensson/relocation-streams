@@ -22,11 +22,9 @@ import { useState } from 'react'
 
 interface ChartBuilderProps {
   chart: ChartModel | null
-  location: string
-  filters: Filter[]
 }
 
-export function ChartBuilder({ chart, location, filters }: ChartBuilderProps) {
+export function ChartBuilder({ chart }: ChartBuilderProps) {
   const submit = useSubmit()
   const [type, setType] = useState<string>('')
   const [measure, setMeasure] = useState<string>('')
@@ -244,7 +242,6 @@ export function ChartBuilder({ chart, location, filters }: ChartBuilderProps) {
                 </div>
               )}
               <SheetFooter className="mt-6">
-                <SheetClose asChild></SheetClose>
                 <Button type="submit">Visa diagram</Button>
               </SheetFooter>
             </Form>
