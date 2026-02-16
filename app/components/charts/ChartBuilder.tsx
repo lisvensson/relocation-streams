@@ -37,7 +37,7 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
   const [chartType, setChartType] = useState<string>('')
   const [measureCalculation, setMeasureCalculation] = useState<string>('')
   const [searchParams] = useSearchParams()
-  const chartParams = [
+  const chartSettingParams = [
     'type',
     'measure',
     'category',
@@ -48,7 +48,16 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
   ]
 
   return (
-    <Sheet>
+    <Sheet
+      onOpenChange={(open) => {
+        if (!open) {
+          const url = new URL(window.location.href)
+          chartSettingParams.forEach((p) => url.searchParams.delete(p))
+          window.history.replaceState({}, '', url.toString())
+          window.location.reload()
+        }
+      }}
+    >
       <SheetTrigger asChild>
         <Button variant="default">Lägg till diagram</Button>
       </SheetTrigger>
@@ -64,7 +73,7 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
               }
             >
               {Array.from(searchParams.entries())
-                .filter(([key]) => !chartParams.includes(key))
+                .filter(([key]) => !chartSettingParams.includes(key))
                 .map(([key, value]) => (
                   <input
                     key={`${key}-${value}`}

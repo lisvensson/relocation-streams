@@ -30,7 +30,7 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
   const [searchParams] = useSearchParams()
   const { charts, preview } = useLoaderData<typeof loader>()
   const savedChart = charts.find((c) => c.id === chartId)
-  const chartConfig = savedChart.config
+  const chartConfig = savedChart?.config
   const [type, setType] = useState(chartConfig.type)
   const [measure, setMeasure] = useState(chartConfig.measure)
   const [category, setCategory] = useState(chartConfig.category)
@@ -45,7 +45,7 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
     chartConfig.measureCalculation
   )
 
-  const chartParams = [
+  const chartSettingParams = [
     'type',
     'measure',
     'category',
@@ -56,7 +56,16 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
   ]
 
   return (
-    <Sheet>
+    <Sheet
+      onOpenChange={(open) => {
+        if (!open) {
+          const url = new URL(window.location.href)
+          chartSettingParams.forEach((p) => url.searchParams.delete(p))
+          window.history.replaceState({}, '', url.toString())
+          window.location.reload()
+        }
+      }}
+    >
       <SheetTrigger asChild>
         <button
           type="button"
@@ -77,7 +86,7 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
               }
             >
               {Array.from(searchParams.entries())
-                .filter(([key]) => !chartParams.includes(key))
+                .filter(([key]) => !chartSettingParams.includes(key))
                 .map(([key, value]) => (
                   <input
                     key={`${key}-${value}`}
