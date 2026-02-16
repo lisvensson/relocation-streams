@@ -59,7 +59,9 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
       }}
     >
       <SheetTrigger asChild>
-        <Button variant="default">Lägg till diagram</Button>
+        <Button variant="default" className="mb-4">
+          Lägg till diagram
+        </Button>
       </SheetTrigger>
 
       <SheetContent className="!max-w-none w-full max-w-full overflow-y-auto">
@@ -86,8 +88,13 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
               {/* type */}
               <div>
                 <label className="block mb-1 font-medium">Välj diagram</label>
-                <Select name="type" value={type} onValueChange={setType}>
-                  <SelectTrigger className="w-full">
+                <Select
+                  name="type"
+                  value={type}
+                  onValueChange={setType}
+                  required
+                >
+                  <SelectTrigger className="w-full" aria-invalid={!type}>
                     <SelectValue placeholder="Välj diagramtyp" />
                   </SelectTrigger>
                   <SelectContent>
@@ -117,8 +124,12 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
                         name="measure"
                         value={measure}
                         onValueChange={setMeasure}
+                        required
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger
+                          className="w-full"
+                          aria-invalid={!measure}
+                        >
                           <SelectValue placeholder="Välj mått" />
                         </SelectTrigger>
                         <SelectContent>
@@ -137,8 +148,12 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
                         name="category"
                         value={category}
                         onValueChange={setCategory}
+                        required
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger
+                          className="w-full"
+                          aria-invalid={!category}
+                        >
                           <SelectValue placeholder="Välj kategori" />
                         </SelectTrigger>
                         <SelectContent>
@@ -181,6 +196,10 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
                         onChange={(e) =>
                           setMaxNumberOfCategories(Number(e.target.value))
                         }
+                        aria-invalid={
+                          type === 'temporal+category' && !maxNumberOfCategories
+                        }
+                        required={type === 'temporal+category'}
                       />
                     </div>
                   )}
@@ -215,12 +234,18 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
                         name="chartType"
                         value={chartType}
                         onValueChange={setChartType}
+                        required
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger
+                          className="w-full"
+                          aria-invalid={!chartType}
+                        >
                           <SelectValue placeholder="Välj diagramtyp" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="bar">Stapeldiagram</SelectItem>
+                          <SelectItem value="bar">
+                            Liggande stapeldiagram
+                          </SelectItem>
                           <SelectItem value="pie">Cirkeldiagram</SelectItem>
                         </SelectContent>
                       </Select>
@@ -237,8 +262,12 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
                         name="measureCalculation"
                         value={measureCalculation}
                         onValueChange={setMeasureCalculation}
+                        required
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger
+                          className="w-full"
+                          aria-invalid={!measureCalculation}
+                        >
                           <SelectValue placeholder="Välj beräkning" />
                         </SelectTrigger>
                         <SelectContent>
@@ -250,42 +279,52 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
                   )}
                 </div>
               )}
-              <SheetFooter className="mt-6">
-                <Button type="submit">Visa diagram</Button>
-              </SheetFooter>
+            </Form>
+            <Form method="post" className="mt-6">
+              <input type="hidden" name="intent" value="addChart" />
+              <input type="hidden" name="type" value={type} />
+              <input type="hidden" name="measure" value={measure} />
+              <input type="hidden" name="category" value={category} />
+              <input
+                type="hidden"
+                name="maxNumberOfCategories"
+                value={maxNumberOfCategories}
+              />
+              <input
+                type="hidden"
+                name="combineRemainingCategories"
+                value={combineRemainingCategories ? 'on' : 'off'}
+              />
+              <input type="hidden" name="chartType" value={chartType} />
+              <input
+                type="hidden"
+                name="measureCalculation"
+                value={measureCalculation}
+              />
+              <SheetClose asChild>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={
+                    !type ||
+                    (['temporal', 'category', 'temporal+category'].includes(
+                      type
+                    ) &&
+                      !measure) ||
+                    (['category', 'temporal+category'].includes(type) &&
+                      !category) ||
+                    (type === 'category' && !chartType) ||
+                    (type === 'temporal+category' && !measureCalculation) ||
+                    (type === 'temporal+category' && !maxNumberOfCategories)
+                  }
+                >
+                  Lägg till diagram i rapporten
+                </Button>
+              </SheetClose>
             </Form>
           </div>
           <div className="flex-1 p-6">
-            {chart && (
-              <>
-                <ChartRenderer {...chart} />
-                <Form method="post" className="mt-6">
-                  <input type="hidden" name="intent" value="addChart" />
-                  <input type="hidden" name="type" value={type} />
-                  <input type="hidden" name="measure" value={measure} />
-                  <input type="hidden" name="category" value={category} />
-                  <input
-                    type="hidden"
-                    name="maxNumberOfCategories"
-                    value={maxNumberOfCategories}
-                  />
-                  <input
-                    type="hidden"
-                    name="combineRemainingCategories"
-                    value={combineRemainingCategories ? 'on' : 'off'}
-                  />
-                  <input type="hidden" name="chartType" value={chartType} />
-                  <input
-                    type="hidden"
-                    name="measureCalculation"
-                    value={measureCalculation}
-                  />
-                  <SheetClose asChild>
-                    <Button type="submit">Lägg till diagram i rapporten</Button>
-                  </SheetClose>
-                </Form>
-              </>
-            )}
+            {chart && <ChartRenderer {...chart} />}
           </div>
         </div>
       </SheetContent>

@@ -1,12 +1,6 @@
 import { Form, useLoaderData, useSearchParams, useSubmit } from 'react-router'
 import { Button } from '../ui/button'
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetFooter,
-  SheetTrigger,
-} from '../ui/sheet'
+import { Sheet, SheetClose, SheetContent, SheetTrigger } from '../ui/sheet'
 import type { loader } from '~/routes/CreateReport'
 import { useState } from 'react'
 import { Input } from '../ui/input'
@@ -99,8 +93,13 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
               {/* type */}
               <div>
                 <label className="block mb-1 font-medium">Välj diagram</label>
-                <Select name="type" value={type} onValueChange={setType}>
-                  <SelectTrigger className="w-full">
+                <Select
+                  name="type"
+                  value={type}
+                  onValueChange={setType}
+                  required
+                >
+                  <SelectTrigger className="w-full" aria-invalid={!type}>
                     <SelectValue placeholder="Välj diagramtyp" />
                   </SelectTrigger>
                   <SelectContent>
@@ -130,8 +129,12 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                         name="measure"
                         value={measure}
                         onValueChange={setMeasure}
+                        required
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger
+                          className="w-full"
+                          aria-invalid={!measure}
+                        >
                           <SelectValue placeholder="Välj mått" />
                         </SelectTrigger>
                         <SelectContent>
@@ -150,8 +153,12 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                         name="category"
                         value={category}
                         onValueChange={setCategory}
+                        required
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger
+                          className="w-full"
+                          aria-invalid={!category}
+                        >
                           <SelectValue placeholder="Välj kategori" />
                         </SelectTrigger>
                         <SelectContent>
@@ -194,6 +201,10 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                         onChange={(e) =>
                           setMaxNumberOfCategories(Number(e.target.value))
                         }
+                        aria-invalid={
+                          type === 'temporal+category' && !maxNumberOfCategories
+                        }
+                        required={type === 'temporal+category'}
                       />
                     </div>
                   )}
@@ -228,12 +239,18 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                         name="chartType"
                         value={chartType}
                         onValueChange={setChartType}
+                        required
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger
+                          className="w-full"
+                          aria-invalid={!chartType}
+                        >
                           <SelectValue placeholder="Välj diagramtyp" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="bar">Stapeldiagram</SelectItem>
+                          <SelectItem value="bar">
+                            Liggande stapeldiagram
+                          </SelectItem>
                           <SelectItem value="pie">Cirkeldiagram</SelectItem>
                         </SelectContent>
                       </Select>
@@ -250,8 +267,12 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                         name="measureCalculation"
                         value={measureCalculation}
                         onValueChange={setMeasureCalculation}
+                        required
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger
+                          className="w-full"
+                          aria-invalid={!measureCalculation}
+                        >
                           <SelectValue placeholder="Välj beräkning" />
                         </SelectTrigger>
                         <SelectContent>
@@ -263,43 +284,53 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                   )}
                 </div>
               )}
-              <SheetFooter className="mt-6">
-                <Button type="submit">Visa diagram</Button>
-              </SheetFooter>
+            </Form>
+            <Form method="post" className="mt-6">
+              <input type="hidden" name="intent" value="updateChart" />
+              <input type="hidden" name="id" value={chartId} />
+              <input type="hidden" name="type" value={type} />
+              <input type="hidden" name="measure" value={measure} />
+              <input type="hidden" name="category" value={category} />
+              <input
+                type="hidden"
+                name="maxNumberOfCategories"
+                value={maxNumberOfCategories}
+              />
+              <input
+                type="hidden"
+                name="combineRemainingCategories"
+                value={combineRemainingCategories ? 'on' : 'off'}
+              />
+              <input type="hidden" name="chartType" value={chartType} />
+              <input
+                type="hidden"
+                name="measureCalculation"
+                value={measureCalculation}
+              />
+              <SheetClose asChild>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={
+                    !type ||
+                    (['temporal', 'category', 'temporal+category'].includes(
+                      type
+                    ) &&
+                      !measure) ||
+                    (['category', 'temporal+category'].includes(type) &&
+                      !category) ||
+                    (type === 'category' && !chartType) ||
+                    (type === 'temporal+category' && !measureCalculation) ||
+                    (type === 'temporal+category' && !maxNumberOfCategories)
+                  }
+                >
+                  Spara ändringar
+                </Button>
+              </SheetClose>
             </Form>
           </div>
           <div className="flex-1 p-6">
-            {preview && (
-              <>
-                <ChartRenderer {...preview} />
-                <Form method="post" className="mt-6">
-                  <input type="hidden" name="intent" value="updateChart" />
-                  <input type="hidden" name="id" value={chartId} />
-                  <input type="hidden" name="type" value={type} />
-                  <input type="hidden" name="measure" value={measure} />
-                  <input type="hidden" name="category" value={category} />
-                  <input
-                    type="hidden"
-                    name="maxNumberOfCategories"
-                    value={maxNumberOfCategories}
-                  />
-                  <input
-                    type="hidden"
-                    name="combineRemainingCategories"
-                    value={combineRemainingCategories ? 'on' : 'off'}
-                  />
-                  <input type="hidden" name="chartType" value={chartType} />
-                  <input
-                    type="hidden"
-                    name="measureCalculation"
-                    value={measureCalculation}
-                  />
-                  <SheetClose asChild>
-                    <Button type="submit">Spara ändringar</Button>
-                  </SheetClose>
-                </Form>
-              </>
-            )}
+            {preview && <ChartRenderer {...preview} />}
           </div>
         </div>
       </SheetContent>
