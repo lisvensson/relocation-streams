@@ -1,0 +1,1 @@
+ALTER TABLE "saved_charts" ALTER COLUMN "id" SET DEFAULT uuidv7();
