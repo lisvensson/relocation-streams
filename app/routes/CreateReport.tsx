@@ -139,7 +139,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   const netflowConfig: NetFlowChartConfig = {
     type: 'netflow',
-    title: 'Nettoflyttar per år',
+    title: 'Netflow chart',
   }
 
   const result = await buildNetFlowChart(location, filters, netflowConfig)
@@ -153,10 +153,18 @@ export async function loader({ request }: Route.LoaderArgs) {
   )
   const chartType = searchParams.get('chartType')
   const measureCalculation = searchParams.get('measureCalculation')
+  const containerSize = searchParams.get('containerSize')
+  const legendPlacement = searchParams.get('legendPlacement')
+  const tablePlacement = searchParams.get('tablePlacement')
 
   const chartConfig = {
     type,
     measure,
+    uiSettings: {
+      containerSize,
+      legendPlacement,
+      tablePlacement,
+    },
     category,
     maxNumberOfCategories: maxNumberOfCategories
       ? Number(maxNumberOfCategories)
@@ -186,7 +194,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     preview = await buildTemporalCategoryChart(location, filters, chartConfig)
   }
 
-  const savedChart = await db.select().from(savedCharts)
+  const savedChart = await db.select().from(savedCharts).orderBy(savedCharts.id)
 
   const charts = await Promise.all(
     savedChart.map(async (chart) => {
@@ -251,6 +259,11 @@ export async function action({ request }: Route.ActionArgs) {
         formData.get('combineRemainingCategories') === 'on',
       chartType: formData.get('chartType'),
       measureCalculation: formData.get('measureCalculation'),
+      uiSettings: {
+        containerSize: formData.get('containerSize'),
+        legendPlacement: formData.get('legendPlacement'),
+        tablePlacement: formData.get('tablePlacement'),
+      },
     }
 
     await db.insert(savedCharts).values({ config })
@@ -274,6 +287,11 @@ export async function action({ request }: Route.ActionArgs) {
         formData.get('combineRemainingCategories') === 'on',
       chartType: formData.get('chartType'),
       measureCalculation: formData.get('measureCalculation'),
+      uiSettings: {
+        containerSize: formData.get('containerSize'),
+        legendPlacement: formData.get('legendPlacement'),
+        tablePlacement: formData.get('tablePlacement'),
+      },
     }
 
     await db
@@ -370,8 +388,8 @@ export default function CreateReport({ loaderData }: Route.ComponentProps) {
       </aside>
       <div className="flex-1 p-6">
         <ChartBuilder chart={preview} />
-        <NetFlowChart data={result} />
-        <div className="space-y-6 mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <NetFlowChart data={result} />
           {charts.map((chart) => (
             <ChartRenderer key={chart?.id} {...chart} />
           ))}
