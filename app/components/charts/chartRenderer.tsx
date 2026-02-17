@@ -2,6 +2,7 @@ import type { ChartModel } from '~/shared/database/models/chartModels'
 import {
   ChartContainer,
   ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from '~/components/ui/chart'
@@ -45,7 +46,22 @@ export default function ChartRenderer({
   data,
 }: ChartModel) {
   const config = Object.fromEntries(
-    series.map((s, i) => [s, { label: s, color: `var(--chart-${i + 1})` }])
+    series.map((s, i) => {
+      let label = s
+
+      if (s === 'inflow') label = 'Inflytt'
+      else if (s === 'outflow') label = 'Utflytt'
+      else if (s === 'net') label = 'Nettoflytt'
+      else label = s.charAt(0).toUpperCase() + s.slice(1)
+
+      return [
+        s,
+        {
+          label,
+          color: `var(--chart-${i + 1})`,
+        },
+      ]
+    })
   )
 
   return (
@@ -106,7 +122,7 @@ export default function ChartRenderer({
                 cursor={false}
                 content={<ChartTooltipContent hideLabel />}
               />
-              <ChartLegend />
+              <ChartLegend content={<ChartLegendContent />} />
               {series.map((s, i) => (
                 <Bar
                   key={s}
@@ -137,7 +153,7 @@ export default function ChartRenderer({
                 cursor={false}
                 content={<ChartTooltipContent hideLabel />}
               />
-              <ChartLegend />
+              <ChartLegend content={<ChartLegendContent />} />
               {series.map((s, i) => (
                 <Bar
                   key={s}
@@ -161,7 +177,7 @@ export default function ChartRenderer({
                 cursor={false}
                 content={<ChartTooltipContent hideLabel />}
               />
-              <ChartLegend />
+              <ChartLegend content={<ChartLegendContent />} />
               {series.map((s, i) => (
                 <Line
                   key={s}
