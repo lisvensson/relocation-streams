@@ -36,6 +36,9 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
     useState(false)
   const [chartType, setChartType] = useState<string>('')
   const [measureCalculation, setMeasureCalculation] = useState<string>('')
+  const [containerSize, setContainerSize] = useState<string>('')
+  const [legendPlacement, setLegendPlacement] = useState<string>('')
+  const [tablePlacement, setTablePlacement] = useState<string>('')
   const [searchParams] = useSearchParams()
   const chartSettingParams = [
     'type',
@@ -45,6 +48,9 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
     'combineRemainingCategories',
     'chartType',
     'measureCalculation',
+    'containerSize',
+    'legendPlacement',
+    'tablePlacement',
   ]
 
   return (
@@ -277,6 +283,97 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
                       </Select>
                     </div>
                   )}
+
+                  {/* containerSize */}
+                  {(type === 'temporal' ||
+                    type === 'category' ||
+                    type === 'temporal+category') && (
+                    <div>
+                      <label className="block mb-1 font-medium">
+                        Containerstorlek
+                      </label>
+                      <Select
+                        name="containerSize"
+                        value={containerSize}
+                        onValueChange={setContainerSize}
+                        required
+                      >
+                        <SelectTrigger
+                          className="w-full"
+                          aria-invalid={!containerSize}
+                        >
+                          <SelectValue placeholder="Välj storlek" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="small">Liten</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="large">Stor</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {/* legendPlacement */}
+                  {(type === 'temporal' ||
+                    type === 'category' ||
+                    type === 'temporal+category') && (
+                    <div>
+                      <label className="block mb-1 font-medium">
+                        Legendplacering
+                      </label>
+                      <Select
+                        name="legendPlacement"
+                        value={legendPlacement}
+                        onValueChange={setLegendPlacement}
+                        required
+                      >
+                        <SelectTrigger
+                          className="w-full"
+                          aria-invalid={!legendPlacement}
+                        >
+                          <SelectValue placeholder="Välj placering" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="hidden">Dölj</SelectItem>
+                          <SelectItem value="top">Ovanför</SelectItem>
+                          <SelectItem value="bottom">Under</SelectItem>
+                          <SelectItem value="left">Vänster</SelectItem>
+                          <SelectItem value="right">Höger</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {/* tablePlacement */}
+                  {(type === 'temporal' ||
+                    type === 'category' ||
+                    type === 'temporal+category') && (
+                    <div>
+                      <label className="block mb-1 font-medium">
+                        Tabellplacering
+                      </label>
+                      <Select
+                        name="tablePlacement"
+                        value={tablePlacement}
+                        onValueChange={setTablePlacement}
+                        required
+                      >
+                        <SelectTrigger
+                          className="w-full"
+                          aria-invalid={!tablePlacement}
+                        >
+                          <SelectValue placeholder="Välj placering" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="hidden">Dölj</SelectItem>
+                          <SelectItem value="top">Ovanför</SelectItem>
+                          <SelectItem value="bottom">Under</SelectItem>
+                          <SelectItem value="left">Vänster</SelectItem>
+                          <SelectItem value="right">Höger</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
               )}
             </Form>
@@ -301,12 +398,26 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
                 name="measureCalculation"
                 value={measureCalculation}
               />
+              <input type="hidden" name="containerSize" value={containerSize} />
+              <input
+                type="hidden"
+                name="legendPlacement"
+                value={legendPlacement}
+              />
+              <input
+                type="hidden"
+                name="tablePlacement"
+                value={tablePlacement}
+              />
               <SheetClose asChild>
                 <Button
                   type="submit"
                   className="w-full"
                   disabled={
                     !type ||
+                    !containerSize ||
+                    !legendPlacement ||
+                    !tablePlacement ||
                     (['temporal', 'category', 'temporal+category'].includes(
                       type
                     ) &&
