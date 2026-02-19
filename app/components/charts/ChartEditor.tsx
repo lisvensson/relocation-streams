@@ -348,8 +348,6 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                           <SelectItem value="hidden">Dölj</SelectItem>
                           <SelectItem value="top">Ovanför</SelectItem>
                           <SelectItem value="bottom">Under</SelectItem>
-                          <SelectItem value="left">Vänster</SelectItem>
-                          <SelectItem value="right">Höger</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -379,8 +377,6 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                           <SelectItem value="hidden">Dölj</SelectItem>
                           <SelectItem value="top">Ovanför</SelectItem>
                           <SelectItem value="bottom">Under</SelectItem>
-                          <SelectItem value="left">Vänster</SelectItem>
-                          <SelectItem value="right">Höger</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
