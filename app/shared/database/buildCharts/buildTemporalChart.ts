@@ -65,5 +65,6 @@ export const buildTemporalChart: BuildTemporalChartFunction = async (
     dimension: dimensionKey,
     series: [measure],
     data,
+    uiSettings: chartConfig.uiSettings,
   }
 }

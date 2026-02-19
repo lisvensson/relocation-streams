@@ -135,5 +135,6 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
       dimension: dimensionKey,
       series,
       data,
+      uiSettings: chartConfig.uiSettings,
     }
   }

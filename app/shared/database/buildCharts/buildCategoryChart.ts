@@ -91,5 +91,6 @@ export const buildCategoryChart: buildCategoryChartFunction = async (
     dimension: dimensionKey,
     series: [measure],
     data,
+    uiSettings: chartConfig.uiSettings,
   }
 }

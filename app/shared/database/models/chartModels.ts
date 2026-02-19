@@ -10,8 +10,8 @@ type Category =
 
 export type ChartUiSettings = {
   containerSize: 'small' | 'medium' | 'large' // ??
-  legendPlacement: 'hidden' | 'top' | 'bottom' | 'left' | 'right'
-  tablePlacement: 'hidden' | 'top' | 'bottom' | 'left' | 'right'
+  legendPlacement: 'hidden' | 'top' | 'bottom' /* | 'left' | 'right' */
+  tablePlacement: 'hidden' | 'top' | 'bottom' /* | 'left' | 'right' */
 }
 
 export type TemporalChartConfig = {
@@ -66,6 +66,7 @@ export type ChartModel = {
   dimension: Dimension
   series: string[]
   data: ChartDataPoint[]
+  uiSettings?: ChartUiSettings
 }
 
 export type TemporalDimension = 'year' | 'month' | 'week'
