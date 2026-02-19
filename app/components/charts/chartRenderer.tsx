@@ -71,12 +71,12 @@ export default function ChartRenderer({
       className={
         'relative w-full ' +
         (uiSettings?.containerSize === 'small'
-          ? 'max-w-md'
+          ? 'max-w-xl'
           : uiSettings?.containerSize === 'medium'
-            ? 'max-w-xl'
+            ? 'max-w-3xl'
             : uiSettings?.containerSize === 'large'
-              ? 'max-w-3xl'
-              : 'max-w-xl')
+              ? 'max-w-5xl'
+              : 'max-w-3xl')
       }
     >
       {id && (
