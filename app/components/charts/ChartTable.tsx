@@ -32,16 +32,22 @@ export function ChartTable({
       </TableHeader>
 
       <TableBody>
-        {series.map((serie) => (
+        {series.map((serie, index) => (
           <TableRow key={serie}>
             <TableCell className="font-medium">
-              {serie === 'inflow'
-                ? 'Inflytt'
-                : serie === 'outflow'
-                  ? 'Utflytt'
-                  : serie === 'net'
-                    ? 'Nettoflytt'
-                    : serie.charAt(0).toUpperCase() + serie.slice(1)}
+              <div className="flex items-center gap-4">
+                <div
+                  className="h-3 w-3 rounded"
+                  style={{ backgroundColor: `var(--chart-${index + 1})` }}
+                />
+                {serie === 'inflow'
+                  ? 'Inflytt'
+                  : serie === 'outflow'
+                    ? 'Utflytt'
+                    : serie === 'net'
+                      ? 'Nettoflytt'
+                      : serie.charAt(0).toUpperCase() + serie.slice(1)}
+              </div>
             </TableCell>
 
             {data.map((row) => (
