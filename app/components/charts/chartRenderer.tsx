@@ -36,6 +36,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '../ui/alert-dialog'
+import { cn } from '~/lib/utils'
+import { ChartTable } from './ChartTable'
 
 export default function ChartRenderer({
   id,
@@ -44,6 +46,7 @@ export default function ChartRenderer({
   dimension,
   series,
   data,
+  uiSettings,
 }: ChartModel) {
   const config = Object.fromEntries(
     series.map((s, i) => {
@@ -63,9 +66,19 @@ export default function ChartRenderer({
       ]
     })
   )
-
   return (
-    <Card className="w-full relative">
+    <Card
+      className={
+        'relative w-full ' +
+        (uiSettings?.containerSize === 'small'
+          ? 'max-w-md'
+          : uiSettings?.containerSize === 'medium'
+            ? 'max-w-xl'
+            : uiSettings?.containerSize === 'large'
+              ? 'max-w-3xl'
+              : 'max-w-xl')
+      }
+    >
       {id && (
         <div className="absolute top-3 right-3 flex gap-2">
           <ChartEditor chartId={id} />
@@ -107,6 +120,10 @@ export default function ChartRenderer({
       </CardHeader>
 
       <CardContent>
+        {uiSettings?.tablePlacement === 'top' && (
+          <ChartTable data={data} dimension={dimension} series={series} />
+        )}
+
         <ChartContainer config={config}>
           {type === 'column' ? (
             <BarChart data={data} layout="horizontal">
@@ -122,7 +139,14 @@ export default function ChartRenderer({
                 cursor={false}
                 content={<ChartTooltipContent hideLabel />}
               />
-              <ChartLegend content={<ChartLegendContent />} />
+              {uiSettings?.legendPlacement !== 'hidden' && (
+                <ChartLegend
+                  verticalAlign={
+                    uiSettings?.legendPlacement === 'top' ? 'top' : 'bottom'
+                  }
+                  content={<ChartLegendContent />}
+                />
+              )}
               {series.map((s, i) => (
                 <Bar
                   key={s}
@@ -153,7 +177,14 @@ export default function ChartRenderer({
                 cursor={false}
                 content={<ChartTooltipContent hideLabel />}
               />
-              <ChartLegend content={<ChartLegendContent />} />
+              {uiSettings?.legendPlacement !== 'hidden' && (
+                <ChartLegend
+                  verticalAlign={
+                    uiSettings?.legendPlacement === 'top' ? 'top' : 'bottom'
+                  }
+                  content={<ChartLegendContent />}
+                />
+              )}
               {series.map((s, i) => (
                 <Bar
                   key={s}
@@ -177,7 +208,14 @@ export default function ChartRenderer({
                 cursor={false}
                 content={<ChartTooltipContent hideLabel />}
               />
-              <ChartLegend content={<ChartLegendContent />} />
+              {uiSettings?.legendPlacement !== 'hidden' && (
+                <ChartLegend
+                  verticalAlign={
+                    uiSettings?.legendPlacement === 'top' ? 'top' : 'bottom'
+                  }
+                  content={<ChartLegendContent />}
+                />
+              )}
               {series.map((s, i) => (
                 <Line
                   key={s}
@@ -201,6 +239,9 @@ export default function ChartRenderer({
             <div>Inga diagram tillgängliga</div>
           )}
         </ChartContainer>
+        {uiSettings?.tablePlacement === 'bottom' && (
+          <ChartTable data={data} dimension={dimension} series={series} />
+        )}
       </CardContent>
     </Card>
   )
