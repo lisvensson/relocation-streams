@@ -388,7 +388,7 @@ export default function CreateReport({ loaderData }: Route.ComponentProps) {
       </aside>
       <div className="flex-1 p-6">
         <ChartBuilder chart={preview} />
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="flex flex-col gap-6">
           <NetFlowChart data={result} />
           {charts.map((chart) => (
             <ChartRenderer key={chart?.id} {...chart} />
