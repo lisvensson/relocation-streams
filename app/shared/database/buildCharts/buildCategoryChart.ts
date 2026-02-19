@@ -35,7 +35,22 @@ export const buildCategoryChart: buildCategoryChartFunction = async (
     outflow: relocation.fromLocation,
   }[measure]
 
-  const categoryValue = relocation[category]
+  let categoryValue
+
+  if (category === 'postalArea') {
+    categoryValue =
+      measure === 'inflow' ? relocation.fromPostalArea : relocation.toPostalArea
+  } else if (category === 'municipality') {
+    categoryValue =
+      measure === 'inflow'
+        ? relocation.fromMunicipality
+        : relocation.toMunicipality
+  } else if (category === 'county') {
+    categoryValue =
+      measure === 'inflow' ? relocation.fromCounty : relocation.toCounty
+  } else {
+    categoryValue = relocation[category]
+  }
 
   const where = and(
     ...filters.map((f) =>

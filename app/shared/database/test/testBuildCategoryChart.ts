@@ -1,7 +1,7 @@
 import { buildCategoryChart } from '../buildCharts/buildCategoryChart.ts'
 import type { Filter, CategoryChartConfig } from '../models/chartModels.ts'
 
-const area = 'stockholm'
+const area = 'göteborg'
 
 const filters: Filter[] = [
   {
@@ -12,7 +12,7 @@ const filters: Filter[] = [
   {
     key: 'relocationYear',
     operator: 'in',
-    value: [2021, 2022, 2023, 2024, 2025],
+    value: [2020, 2021, 2022, 2023, 2024],
   },
 ]
 
@@ -25,8 +25,8 @@ const chartConfig: CategoryChartConfig = {
     legendPlacement: 'bottom',
     tablePlacement: 'hidden',
   },
-  category: 'industryCluster',
-  maxNumberOfCategories: 10,
+  category: 'municipality',
+  maxNumberOfCategories: 5,
   combineRemainingCategories: true,
   chartType: 'bar', // pie eller bar
 }

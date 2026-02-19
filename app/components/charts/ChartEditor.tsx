@@ -183,18 +183,9 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                           <SelectItem value="companyType">
                             Företagsform
                           </SelectItem>
-
-                          {type === 'temporal+category' && (
-                            <>
-                              <SelectItem value="postalArea">
-                                Postområde
-                              </SelectItem>
-                              <SelectItem value="municipality">
-                                Kommun
-                              </SelectItem>
-                              <SelectItem value="county">Län</SelectItem>
-                            </>
-                          )}
+                          <SelectItem value="postalArea">Postområde</SelectItem>
+                          <SelectItem value="municipality">Kommun</SelectItem>
+                          <SelectItem value="county">Län</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
