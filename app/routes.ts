@@ -14,5 +14,7 @@ export default [
     route('relocations', './routes/Relocations.tsx'),
     route('testchart', './routes/TestChart.tsx'),
     route('skapa-rapport', './routes/CreateReport.tsx'),
+    route('rapport/:reportId', './routes/Report.tsx'),
+    route('rapporter', './routes/Reports.tsx'),
   ]),
 ] satisfies RouteConfig
