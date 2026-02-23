@@ -3,7 +3,6 @@ import {
   Sheet,
   SheetTrigger,
   SheetContent,
-  SheetFooter,
   SheetClose,
 } from '~/components/ui/sheet'
 import {
@@ -19,6 +18,7 @@ import { Form, useSearchParams, useSubmit } from 'react-router'
 import ChartRenderer from '~/components/charts/ChartRenderer'
 import type { ChartModel } from '~/shared/database/models/chartModels'
 import { useState } from 'react'
+import { PlusIcon } from 'lucide-react'
 
 interface ChartBuilderProps {
   chart: ChartModel | null
@@ -65,8 +65,11 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
       }}
     >
       <SheetTrigger asChild>
-        <Button variant="default" className="mb-4">
-          Lägg till diagram
+        <Button
+          variant="ghost"
+          className="text-muted-foreground hover:text-blue-500 transition"
+        >
+          <PlusIcon className="size-5" />
         </Button>
       </SheetTrigger>
 

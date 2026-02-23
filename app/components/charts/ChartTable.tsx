@@ -58,7 +58,6 @@ export function ChartTable({
           </TableRow>
         ))}
       </TableBody>
-      <TableRow></TableRow>
     </Table>
   )
 }

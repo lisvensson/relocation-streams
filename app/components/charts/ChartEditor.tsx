@@ -1,7 +1,6 @@
 import { Form, useLoaderData, useSearchParams, useSubmit } from 'react-router'
 import { Button } from '../ui/button'
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from '../ui/sheet'
-import type { loader } from '~/routes/CreateReport'
 import { useState } from 'react'
 import { Input } from '../ui/input'
 import {
@@ -14,6 +13,7 @@ import {
 import { Checkbox } from '../ui/checkbox'
 import ChartRenderer from './ChartRenderer'
 import { SquarePenIcon } from 'lucide-react'
+import type { loader } from '~/routes/Report'
 
 interface ChartEditorProps {
   chartId: string
@@ -23,7 +23,7 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
   const submit = useSubmit()
   const [searchParams] = useSearchParams()
   const { charts, preview } = useLoaderData<typeof loader>()
-  const savedChart = charts.find((c) => c.id === chartId)
+  const savedChart = charts.find((c) => c?.id === chartId)
   const chartConfig = savedChart?.config
   const [type, setType] = useState(chartConfig.type)
   const [measure, setMeasure] = useState(chartConfig.measure)
@@ -73,12 +73,12 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
       }}
     >
       <SheetTrigger asChild>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
           className="text-muted-foreground hover:text-blue-500 transition"
         >
           <SquarePenIcon className="size-4" />
-        </button>
+        </Button>
       </SheetTrigger>
 
       <SheetContent className="!max-w-none w-full max-w-full overflow-y-auto">

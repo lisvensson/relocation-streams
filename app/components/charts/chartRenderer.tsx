@@ -21,8 +21,6 @@ import {
 } from 'recharts'
 import { Trash2Icon } from 'lucide-react'
 import { Form } from 'react-router'
-
-import { Button } from '@base-ui/react'
 import { ChartEditor } from './ChartEditor'
 import {
   AlertDialog,
@@ -36,8 +34,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '../ui/alert-dialog'
-import { cn } from '~/lib/utils'
 import { ChartTable } from './ChartTable'
+import { Button } from '../ui/button'
 
 export default function ChartRenderer({
   id,
@@ -85,7 +83,10 @@ export default function ChartRenderer({
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button className="text-muted-foreground hover:text-red-500 transition">
+              <Button
+                variant="ghost"
+                className="text-muted-foreground hover:text-red-500 transition"
+              >
                 <Trash2Icon className="size-4" />
               </Button>
             </AlertDialogTrigger>
@@ -106,7 +107,7 @@ export default function ChartRenderer({
                   <Form method="post">
                     <input type="hidden" name="intent" value="deleteChart" />
                     <input type="hidden" name="id" value={id} />
-                    <Button type="submit">Radera</Button>
+                    <button type="submit">Radera</button>
                   </Form>
                 </AlertDialogAction>
               </AlertDialogFooter>
