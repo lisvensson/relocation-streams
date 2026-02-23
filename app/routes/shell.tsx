@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router'
+import { Outlet, useLocation } from 'react-router'
 import type { Route } from './+types/shell'
 import { requireUserMiddleware } from '~/middleware/requireUserMiddleware'
 import { userSessionContext } from '~/context/userSessionContext'
@@ -30,10 +30,18 @@ export default function Shell({
 }: {
   loaderData: { isLoggedIn: boolean }
 }) {
+  const location = useLocation()
+
+  const hideNavbar =
+    location.pathname.startsWith('/rapport/') ||
+    location.pathname.startsWith('/skapa-rapport')
+
   return (
-    <div>
-      <Navbar isLoggedIn={loaderData.isLoggedIn} />
-      <Outlet />
+    <div className="min-h-screen flex">
+      {!hideNavbar && <Navbar isLoggedIn={loaderData.isLoggedIn} />}
+      <main className="flex-1 p-6">
+        <Outlet />
+      </main>
     </div>
   )
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "reports" ADD COLUMN "filters" jsonb DEFAULT '[]'::jsonb NOT NULL;

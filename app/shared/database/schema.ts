@@ -109,9 +109,30 @@ export const relocation = pgTable(
   }
 )
 
-export const savedCharts = pgTable('saved_charts', {
+export const reports = pgTable('reports', {
   id: uuid()
     .primaryKey()
     .default(sql`uuidv7()`),
+  userId: text()
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  title: text().notNull(),
+  location: text(),
+  filters: jsonb(),
+  createdAt: timestamp().defaultNow().notNull(),
+  updatedAt: timestamp()
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+})
+
+export const charts = pgTable('charts', {
+  id: uuid()
+    .primaryKey()
+    .default(sql`uuidv7()`),
+  reportId: uuid()
+    .notNull()
+    .references(() => reports.id, { onDelete: 'cascade' }),
   config: jsonb().notNull(),
+  createdAt: timestamp().defaultNow().notNull(),
 })
