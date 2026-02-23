@@ -126,6 +126,53 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const url = new URL(request.url)
   const searchParams = url.searchParams
 
+  const hasFilters =
+    searchParams.has('location') ||
+    searchParams.has('years') ||
+    searchParams.has('employeeRanges') ||
+    searchParams.has('companyTypes') ||
+    searchParams.has('industryClusters')
+
+  if (
+    !hasFilters &&
+    Array.isArray(report.filters) &&
+    report.filters.length > 0
+  ) {
+    if (report.location) {
+      searchParams.set('location', report.location)
+    }
+
+    for (const filter of report.filters) {
+      const values = Array.isArray(filter.value) ? filter.value : [filter.value]
+
+      if (filter.key === 'relocationYear') {
+        for (const value of values) {
+          searchParams.append('years', value)
+        }
+      }
+
+      if (filter.key === 'employeeRange') {
+        for (const value of values) {
+          searchParams.append('employeeRanges', value)
+        }
+      }
+
+      if (filter.key === 'companyType') {
+        for (const value of values) {
+          searchParams.append('companyTypes', value)
+        }
+      }
+
+      if (filter.key === 'industryCluster') {
+        for (const value of values) {
+          searchParams.append('industryClusters', value)
+        }
+      }
+    }
+
+    return redirect(url.toString())
+  }
+
   const location = searchParams.get('location')?.toLowerCase()
   const years = searchParams.getAll('years').map(Number)
   const employeeRanges = searchParams.getAll('employeeRanges')
@@ -446,7 +493,6 @@ export default function CreateReport({ loaderData }: Route.ComponentProps) {
             ) : (
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-semibold">{report.title}</h1>
-
                 <Button
                   variant="ghost"
                   className="text-muted-foreground hover:text-blue-500 transition"
@@ -470,7 +516,6 @@ export default function CreateReport({ loaderData }: Route.ComponentProps) {
                 name="filters"
                 value={JSON.stringify(filters)}
               />
-
               <Button
                 type="submit"
                 name="intent"
@@ -481,6 +526,7 @@ export default function CreateReport({ loaderData }: Route.ComponentProps) {
                 <SaveIcon className="size-5" />
               </Button>
             </Form>
+
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
