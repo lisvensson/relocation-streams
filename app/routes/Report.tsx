@@ -478,7 +478,7 @@ export default function CreateReport({ loaderData }: Route.ComponentProps) {
                   name="intent"
                   value="updateTitle"
                   variant="ghost"
-                  className="text-muted-foreground hover:text-blue-500 transition"
+                  className="text-muted-foreground hover:text-primary transition"
                 >
                   <SaveIcon className="size-5" />
                 </Button>
@@ -495,7 +495,7 @@ export default function CreateReport({ loaderData }: Route.ComponentProps) {
                 <h1 className="text-xl font-semibold">{report.title}</h1>
                 <Button
                   variant="ghost"
-                  className="text-muted-foreground hover:text-blue-500 transition"
+                  className="text-muted-foreground hover:text-primary transition"
                   onClick={() => setIsEditingTitle(true)}
                 >
                   <SquarePenIcon className="size-5" />

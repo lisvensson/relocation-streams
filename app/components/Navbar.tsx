@@ -22,16 +22,14 @@ export default function Navbar({ isLoggedIn }: Props) {
 
   return (
     <aside className="w-64 h-screen border-r flex flex-col p-4">
-      <h2 className="text-xl font-semibold text-indigo-600 mb-6">
-        Flyttströmmar
-      </h2>
+      <h2 className="text-xl font-semibold text-primary mb-6">Flyttströmmar</h2>
 
       <nav className="flex flex-col gap-3 flex-1">
-        <Link to="/" className="text-gray-700 hover:text-indigo-600">
+        <Link to="/" className="hover:text-primary">
           Hem
         </Link>
 
-        <Link to="/rapporter" className="text-gray-700 hover:text-indigo-600">
+        <Link to="/rapporter" className="hover:text-primary">
           Rapporter
         </Link>
       </nav>
@@ -47,9 +45,9 @@ export default function Navbar({ isLoggedIn }: Props) {
           <Button
             type="submit"
             variant="ghost"
-            className="text-sm text-red-600 hover:text-red-800 cursor-pointer"
+            className="hover:text-destructive cursor-pointer"
           >
-            <LogOutIcon />
+            <LogOutIcon className="size-5" />
           </Button>
         </Form>
       )}
