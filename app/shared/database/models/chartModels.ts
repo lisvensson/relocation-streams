@@ -60,8 +60,9 @@ export type ChartConfig =
 
 export type ChartModel = {
   id?: string
+  type: string
   title: string
-  type: ChartType
+  chartType: ChartType
   measure: Measure // ??
   dimension: Dimension
   series: string[]

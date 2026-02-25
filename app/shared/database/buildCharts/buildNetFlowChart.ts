@@ -79,8 +79,9 @@ export const buildNetFlowChart: BuildNetFlowChartFunction = async (
   }
 
   return {
+    type: chartConfig.type,
     title: generateChartTitle(chartConfig, area),
-    type: 'column',
+    chartType: 'column',
     measure: 'inflow',
     dimension: 'year',
     series: ['inflow', 'outflow', 'net'],

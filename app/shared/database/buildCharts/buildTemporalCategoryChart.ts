@@ -129,8 +129,9 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
       : topCategories
 
     return {
+      type: chartConfig.type,
       title: generateChartTitle(chartConfig, area),
-      type: 'line',
+      chartType: 'line',
       measure,
       dimension: dimensionKey,
       series,

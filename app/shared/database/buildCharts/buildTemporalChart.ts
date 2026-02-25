@@ -59,8 +59,9 @@ export const buildTemporalChart: BuildTemporalChartFunction = async (
   }
 
   return {
+    type: chartConfig.type,
     title: generateChartTitle(chartConfig, area),
-    type: 'column',
+    chartType: 'column',
     measure,
     dimension: dimensionKey,
     series: [measure],
