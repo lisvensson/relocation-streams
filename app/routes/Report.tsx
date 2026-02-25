@@ -14,6 +14,7 @@ import { LocationSelector } from '~/components/charts/LocationSelector'
 import { FilterSelector } from '~/components/charts/FilterSelector'
 import type { ChartModel, Filter } from '~/shared/database/models/chartModels'
 import { ChartBuilder } from '~/components/charts/ChartBuilder'
+import { buildNetFlowChart } from '~/shared/database/buildCharts/buildNetFlowChart'
 import { buildTemporalChart } from '~/shared/database/buildCharts/buildTemporalChart'
 import { buildCategoryChart } from '~/shared/database/buildCharts/buildCategoryChart'
 import { buildTemporalCategoryChart } from '~/shared/database/buildCharts/buildTemporalCategoryChart'
@@ -246,6 +247,10 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const buildCharts = await Promise.all(
     savedCharts.map(async (chart) => {
       const config = chart.config
+      if (config.type === 'netflow') {
+        const buildChart = await buildNetFlowChart(location, filters, config)
+        return { id: chart.id, ...buildChart, config }
+      }
 
       if (config.type === 'temporal') {
         const buildChart = await buildTemporalChart(location, filters, config)
