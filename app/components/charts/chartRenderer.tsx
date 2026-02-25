@@ -41,6 +41,7 @@ export default function ChartRenderer({
   id,
   type,
   title,
+  chartType,
   dimension,
   series,
   data,
@@ -79,7 +80,7 @@ export default function ChartRenderer({
     >
       {id && (
         <div className="absolute top-3 right-3 flex gap-2">
-          <ChartEditor chartId={id} />
+          {type !== 'netflow' && <ChartEditor chartId={id} />}
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
@@ -97,8 +98,9 @@ export default function ChartRenderer({
                 </AlertDialogMedia>
                 <AlertDialogTitle>Radera diagram?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Detta går inte att ångra. Diagrammet tas bort permanent från
-                  rapporten.
+                  {type === 'netflow'
+                    ? 'Detta ett nettoflytt-diagram och kan inte läggas till igen om du raderar det.'
+                    : 'Detta går inte att ångra. Diagrammet tas bort permanent från rapporten.'}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -126,7 +128,7 @@ export default function ChartRenderer({
         )}
 
         <ChartContainer config={config}>
-          {type === 'column' ? (
+          {chartType === 'column' ? (
             <BarChart data={data} layout="horizontal">
               <CartesianGrid vertical={false} />
               <YAxis tickLine={false} tickMargin={10} axisLine={false} />
@@ -157,7 +159,7 @@ export default function ChartRenderer({
                 />
               ))}
             </BarChart>
-          ) : type === 'bar' ? (
+          ) : chartType === 'bar' ? (
             <BarChart data={data} layout="vertical">
               <CartesianGrid vertical={false} />
               <YAxis
@@ -195,7 +197,7 @@ export default function ChartRenderer({
                 />
               ))}
             </BarChart>
-          ) : type === 'line' ? (
+          ) : chartType === 'line' ? (
             <LineChart data={data}>
               <CartesianGrid vertical={false} />
               <YAxis tickLine={false} tickMargin={10} axisLine={false} />
@@ -227,7 +229,7 @@ export default function ChartRenderer({
                 />
               ))}
             </LineChart>
-          ) : type === 'pie' ? (
+          ) : chartType === 'pie' ? (
             <PieChart>
               <ChartTooltip content={<ChartTooltipContent hideLabel />} />
               <Pie data={data} dataKey={series[0]} nameKey={dimension} label>
