@@ -34,7 +34,8 @@ export default function Shell({
 
   const hideNavbar =
     location.pathname.startsWith('/rapport/') ||
-    location.pathname.startsWith('/skapa-rapport')
+    location.pathname.startsWith('/skapa-rapport/') ||
+    location.pathname.startsWith('/visa-rapport/')
 
   return (
     <div className="min-h-screen flex">

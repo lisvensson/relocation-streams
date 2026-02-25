@@ -46,7 +46,8 @@ export default function ChartRenderer({
   series,
   data,
   uiSettings,
-}: ChartModel) {
+  readOnly,
+}: ChartModel & { readOnly?: boolean }) {
   const config = Object.fromEntries(
     series.map((s, i) => {
       let label = s
@@ -78,7 +79,7 @@ export default function ChartRenderer({
               : 'max-w-3xl')
       }
     >
-      {id && (
+      {!readOnly && id && (
         <div className="absolute top-3 right-3 flex gap-2">
           {type !== 'netflow' && <ChartEditor chartId={id} />}
 

@@ -570,7 +570,7 @@ export default function CreateReport({ loaderData }: Route.ComponentProps) {
 
         <div className="flex flex-col gap-6">
           {charts.map((chart) => (
-            <ChartRenderer key={chart.id} {...chart} />
+            <ChartRenderer key={chart.id} {...chart} readOnly={false} />
           ))}
         </div>
       </div>
