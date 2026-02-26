@@ -115,13 +115,15 @@ export default function ChartRenderer({
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel variant="outline">Avbryt</AlertDialogCancel>
-                <AlertDialogAction variant="destructive" asChild>
-                  <Form method="post">
-                    <input type="hidden" name="intent" value="deleteChart" />
-                    <input type="hidden" name="id" value={id} />
-                    <button type="submit">Radera</button>
-                  </Form>
-                </AlertDialogAction>
+                <Form method="post">
+                  <input type="hidden" name="intent" value="deleteChart" />
+                  <input type="hidden" name="id" value={id} />
+                  <AlertDialogAction variant="destructive" asChild>
+                    <button type="submit" className="w-full">
+                      Radera
+                    </button>
+                  </AlertDialogAction>
+                </Form>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

@@ -44,7 +44,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     .from(reports)
     .where(eq(reports.id, params.reportId))
 
-  if (!report) throw new Response('Not found', { status: 404 })
+  if (!report) throw new Response('Rapporten hittades inte', { status: 404 })
 
   const savedCharts = await db
     .select()
@@ -356,7 +356,9 @@ export async function action({ request, params }: Route.ActionArgs) {
   if (intent === 'deleteChart') {
     const chartId = formData.get('id') as string
 
-    return await db.delete(charts).where(eq(charts.id, chartId))
+    await db.delete(charts).where(eq(charts.id, chartId))
+
+    return redirect(url.toString())
   }
 
   if (intent === 'updateTitle') {
@@ -556,12 +558,14 @@ export default function CreateReport({ loaderData }: Route.ComponentProps) {
                   <AlertDialogCancel variant="outline">
                     Avbryt
                   </AlertDialogCancel>
-                  <AlertDialogAction variant="destructive" asChild>
-                    <Form method="post">
-                      <input type="hidden" name="intent" value="deleteReport" />
-                      <button type="submit">Radera</button>
-                    </Form>
-                  </AlertDialogAction>
+                  <Form method="post">
+                    <input type="hidden" name="intent" value="deleteReport" />
+                    <AlertDialogAction variant="destructive" asChild>
+                      <button type="submit" className="w-full">
+                        Radera
+                      </button>
+                    </AlertDialogAction>
+                  </Form>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>

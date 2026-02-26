@@ -134,18 +134,19 @@ export default function Reports({ loaderData }: Route.ComponentProps) {
                       <AlertDialogCancel variant="outline">
                         Avbryt
                       </AlertDialogCancel>
-
-                      <AlertDialogAction variant="destructive" asChild>
-                        <Form method="post">
-                          <input
-                            type="hidden"
-                            name="intent"
-                            value="deleteReport"
-                          />
-                          <input type="hidden" name="id" value={r.id} />
-                          <button type="submit">Radera</button>
-                        </Form>
-                      </AlertDialogAction>
+                      <Form method="post">
+                        <input
+                          type="hidden"
+                          name="intent"
+                          value="deleteReport"
+                        />
+                        <input type="hidden" name="id" value={r.id} />
+                        <AlertDialogAction variant="destructive" asChild>
+                          <button type="submit" className="w-full">
+                            Radera
+                          </button>
+                        </AlertDialogAction>
+                      </Form>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
