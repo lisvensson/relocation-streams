@@ -67,7 +67,7 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
       <SheetTrigger asChild>
         <Button
           variant="ghost"
-          className="text-muted-foreground hover:text-blue-500 transition"
+          className="text-muted-foreground hover:text-primary transition"
         >
           <PlusIcon className="size-5" />
         </Button>
