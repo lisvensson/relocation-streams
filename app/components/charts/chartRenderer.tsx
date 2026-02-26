@@ -66,6 +66,15 @@ export default function ChartRenderer({
       ]
     })
   )
+
+  data.map((d, i) => {
+    const key = d[dimension]
+    config[key] = {
+      label: key,
+      color: `var(--chart-${(i % 11) + 1})`,
+    }
+  })
+
   return (
     <Card
       className={
@@ -238,6 +247,14 @@ export default function ChartRenderer({
                   <Cell key={i} fill={`var(--chart-${(i % 11) + 1})`} />
                 ))}
               </Pie>
+              {uiSettings?.legendPlacement !== 'hidden' && (
+                <ChartLegend
+                  verticalAlign={
+                    uiSettings?.legendPlacement === 'top' ? 'top' : 'bottom'
+                  }
+                  content={<ChartLegendContent nameKey={dimension} />}
+                />
+              )}
             </PieChart>
           ) : (
             <div>Inga diagram tillgängliga</div>
