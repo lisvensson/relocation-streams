@@ -50,6 +50,13 @@
       "when": 1771839929735,
       "tag": "0006_stiff_human_cannonball",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1772188054627,
+      "tag": "0007_closed_legion",
+      "breakpoints": true
     }
   ]
 }

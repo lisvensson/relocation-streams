@@ -80,7 +80,10 @@ export default function ReportView({ loaderData }: Route.ComponentProps) {
           </Link>
         </Button>
       </div>
-
+      <div className="flex flex-col items-start gap-1">
+        <h2 className="font-medium">Beskrivning</h2>
+        <p className="text-sm text-muted-foreground">{report.description}</p>
+      </div>
       <div className="space-y-12">
         {charts.map((chart) => (
           <ChartRenderer key={chart.id} {...chart} readOnly={true} />

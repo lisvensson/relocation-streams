@@ -117,6 +117,7 @@ export const reports = pgTable('reports', {
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
   title: text().notNull(),
+  description: text().notNull(),
   location: text(),
   filters: jsonb(),
   createdAt: timestamp().defaultNow().notNull(),

@@ -35,6 +35,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '~/components/ui/alert-dialog'
+import { Textarea } from '~/components/ui/textarea'
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const start = performance.now()
@@ -369,6 +370,17 @@ export async function action({ request, params }: Route.ActionArgs) {
     return redirect(url.toString())
   }
 
+  if (intent === 'updateDescription') {
+    const description = formData.get('description') as string
+
+    await db
+      .update(reports)
+      .set({ description })
+      .where(eq(reports.id, reportId))
+
+    return redirect(url.toString())
+  }
+
   if (intent === 'deleteReport') {
     await db.delete(reports).where(eq(reports.id, reportId))
     return redirect(`/rapporter`)
@@ -396,6 +408,7 @@ export default function Report({ loaderData }: Route.ComponentProps) {
   const { report, filterOptions, filters, preview, charts } = loaderData
   const [location, setLocation] = useState(searchParams.get('location') ?? '')
   const [isEditingTitle, setIsEditingTitle] = useState(false)
+  const [isEditingDescription, setIsEditingDescription] = useState(false)
 
   return (
     <div className="flex">
@@ -466,7 +479,7 @@ export default function Report({ loaderData }: Route.ComponentProps) {
       </aside>
 
       <div className="flex-1 p-6 space-y-6">
-        <div className="border-b px-6 py-4 flex items-center justify-between">
+        <div className="border-b pb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {isEditingTitle ? (
               <Form
@@ -570,6 +583,48 @@ export default function Report({ loaderData }: Route.ComponentProps) {
               </AlertDialogContent>
             </AlertDialog>
           </div>
+        </div>
+
+        <div>
+          <h2 className="font-medium">Beskrivning</h2>
+          {isEditingDescription ? (
+            <Form
+              method="post"
+              className="flex items-center gap-2"
+              onSubmit={() => setIsEditingDescription(false)}
+            >
+              <Textarea name="description" defaultValue={report.description} />
+              <Button
+                type="submit"
+                name="intent"
+                value="updateDescription"
+                variant="ghost"
+                className="text-muted-foreground hover:text-primary transition"
+              >
+                <SaveIcon className="size-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                className="text-muted-foreground hover:text-red-500 transition"
+                onClick={() => setIsEditingDescription(false)}
+              >
+                <CircleXIcon className="size-4" />
+              </Button>
+            </Form>
+          ) : (
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-muted-foreground">
+                {report.description}
+              </p>
+              <Button
+                variant="ghost"
+                className="text-muted-foreground hover:text-primary transition"
+                onClick={() => setIsEditingDescription(true)}
+              >
+                <SquarePenIcon className="size-4" />
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-6">
