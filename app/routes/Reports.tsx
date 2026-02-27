@@ -1,6 +1,6 @@
 import { desc, eq } from 'drizzle-orm'
 import { db } from '~/shared/database'
-import { reports } from '~/shared/database/schema'
+import { charts, reports } from '~/shared/database/schema'
 import type { Route } from './+types/Reports'
 import {
   Table,
@@ -32,6 +32,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '~/components/ui/alert-dialog'
+import { CreateReport } from '~/components/reports/CreateReport'
+import { userSessionContext } from '~/context/userSessionContext'
 
 export async function loader({}: Route.LoaderArgs) {
   const report = await db
@@ -46,9 +48,42 @@ export async function loader({}: Route.LoaderArgs) {
   return { report }
 }
 
-export async function action({ request }: Route.ActionArgs) {
+export async function action({ context, request }: Route.ActionArgs) {
+  const userSession = context.get(userSessionContext)
+  if (!userSession) throw new Error('User session missing')
+
   const formData = await request.formData()
   const intent = formData.get('intent')
+
+  if (intent === 'createReport') {
+    const [report] = await db
+      .insert(reports)
+      .values({
+        userId: userSession.user.id,
+        title: 'Ny rapport',
+      })
+      .returning({ id: reports.id })
+
+    await db.insert(charts).values({
+      reportId: report.id,
+      config: {
+        type: 'netflow',
+        measure: '',
+        category: '',
+        chartType: '',
+        uiSettings: {
+          containerSize: 'medium',
+          tablePlacement: 'hidden',
+          legendPlacement: 'top',
+        },
+        measureCalculation: '',
+        maxNumberOfCategories: 0,
+        combineRemainingCategories: false,
+      },
+    })
+
+    return redirect(`/rapport/${report.id}`)
+  }
 
   if (intent === 'deleteReport') {
     const reportId = formData.get('id') as string
@@ -66,10 +101,7 @@ export default function Reports({ loaderData }: Route.ComponentProps) {
     <div className="space-y-10">
       <div className="flex items-center justify-between pb-4 border-b">
         <h1 className="text-2xl font-bold">Rapporter</h1>
-
-        <Button asChild>
-          <Link to="/skapa-rapport">Skapa rapport</Link>
-        </Button>
+        <CreateReport />
       </div>
 
       <Table>

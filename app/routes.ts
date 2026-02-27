@@ -11,7 +11,6 @@ export default [
   route('api/auth/*', 'routes/auth.ts'),
   layout('./routes/shell.tsx', [
     index('routes/home.tsx'),
-    route('skapa-rapport', './routes/CreateReport.tsx'),
     route('rapport/:reportId', './routes/Report.tsx'),
     route('rapporter', './routes/Reports.tsx'),
     route('visa-rapport/:reportId/', './routes/ReportView.tsx'),
