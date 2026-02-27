@@ -17,12 +17,13 @@ export async function loader({ params }: Route.LoaderArgs) {
     .from(reports)
     .where(eq(reports.id, params.reportId))
 
-  const location = report.location?.toLowerCase()
-  const filters = report.filters
-
   if (!report) {
     throw new Response('Rapporten hittades inte', { status: 404 })
   }
+
+  const location = report.location?.toLowerCase()
+  const filters = report.filters
+
   const savedCharts = await db
     .select()
     .from(charts)

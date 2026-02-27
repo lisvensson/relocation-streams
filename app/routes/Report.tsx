@@ -391,7 +391,7 @@ export async function action({ request, params }: Route.ActionArgs) {
   return null
 }
 
-export default function CreateReport({ loaderData }: Route.ComponentProps) {
+export default function Report({ loaderData }: Route.ComponentProps) {
   const [searchParams] = useSearchParams()
   const { report, filterOptions, filters, preview, charts } = loaderData
   const [location, setLocation] = useState(searchParams.get('location') ?? '')
