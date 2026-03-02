@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm'
 import { db } from '~/shared/database'
 import type { Route } from './+types/ReportView'
 import { charts, reports } from '~/shared/database/schema'
-import { buildNetFlowChart } from '~/shared/database/buildCharts/buildNetFlowChart'
+import { buildNetFlowCategoryChart } from '~/shared/database/buildCharts/buildNetFlowCategoryChart'
 import { buildTemporalChart } from '~/shared/database/buildCharts/buildTemporalChart'
 import { buildCategoryChart } from '~/shared/database/buildCharts/buildCategoryChart'
 import { buildTemporalCategoryChart } from '~/shared/database/buildCharts/buildTemporalCategoryChart'
@@ -33,8 +33,12 @@ export async function loader({ params }: Route.LoaderArgs) {
   const buildCharts = await Promise.all(
     savedCharts.map(async (chart) => {
       const config = chart.config
-      if (config.type === 'netflow') {
-        const buildChart = await buildNetFlowChart(location, filters, config)
+      if (config.type === 'netflow+category') {
+        const buildChart = await buildNetFlowCategoryChart(
+          location,
+          filters,
+          config
+        )
         return { id: chart.id, ...buildChart, config }
       }
 

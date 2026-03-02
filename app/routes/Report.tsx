@@ -14,7 +14,7 @@ import { LocationSelector } from '~/components/charts/LocationSelector'
 import { FilterSelector } from '~/components/charts/FilterSelector'
 import type { ChartModel, Filter } from '~/shared/database/models/chartModels'
 import { ChartBuilder } from '~/components/charts/ChartBuilder'
-import { buildNetFlowChart } from '~/shared/database/buildCharts/buildNetFlowChart'
+import { buildNetFlowCategoryChart } from '~/shared/database/buildCharts/buildNetFlowCategoryChart'
 import { buildTemporalChart } from '~/shared/database/buildCharts/buildTemporalChart'
 import { buildCategoryChart } from '~/shared/database/buildCharts/buildCategoryChart'
 import { buildTemporalCategoryChart } from '~/shared/database/buildCharts/buildTemporalCategoryChart'
@@ -245,11 +245,24 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     preview = await buildTemporalCategoryChart(location, filters, chartConfig)
   }
 
+  if (
+    type === 'netflow+category' &&
+    measure &&
+    category &&
+    maxNumberOfCategories
+  ) {
+    preview = await buildNetFlowCategoryChart(location, filters, chartConfig)
+  }
+
   const buildCharts = await Promise.all(
     savedCharts.map(async (chart) => {
       const config = chart.config
-      if (config.type === 'netflow') {
-        const buildChart = await buildNetFlowChart(location, filters, config)
+      if (config.type === 'netflow+category') {
+        const buildChart = await buildNetFlowCategoryChart(
+          location,
+          filters,
+          config
+        )
         return { id: chart.id, ...buildChart, config }
       }
 
