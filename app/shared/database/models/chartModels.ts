@@ -1,6 +1,7 @@
 export type Measure = 'inflow' | 'outflow'
 
 type Category =
+  | 'relocationYear'
   | 'employeeRange'
   | 'industryCluster'
   | 'companyType'
@@ -46,17 +47,21 @@ export type TemporalCategoryChartConfig = {
   measureCalculation: 'volume' | 'percent'
 }
 
-export type NetFlowChartConfig = {
-  type: 'netflow'
+export type NetFlowCategoryChartConfig = {
+  type: 'netflow+category'
   title: string
   filters?: Filter[]
+  uiSettings?: ChartUiSettings
+  category: Category
+  maxNumberOfCategories: number
+  combineRemainingCategories: boolean
 }
 
 export type ChartConfig =
   | TemporalChartConfig
   | CategoryChartConfig
   | TemporalCategoryChartConfig
-  | NetFlowChartConfig
+  | NetFlowCategoryChartConfig
 
 export type ChartModel = {
   id?: string
