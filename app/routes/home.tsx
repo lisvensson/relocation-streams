@@ -26,26 +26,9 @@ export async function action({ context, request }: Route.ActionArgs) {
       .values({
         userId: userSession.user.id,
         title: 'Ny rapport',
+        description: 'Beskrivning',
       })
       .returning({ id: reports.id })
-
-    await db.insert(charts).values({
-      reportId: report.id,
-      config: {
-        type: 'netflow',
-        measure: '',
-        category: '',
-        chartType: '',
-        uiSettings: {
-          containerSize: 'medium',
-          tablePlacement: 'hidden',
-          legendPlacement: 'top',
-        },
-        measureCalculation: '',
-        maxNumberOfCategories: 0,
-        combineRemainingCategories: false,
-      },
-    })
 
     return redirect(`/rapport/${report.id}`)
   }
