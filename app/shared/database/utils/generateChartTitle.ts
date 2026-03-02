@@ -19,8 +19,8 @@ export function generateChartTitle(
         ? '(volym)'
         : '(volym)'
 
-  if (type === 'netflow') {
-    return `Nettoflytt per år ${area} ${calculationValue}`
+  if (type === 'netflow+category') {
+    return `Nettoflytt per kategori ${area} ${calculationValue}`
   }
 
   if (type === 'temporal') {
