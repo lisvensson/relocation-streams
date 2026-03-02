@@ -90,8 +90,7 @@ export default function ChartRenderer({
     >
       {!readOnly && id && (
         <div className="absolute top-3 right-3 flex gap-2">
-          {type !== 'netflow' && <ChartEditor chartId={id} />}
-
+          <ChartEditor chartId={id} />
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
@@ -108,9 +107,8 @@ export default function ChartRenderer({
                 </AlertDialogMedia>
                 <AlertDialogTitle>Radera diagram?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  {type === 'netflow'
-                    ? 'Detta ett nettoflytt-diagram och kan inte läggas till igen om du raderar det.'
-                    : 'Detta går inte att ångra. Diagrammet tas bort permanent från rapporten.'}
+                  Detta går inte att ångra. Diagrammet tas bort permanent från
+                  rapporten
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
