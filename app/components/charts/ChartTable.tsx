@@ -36,10 +36,17 @@ export function ChartTable({
           <TableRow key={serie}>
             <TableCell className="font-medium">
               <div className="flex items-center gap-4">
-                <div
-                  className="h-3 w-3 rounded"
-                  style={{ backgroundColor: `var(--chart-${index + 1})` }}
-                />
+                {serie === 'net' ? (
+                  <div className="flex h-3 w-3 rounded overflow-hidden ">
+                    <div className="w-1/2 h-full bg-[var(--chart-positive)]" />
+                    <div className="w-1/2 h-full bg-[var(--chart-negative)]" />
+                  </div>
+                ) : (
+                  <div
+                    className="h-3 w-3 rounded overflow-hidden"
+                    style={{ backgroundColor: `var(--chart-${index + 1})` }}
+                  />
+                )}
                 {serie === 'inflow'
                   ? 'Inflytt'
                   : serie === 'outflow'
