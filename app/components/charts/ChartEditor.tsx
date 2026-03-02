@@ -124,6 +124,9 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                     <SelectItem value="temporal+category">
                       Utveckling per kategori över tid
                     </SelectItem>
+                    <SelectItem value="netflow+category">
+                      Nettoflytt per kategori
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -156,9 +159,14 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                       </Select>
                     </div>
                   )}
+                  {type === 'netflow+category' && (
+                    <input type="hidden" name="measure" value="inflow" />
+                  )}
 
                   {/* category */}
-                  {(type === 'category' || type === 'temporal+category') && (
+                  {(type === 'category' ||
+                    type === 'temporal+category' ||
+                    type === 'netflow+category') && (
                     <div>
                       <label className="block mb-1 font-medium">Kategori</label>
                       <Select
@@ -174,6 +182,11 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                           <SelectValue placeholder="Välj kategori" />
                         </SelectTrigger>
                         <SelectContent>
+                          {type === 'netflow+category' && (
+                            <SelectItem value="relocationYear">
+                              Flyttår
+                            </SelectItem>
+                          )}
                           <SelectItem value="employeeRange">
                             Antal anställda
                           </SelectItem>
@@ -192,7 +205,9 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                   )}
 
                   {/* maxNumberOfCategories */}
-                  {(type === 'category' || type === 'temporal+category') && (
+                  {(type === 'category' ||
+                    type === 'temporal+category' ||
+                    type === 'netflow+category') && (
                     <div>
                       <label className="block mb-1 font-medium">
                         Max antal kategorier
@@ -205,15 +220,22 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                           setMaxNumberOfCategories(Number(e.target.value))
                         }
                         aria-invalid={
-                          type === 'temporal+category' && !maxNumberOfCategories
+                          (type === 'temporal+category' ||
+                            type === 'netflow+category') &&
+                          !maxNumberOfCategories
                         }
-                        required={type === 'temporal+category'}
+                        required={
+                          type === 'temporal+category' ||
+                          type === 'netflow+category'
+                        }
                       />
                     </div>
                   )}
 
                   {/* combineRemainingCategories */}
-                  {(type === 'category' || type === 'temporal+category') && (
+                  {(type === 'category' ||
+                    type === 'temporal+category' ||
+                    type === 'netflow+category') && (
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id="combineRemainingCategories"
@@ -289,7 +311,8 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                   {/* containerSize */}
                   {(type === 'temporal' ||
                     type === 'category' ||
-                    type === 'temporal+category') && (
+                    type === 'temporal+category' ||
+                    type === 'netflow+category') && (
                     <div>
                       <label className="block mb-1 font-medium">
                         Containerstorlek
@@ -318,7 +341,8 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                   {/* legendPlacement */}
                   {(type === 'temporal' ||
                     type === 'category' ||
-                    type === 'temporal+category') && (
+                    type === 'temporal+category' ||
+                    type === 'netflow+category') && (
                     <div>
                       <label className="block mb-1 font-medium">
                         Legendplacering
@@ -347,7 +371,8 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                   {/* tablePlacement */}
                   {(type === 'temporal' ||
                     type === 'category' ||
-                    type === 'temporal+category') && (
+                    type === 'temporal+category' ||
+                    type === 'netflow+category') && (
                     <div>
                       <label className="block mb-1 font-medium">
                         Tabellplacering
@@ -424,8 +449,9 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                     (['category', 'temporal+category'].includes(type) &&
                       !category) ||
                     (type === 'category' && !chartType) ||
-                    (type === 'temporal+category' && !measureCalculation) ||
-                    (type === 'temporal+category' && !maxNumberOfCategories)
+                    (type === 'temporal+category' &&
+                      (!measureCalculation || !maxNumberOfCategories)) ||
+                    (type === 'netflow+category' && !maxNumberOfCategories)
                   }
                 >
                   Spara ändringar
