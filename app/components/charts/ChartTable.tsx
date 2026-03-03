@@ -11,10 +11,12 @@ export function ChartTable({
   data,
   dimension,
   series,
+  measureCalculation,
 }: {
   data: any[]
   dimension: string
   series: string[]
+  measureCalculation?: string
 }) {
   const dimensionValues = data.map((row) => row[dimension])
 
@@ -59,7 +61,9 @@ export function ChartTable({
 
             {data.map((row) => (
               <TableCell key={row[dimension]} className="text-right">
-                {row[serie]}
+                {measureCalculation === 'percent'
+                  ? `${row[serie]} %`
+                  : row[serie]}
               </TableCell>
             ))}
           </TableRow>

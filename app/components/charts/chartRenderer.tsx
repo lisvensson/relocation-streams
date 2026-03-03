@@ -46,6 +46,7 @@ export default function ChartRenderer({
   series,
   data,
   uiSettings,
+  measureCalculation,
   readOnly,
 }: ChartModel & { readOnly?: boolean }) {
   const config = Object.fromEntries(
@@ -242,7 +243,16 @@ export default function ChartRenderer({
               />
               <ChartTooltip
                 cursor={false}
-                content={<ChartTooltipContent hideLabel />}
+                content={
+                  <ChartTooltipContent
+                    hideLabel
+                    formatter={
+                      measureCalculation === 'percent'
+                        ? (value) => `${value} %`
+                        : undefined
+                    }
+                  />
+                }
               />
               {uiSettings?.legendPlacement !== 'hidden' && (
                 <ChartLegend
@@ -284,7 +294,12 @@ export default function ChartRenderer({
           )}
         </ChartContainer>
         {uiSettings?.tablePlacement === 'bottom' && (
-          <ChartTable data={data} dimension={dimension} series={series} />
+          <ChartTable
+            data={data}
+            dimension={dimension}
+            series={series}
+            measureCalculation={measureCalculation}
+          />
         )}
       </CardContent>
     </Card>

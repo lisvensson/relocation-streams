@@ -137,5 +137,6 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
       series,
       data,
       uiSettings: chartConfig.uiSettings,
+      measureCalculation: chartConfig.measureCalculation,
     }
   }

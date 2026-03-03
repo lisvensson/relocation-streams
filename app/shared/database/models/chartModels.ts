@@ -73,6 +73,7 @@ export type ChartModel = {
   series: string[]
   data: ChartDataPoint[]
   uiSettings?: ChartUiSettings
+  measureCalculation: string
 }
 
 export type TemporalDimension = 'year' | 'month' | 'week'
