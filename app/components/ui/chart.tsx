@@ -298,23 +298,21 @@ function ChartLegendContent({
             >
               {itemConfig?.icon && !hideIcon ? (
                 <itemConfig.icon />
-              ) : item.dataKey === 'diffCount' ? (
-                <div className="h-2 w-2 shrink-0 rounded-[2px] relative overflow-hidden flex">
+              ) : item.dataKey === 'net' ? (
+                <div className="h-2 w-2 shrink-0 rounded-[2px] overflow-hidden flex">
                   <div
                     className="w-1/2 h-full"
-                    style={{ backgroundColor: config.diffCount?.positiveColor }}
+                    style={{ backgroundColor: itemConfig?.positiveColor }}
                   />
                   <div
                     className="w-1/2 h-full"
-                    style={{ backgroundColor: config.diffCount?.negativeColor }}
+                    style={{ backgroundColor: itemConfig?.negativeColor }}
                   />
                 </div>
               ) : (
                 <div
                   className="h-2 w-2 shrink-0 rounded-[2px]"
-                  style={{
-                    backgroundColor: item.color,
-                  }}
+                  style={{ backgroundColor: item.color }}
                 />
               )}
               {itemConfig?.label}
