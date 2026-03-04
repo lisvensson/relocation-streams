@@ -17,7 +17,7 @@ const filters: Filter[] = [
 ]
 
 const chartConfig: CategoryChartConfig = {
-  title: 'Inflytt per kategori',
+  title: 'Utveckling per kategori',
   type: 'category',
   measure: 'outflow',
   uiSettings: {
