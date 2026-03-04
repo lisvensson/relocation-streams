@@ -7,7 +7,6 @@ import type {
 } from '../models/chartModels.ts'
 import { db } from '../index.ts'
 import { relocation } from '../schema.ts'
-import { generateChartTitle } from '../utils/generateChartTitle.ts'
 
 type BuildNetFlowCategoryChartFunction = (
   area: string | undefined,
@@ -143,7 +142,7 @@ export const buildNetFlowCategoryChart: BuildNetFlowCategoryChartFunction =
 
     return {
       type: chartConfig.type,
-      title: generateChartTitle(chartConfig, area),
+      title: chartConfig.title,
       chartType: 'column',
       measure: 'inflow',
       dimension: dimensionKey,

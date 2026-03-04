@@ -7,7 +7,6 @@ import type {
 } from '../models/chartModels.ts'
 import { db } from '../index.ts'
 import { relocation } from '../schema.ts'
-import { generateChartTitle } from '../utils/generateChartTitle.ts'
 
 type BuildTemporalChartFunction = (
   area: string | undefined,
@@ -60,7 +59,7 @@ export const buildTemporalChart: BuildTemporalChartFunction = async (
 
   return {
     type: chartConfig.type,
-    title: generateChartTitle(chartConfig, area),
+    title: chartConfig.title,
     chartType: 'column',
     measure,
     dimension: dimensionKey,
