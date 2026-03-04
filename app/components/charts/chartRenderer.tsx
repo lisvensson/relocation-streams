@@ -19,7 +19,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { Trash2Icon } from 'lucide-react'
+import { CircleXIcon, SaveIcon, SquarePenIcon, Trash2Icon } from 'lucide-react'
 import { Form } from 'react-router'
 import { ChartEditor } from './ChartEditor'
 import {
@@ -36,6 +36,8 @@ import {
 } from '../ui/alert-dialog'
 import { ChartTable } from './ChartTable'
 import { Button } from '../ui/button'
+import { useState } from 'react'
+import { Input } from '../ui/input'
 
 export default function ChartRenderer({
   id,
@@ -49,6 +51,8 @@ export default function ChartRenderer({
   measureCalculation,
   readOnly,
 }: ChartModel & { readOnly?: boolean }) {
+  const [isEditingChartTitle, setIsEditingChartTitle] = useState(false)
+
   const config = Object.fromEntries(
     series.map((s, i) => {
       let label = s
@@ -141,7 +145,49 @@ export default function ChartRenderer({
       )}
 
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <div className="flex items-center gap-1">
+          <CardTitle>{title}</CardTitle>
+          {!readOnly && id && !isEditingChartTitle && (
+            <Button
+              variant="ghost"
+              className="text-muted-foreground hover:text-primary transition"
+              onClick={() => setIsEditingChartTitle(true)}
+            >
+              <SquarePenIcon className="size-4" />
+            </Button>
+          )}
+        </div>
+        {!readOnly && id && isEditingChartTitle && (
+          <Form
+            method="post"
+            className="flex items-center"
+            onSubmit={() => setIsEditingChartTitle(false)}
+          >
+            <Input
+              type="text"
+              name="chartTitle"
+              defaultValue={title}
+              className="w-1/2"
+            />
+            <input type="hidden" name="id" value={id} />
+            <Button
+              type="submit"
+              name="intent"
+              value="updateChartTitle"
+              variant="ghost"
+              className="text-muted-foreground hover:text-primary transition"
+            >
+              <SaveIcon className="size-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              className="text-muted-foreground hover:text-destructive transition"
+              onClick={() => setIsEditingChartTitle(false)}
+            >
+              <CircleXIcon className="size-4" />
+            </Button>
+          </Form>
+        )}
       </CardHeader>
 
       <CardContent>

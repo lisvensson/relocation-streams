@@ -404,6 +404,11 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
               <input type="hidden" name="intent" value="updateChart" />
               <input type="hidden" name="id" value={chartId} />
               <input type="hidden" name="type" value={type} />
+              <input
+                type="hidden"
+                name="chartTitle"
+                value={chartConfig.title}
+              />
               <input type="hidden" name="measure" value={measure} />
               <input type="hidden" name="category" value={category} />
               <input

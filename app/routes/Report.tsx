@@ -36,6 +36,7 @@ import {
   AlertDialogTrigger,
 } from '~/components/ui/alert-dialog'
 import { Textarea } from '~/components/ui/textarea'
+import { generateChartTitle } from '~/lib/generateChartTitle'
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const start = performance.now()
@@ -212,8 +213,14 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const legendPlacement = searchParams.get('legendPlacement')
   const tablePlacement = searchParams.get('tablePlacement')
 
+  const previewTitle = generateChartTitle({
+    type: type,
+    measureCalculation: measureCalculation,
+  })
+
   const chartConfig = {
     type,
+    title: previewTitle,
     measure,
     uiSettings: { containerSize, legendPlacement, tablePlacement },
     category,
@@ -319,6 +326,7 @@ export async function action({ request, params }: Route.ActionArgs) {
   if (intent === 'addChart') {
     const config = {
       type: formData.get('type'),
+      title: formData.get('chartTitle'),
       measure: formData.get('measure'),
       category: formData.get('category'),
       maxNumberOfCategories: Number(formData.get('maxNumberOfCategories')),
@@ -347,6 +355,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
     const config = {
       type: formData.get('type'),
+      title: formData.get('chartTitle'),
       measure: formData.get('measure'),
       category: formData.get('category'),
       maxNumberOfCategories: Number(formData.get('maxNumberOfCategories')),
@@ -375,16 +384,35 @@ export async function action({ request, params }: Route.ActionArgs) {
     return redirect(url.toString())
   }
 
-  if (intent === 'updateTitle') {
-    const title = formData.get('title') as string
+  if (intent === 'updateChartTitle') {
+    const chartId = formData.get('id') as string
+    const title = formData.get('chartTitle') as string
+
+    const [chart] = await db.select().from(charts).where(eq(charts.id, chartId))
+
+    const updatedConfig = {
+      ...chart.config,
+      title,
+    }
+
+    await db
+      .update(charts)
+      .set({ config: updatedConfig })
+      .where(eq(charts.id, chartId))
+
+    return redirect(url.toString())
+  }
+
+  if (intent === 'updateReportTitle') {
+    const title = formData.get('reportTitle') as string
 
     await db.update(reports).set({ title }).where(eq(reports.id, reportId))
 
     return redirect(url.toString())
   }
 
-  if (intent === 'updateDescription') {
-    const description = formData.get('description') as string
+  if (intent === 'updateReportDescription') {
+    const description = formData.get('reportDescription') as string
 
     await db
       .update(reports)
@@ -420,8 +448,9 @@ export default function Report({ loaderData }: Route.ComponentProps) {
   const [searchParams] = useSearchParams()
   const { report, filterOptions, filters, preview, charts } = loaderData
   const [location, setLocation] = useState(searchParams.get('location') ?? '')
-  const [isEditingTitle, setIsEditingTitle] = useState(false)
-  const [isEditingDescription, setIsEditingDescription] = useState(false)
+  const [isEditingReportTitle, setIsEditingReportTitle] = useState(false)
+  const [isEditingReportDescription, setIsEditingReportDescription] =
+    useState(false)
 
   return (
     <div className="flex">
@@ -494,22 +523,22 @@ export default function Report({ loaderData }: Route.ComponentProps) {
       <div className="flex-1 p-6 space-y-6">
         <div className="border-b pb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {isEditingTitle ? (
+            {isEditingReportTitle ? (
               <Form
                 method="post"
                 className="flex items-center gap-2"
-                onSubmit={() => setIsEditingTitle(false)}
+                onSubmit={() => setIsEditingReportTitle(false)}
               >
                 <Input
                   type="text"
-                  name="title"
+                  name="reportTitle"
                   defaultValue={report.title}
                   className="w-full"
                 />
                 <Button
                   type="submit"
                   name="intent"
-                  value="updateTitle"
+                  value="updateReportTitle"
                   variant="ghost"
                   className="text-muted-foreground hover:text-primary transition"
                 >
@@ -517,8 +546,8 @@ export default function Report({ loaderData }: Route.ComponentProps) {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="text-muted-foreground hover:text-red-500 transition"
-                  onClick={() => setIsEditingTitle(false)}
+                  className="text-muted-foreground hover:text-destructive transition"
+                  onClick={() => setIsEditingReportTitle(false)}
                 >
                   <CircleXIcon className="size-5" />
                 </Button>
@@ -529,7 +558,7 @@ export default function Report({ loaderData }: Route.ComponentProps) {
                 <Button
                   variant="ghost"
                   className="text-muted-foreground hover:text-primary transition"
-                  onClick={() => setIsEditingTitle(true)}
+                  onClick={() => setIsEditingReportTitle(true)}
                 >
                   <SquarePenIcon className="size-5" />
                 </Button>
@@ -600,17 +629,20 @@ export default function Report({ loaderData }: Route.ComponentProps) {
 
         <div>
           <h2 className="font-medium">Beskrivning</h2>
-          {isEditingDescription ? (
+          {isEditingReportDescription ? (
             <Form
               method="post"
               className="flex items-center gap-2"
-              onSubmit={() => setIsEditingDescription(false)}
+              onSubmit={() => setIsEditingReportDescription(false)}
             >
-              <Textarea name="description" defaultValue={report.description} />
+              <Textarea
+                name="reportDescription"
+                defaultValue={report.description}
+              />
               <Button
                 type="submit"
                 name="intent"
-                value="updateDescription"
+                value="updateReportDescription"
                 variant="ghost"
                 className="text-muted-foreground hover:text-primary transition"
               >
@@ -618,8 +650,8 @@ export default function Report({ loaderData }: Route.ComponentProps) {
               </Button>
               <Button
                 variant="ghost"
-                className="text-muted-foreground hover:text-red-500 transition"
-                onClick={() => setIsEditingDescription(false)}
+                className="text-muted-foreground hover:text-destructive transition"
+                onClick={() => setIsEditingReportDescription(false)}
               >
                 <CircleXIcon className="size-4" />
               </Button>
@@ -632,7 +664,7 @@ export default function Report({ loaderData }: Route.ComponentProps) {
               <Button
                 variant="ghost"
                 className="text-muted-foreground hover:text-primary transition"
-                onClick={() => setIsEditingDescription(true)}
+                onClick={() => setIsEditingReportDescription(true)}
               >
                 <SquarePenIcon className="size-4" />
               </Button>
