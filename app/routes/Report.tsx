@@ -652,7 +652,6 @@ export default function Report({ loaderData }: Route.ComponentProps) {
         </div>
 
         <div>
-          <h2 className="font-medium">Beskrivning</h2>
           {isEditingReportDescription ? (
             <Form
               method="post"
@@ -682,6 +681,15 @@ export default function Report({ loaderData }: Route.ComponentProps) {
             </Form>
           ) : (
             <div className="flex items-center gap-2">
+              {report.description && report.description.trim() !== '' ? (
+                <p className="text-sm text-muted-foreground">
+                  {report.description}
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Lägg till beskrivning...
+                </p>
+              )}
               <p className="text-sm text-muted-foreground">
                 {report.description}
               </p>

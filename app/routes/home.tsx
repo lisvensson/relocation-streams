@@ -26,7 +26,7 @@ export async function action({ context, request }: Route.ActionArgs) {
       .values({
         userId: userSession.user.id,
         title: 'Ny rapport',
-        description: 'Beskrivning',
+        description: '',
       })
       .returning({ id: reports.id })
 
