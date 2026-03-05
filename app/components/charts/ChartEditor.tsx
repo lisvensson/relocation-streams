@@ -207,29 +207,37 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                   {/* maxNumberOfCategories */}
                   {(type === 'category' ||
                     type === 'temporal+category' ||
-                    type === 'netflow+category') && (
-                    <div>
-                      <label className="block mb-1 font-medium">
-                        Max antal kategorier
-                      </label>
-                      <Input
-                        type="number"
-                        name="maxNumberOfCategories"
-                        value={maxNumberOfCategories ?? ''}
-                        onChange={(e) =>
-                          setMaxNumberOfCategories(Number(e.target.value))
-                        }
-                        aria-invalid={
-                          (type === 'temporal+category' ||
-                            type === 'netflow+category') &&
-                          !maxNumberOfCategories
-                        }
-                        required={
-                          type === 'temporal+category' ||
-                          type === 'netflow+category'
-                        }
-                      />
-                    </div>
+                    type === 'netflow+category') &&
+                    category !== 'relocationYear' && (
+                      <div>
+                        <label className="block mb-1 font-medium">
+                          Max antal kategorier
+                        </label>
+                        <Input
+                          type="number"
+                          name="maxNumberOfCategories"
+                          value={maxNumberOfCategories ?? ''}
+                          onChange={(e) =>
+                            setMaxNumberOfCategories(Number(e.target.value))
+                          }
+                          aria-invalid={
+                            (type === 'temporal+category' ||
+                              type === 'netflow+category') &&
+                            !maxNumberOfCategories
+                          }
+                          required={
+                            type === 'temporal+category' ||
+                            type === 'netflow+category'
+                          }
+                        />
+                      </div>
+                    )}
+                  {category === 'relocationYear' && (
+                    <input
+                      type="hidden"
+                      name="maxNumberOfCategories"
+                      value={0}
+                    />
                   )}
 
                   {/* combineRemainingCategories */}
@@ -461,7 +469,9 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                     (type === 'category' && !chartType) ||
                     (type === 'temporal+category' &&
                       (!measureCalculation || !maxNumberOfCategories)) ||
-                    (type === 'netflow+category' && !maxNumberOfCategories)
+                    (type === 'netflow+category' &&
+                      category !== 'relocationYear' &&
+                      !maxNumberOfCategories)
                   }
                 >
                   Spara ändringar
