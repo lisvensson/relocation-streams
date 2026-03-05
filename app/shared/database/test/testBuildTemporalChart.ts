@@ -19,6 +19,7 @@ const filters: Filter[] = [
 const chartConfig: TemporalChartConfig = {
   title: 'Utveckling över tid',
   type: 'temporal',
+  description: '',
   measure: 'inflow',
   uiSettings: {
     containerSize: 'medium',

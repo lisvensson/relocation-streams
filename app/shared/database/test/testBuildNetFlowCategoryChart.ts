@@ -15,15 +15,16 @@ const filters: Filter[] = [
   {
     key: 'relocationYear',
     operator: 'in',
-    value: [2020, 2021, 2022, 2023, 2024],
+    value: [],
   },
 ]
 
 const chartConfig: NetFlowCategoryChartConfig = {
   type: 'netflow+category',
   title: 'Nettoflytt per kategori',
+  description: '',
   category: 'relocationYear',
-  maxNumberOfCategories: 5,
+  maxNumberOfCategories: 0,
   combineRemainingCategories: true,
 }
 

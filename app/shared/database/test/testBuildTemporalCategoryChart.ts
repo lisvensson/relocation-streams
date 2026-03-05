@@ -22,6 +22,7 @@ const filters: Filter[] = [
 const chartConfig: TemporalCategoryChartConfig = {
   type: 'temporal+category',
   title: 'Utveckling per kategori över tid',
+  description: '',
   measure: 'outflow',
   uiSettings: {
     containerSize: 'medium',
