@@ -6,7 +6,13 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '~/components/ui/chart'
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '~/components/ui/card'
 import {
   Bar,
   BarChart,
@@ -38,11 +44,13 @@ import { ChartTable } from './ChartTable'
 import { Button } from '../ui/button'
 import { useState } from 'react'
 import { Input } from '../ui/input'
+import { Textarea } from '../ui/textarea'
 
 export default function ChartRenderer({
   id,
   type,
   title,
+  description,
   chartType,
   dimension,
   series,
@@ -52,6 +60,8 @@ export default function ChartRenderer({
   readOnly,
 }: ChartModel & { readOnly?: boolean }) {
   const [isEditingChartTitle, setIsEditingChartTitle] = useState(false)
+  const [isEditingChartDescription, setIsEditingChartDescription] =
+    useState(false)
 
   const config = Object.fromEntries(
     series.map((s, i) => {
@@ -144,49 +154,112 @@ export default function ChartRenderer({
         </div>
       )}
 
-      <CardHeader>
-        <div className="flex items-center gap-1">
-          <CardTitle>{title}</CardTitle>
-          {!readOnly && id && !isEditingChartTitle && (
-            <Button
-              variant="ghost"
-              className="text-muted-foreground hover:text-primary transition"
-              onClick={() => setIsEditingChartTitle(true)}
+      <CardHeader className="space-y-2">
+        {/* chartTitle */}
+        {isEditingChartTitle ? (
+          !readOnly &&
+          id && (
+            <Form
+              method="post"
+              className="flex items-center"
+              onSubmit={() => setIsEditingChartTitle(false)}
             >
-              <SquarePenIcon className="size-4" />
-            </Button>
-          )}
-        </div>
-        {!readOnly && id && isEditingChartTitle && (
-          <Form
-            method="post"
-            className="flex items-center"
-            onSubmit={() => setIsEditingChartTitle(false)}
-          >
-            <Input
-              type="text"
-              name="chartTitle"
-              defaultValue={title}
-              className="w-1/2"
-            />
-            <input type="hidden" name="id" value={id} />
-            <Button
-              type="submit"
-              name="intent"
-              value="updateChartTitle"
-              variant="ghost"
-              className="text-muted-foreground hover:text-primary transition"
+              <Input
+                type="text"
+                name="chartTitle"
+                defaultValue={title}
+                className="w-1/2"
+              />
+              <input type="hidden" name="id" value={id} />
+              <Button
+                type="submit"
+                name="intent"
+                value="updateChartTitle"
+                variant="ghost"
+                className="text-muted-foreground hover:text-primary transition"
+              >
+                <SaveIcon className="size-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                className="text-muted-foreground hover:text-destructive transition"
+                onClick={() => setIsEditingChartTitle(false)}
+              >
+                <CircleXIcon className="size-4" />
+              </Button>
+            </Form>
+          )
+        ) : (
+          <div className="flex items-center gap-1">
+            {title && title.trim() !== '' ? (
+              <CardTitle>{title}</CardTitle>
+            ) : (
+              !readOnly && <CardTitle>Lägg till titel…</CardTitle>
+            )}
+
+            {!readOnly && id && (
+              <Button
+                variant="ghost"
+                className="text-muted-foreground hover:text-primary transition"
+                onClick={() => setIsEditingChartTitle(true)}
+              >
+                <SquarePenIcon className="size-4" />
+              </Button>
+            )}
+          </div>
+        )}
+        {/* chartDescription */}
+        {isEditingChartDescription ? (
+          !readOnly &&
+          id && (
+            <Form
+              method="post"
+              className="flex items-center"
+              onSubmit={() => setIsEditingChartDescription(false)}
             >
-              <SaveIcon className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              className="text-muted-foreground hover:text-destructive transition"
-              onClick={() => setIsEditingChartTitle(false)}
-            >
-              <CircleXIcon className="size-4" />
-            </Button>
-          </Form>
+              <Textarea
+                name="chartDescription"
+                defaultValue={description ?? ''}
+                className="w-full text-sm"
+              />
+              <input type="hidden" name="id" value={id} />
+              <Button
+                type="submit"
+                name="intent"
+                value="updateChartDescription"
+                variant="ghost"
+                className="text-muted-foreground hover:text-primary transition"
+              >
+                <SaveIcon className="size-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                className="text-muted-foreground hover:text-destructive transition"
+                onClick={() => setIsEditingChartDescription(false)}
+              >
+                <CircleXIcon className="size-4" />
+              </Button>
+            </Form>
+          )
+        ) : (
+          <div className="flex items-center gap-1">
+            {description && description.trim() !== '' ? (
+              <CardDescription>{description}</CardDescription>
+            ) : (
+              !readOnly && (
+                <CardDescription>Lägg till beskrivning…</CardDescription>
+              )
+            )}
+            {!readOnly && id && (
+              <Button
+                variant="ghost"
+                className="text-muted-foreground hover:text-primary transition"
+                onClick={() => setIsEditingChartDescription(true)}
+              >
+                <SquarePenIcon className="size-4" />
+              </Button>
+            )}
+          </div>
         )}
       </CardHeader>
 

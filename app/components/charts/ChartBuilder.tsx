@@ -19,7 +19,6 @@ import ChartRenderer from '~/components/charts/ChartRenderer'
 import type { ChartModel } from '~/shared/database/models/chartModels'
 import { useState } from 'react'
 import { PlusIcon } from 'lucide-react'
-import { generateChartTitle } from '~/lib/generateChartTitle'
 
 interface ChartBuilderProps {
   chart: ChartModel | null
@@ -396,15 +395,8 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
             <Form method="post" className="mt-6">
               <input type="hidden" name="intent" value="addChart" />
               <input type="hidden" name="type" value={type} />
-              <input
-                type="hidden"
-                name="chartTitle"
-                value={generateChartTitle({
-                  type,
-                  measureCalculation,
-                })}
-              />
-
+              <input type="hidden" name="chartTitle" value={''} />
+              <input type="hidden" name="chartDescription" value={''} />
               <input type="hidden" name="measure" value={measure} />
               <input type="hidden" name="category" value={category} />
               <input
@@ -465,7 +457,7 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
             </Form>
           </div>
           <div className="flex-1 p-6">
-            {chart && <ChartRenderer {...chart} />}
+            {chart && <ChartRenderer {...chart} readOnly={true} />}
           </div>
         </div>
       </SheetContent>

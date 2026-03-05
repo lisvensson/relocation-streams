@@ -36,7 +36,7 @@ import {
   AlertDialogTrigger,
 } from '~/components/ui/alert-dialog'
 import { Textarea } from '~/components/ui/textarea'
-import { generateChartTitle } from '~/lib/generateChartTitle'
+import { generateExampleChartTitle } from '~/lib/generateExampleChartTitle'
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const start = performance.now()
@@ -213,14 +213,17 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const legendPlacement = searchParams.get('legendPlacement')
   const tablePlacement = searchParams.get('tablePlacement')
 
-  const previewTitle = generateChartTitle({
+  const previewTitle = generateExampleChartTitle({
     type: type,
+    measure: measure,
     measureCalculation: measureCalculation,
   })
 
   const chartConfig = {
     type,
     title: previewTitle,
+    description:
+      'Exempel: Här kan du lägga till en beskrivning av diagrammet...',
     measure,
     uiSettings: { containerSize, legendPlacement, tablePlacement },
     category,
@@ -327,6 +330,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     const config = {
       type: formData.get('type'),
       title: formData.get('chartTitle'),
+      description: formData.get('chartDescription'),
       measure: formData.get('measure'),
       category: formData.get('category'),
       maxNumberOfCategories: Number(formData.get('maxNumberOfCategories')),
@@ -356,6 +360,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     const config = {
       type: formData.get('type'),
       title: formData.get('chartTitle'),
+      description: formData.get('chartDescription'),
       measure: formData.get('measure'),
       category: formData.get('category'),
       maxNumberOfCategories: Number(formData.get('maxNumberOfCategories')),
@@ -393,6 +398,25 @@ export async function action({ request, params }: Route.ActionArgs) {
     const updatedConfig = {
       ...chart.config,
       title,
+    }
+
+    await db
+      .update(charts)
+      .set({ config: updatedConfig })
+      .where(eq(charts.id, chartId))
+
+    return redirect(url.toString())
+  }
+
+  if (intent === 'updateChartDescription') {
+    const chartId = formData.get('id') as string
+    const description = formData.get('chartDescription') as string
+
+    const [chart] = await db.select().from(charts).where(eq(charts.id, chartId))
+
+    const updatedConfig = {
+      ...chart.config,
+      description,
     }
 
     await db

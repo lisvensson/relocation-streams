@@ -409,6 +409,11 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                 name="chartTitle"
                 value={chartConfig.title}
               />
+              <input
+                type="hidden"
+                name="chartDescription"
+                value={chartConfig.description}
+              />
               <input type="hidden" name="measure" value={measure} />
               <input type="hidden" name="category" value={category} />
               <input
@@ -465,7 +470,7 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
             </Form>
           </div>
           <div className="flex-1 p-6">
-            {preview && <ChartRenderer {...preview} />}
+            {preview && <ChartRenderer {...preview} readOnly={true} />}
           </div>
         </div>
       </SheetContent>
