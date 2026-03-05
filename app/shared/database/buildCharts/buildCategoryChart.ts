@@ -101,6 +101,7 @@ export const buildCategoryChart: buildCategoryChartFunction = async (
   return {
     type: chartConfig.type,
     title: chartConfig.title,
+    description: chartConfig.description,
     chartType: chartType,
     measure,
     dimension: dimensionKey,

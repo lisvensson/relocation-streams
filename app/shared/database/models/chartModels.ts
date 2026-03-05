@@ -18,6 +18,7 @@ export type ChartUiSettings = {
 export type TemporalChartConfig = {
   type: 'temporal'
   title: string
+  description: string
   filters?: Filter[]
   uiSettings?: ChartUiSettings
   measure: Measure
@@ -26,6 +27,7 @@ export type TemporalChartConfig = {
 export type CategoryChartConfig = {
   type: 'category'
   title: string
+  description: string
   filters?: Filter[]
   uiSettings?: ChartUiSettings
   measure: Measure
@@ -38,6 +40,7 @@ export type CategoryChartConfig = {
 export type TemporalCategoryChartConfig = {
   type: 'temporal+category'
   title: string
+  description: string
   filters?: Filter[]
   uiSettings?: ChartUiSettings
   measure: Measure
@@ -50,6 +53,7 @@ export type TemporalCategoryChartConfig = {
 export type NetFlowCategoryChartConfig = {
   type: 'netflow+category'
   title: string
+  description: string
   filters?: Filter[]
   uiSettings?: ChartUiSettings
   category: Category
@@ -67,6 +71,7 @@ export type ChartModel = {
   id?: string
   type: string
   title: string
+  description: string
   chartType: ChartType
   measure: Measure // ??
   dimension: Dimension

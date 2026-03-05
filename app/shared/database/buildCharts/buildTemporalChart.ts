@@ -60,6 +60,7 @@ export const buildTemporalChart: BuildTemporalChartFunction = async (
   return {
     type: chartConfig.type,
     title: chartConfig.title,
+    description: chartConfig.description,
     chartType: 'column',
     measure,
     dimension: dimensionKey,

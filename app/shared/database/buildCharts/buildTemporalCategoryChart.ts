@@ -130,6 +130,7 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
     return {
       type: chartConfig.type,
       title: chartConfig.title,
+      description: chartConfig.description,
       chartType: 'line',
       measure,
       dimension: dimensionKey,

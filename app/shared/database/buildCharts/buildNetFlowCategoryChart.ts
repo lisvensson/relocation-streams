@@ -143,6 +143,7 @@ export const buildNetFlowCategoryChart: BuildNetFlowCategoryChartFunction =
     return {
       type: chartConfig.type,
       title: chartConfig.title,
+      description: chartConfig.description,
       chartType: 'column',
       measure: 'inflow',
       dimension: dimensionKey,
