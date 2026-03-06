@@ -18,7 +18,7 @@ import { buildNetFlowCategoryChart } from '~/shared/database/buildCharts/buildNe
 import { buildTemporalChart } from '~/shared/database/buildCharts/buildTemporalChart'
 import { buildCategoryChart } from '~/shared/database/buildCharts/buildCategoryChart'
 import { buildTemporalCategoryChart } from '~/shared/database/buildCharts/buildTemporalCategoryChart'
-import ChartRenderer from '~/components/charts/ChartRenderer'
+import ChartRenderer from '~/components/charts/ChartRendererTemp'
 import { eq } from 'drizzle-orm'
 import type { Route } from './+types/Report'
 import { Input } from '~/components/ui/input'

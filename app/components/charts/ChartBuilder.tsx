@@ -15,7 +15,7 @@ import {
 import { Input } from '~/components/ui/input'
 import { Checkbox } from '~/components/ui/checkbox'
 import { Form, useSearchParams, useSubmit } from 'react-router'
-import ChartRenderer from '~/components/charts/ChartRenderer'
+import ChartRenderer from '~/components/charts/ChartRendererTemp'
 import type { ChartModel } from '~/shared/database/models/chartModels'
 import { useState } from 'react'
 import { PlusIcon } from 'lucide-react'
