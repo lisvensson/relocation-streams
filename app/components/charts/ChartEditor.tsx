@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '../ui/select'
 import { Checkbox } from '../ui/checkbox'
-import ChartRenderer from './ChartRendererTemp'
+import ChartRenderer from './ChartRenderer'
 import { SquarePenIcon } from 'lucide-react'
 import type { loader } from '~/routes/Report'
 
