@@ -26,6 +26,7 @@ export const buildCategoryChart: buildCategoryChartFunction = async (
     category,
     maxNumberOfCategories,
     combineRemainingCategories,
+    excludeSelectedArea,
     chartType,
   } = chartConfig
 
@@ -69,9 +70,13 @@ export const buildCategoryChart: buildCategoryChartFunction = async (
     .orderBy(desc(count()))
 
   let rows = result
-  if (maxNumberOfCategories && result.length > maxNumberOfCategories) {
-    const topResult = result.slice(0, maxNumberOfCategories)
-    const otherResult = result.slice(maxNumberOfCategories)
+  if (excludeSelectedArea && area) {
+    rows = rows.filter((row) => row.dimension !== area)
+  }
+
+  if (maxNumberOfCategories && rows.length > maxNumberOfCategories) {
+    const topResult = rows.slice(0, maxNumberOfCategories)
+    const otherResult = rows.slice(maxNumberOfCategories)
 
     if (combineRemainingCategories) {
       let otherResultSum = 0

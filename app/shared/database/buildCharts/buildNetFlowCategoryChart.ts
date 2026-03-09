@@ -21,8 +21,12 @@ export const buildNetFlowCategoryChart: BuildNetFlowCategoryChartFunction =
     const inflowValue = relocation.toLocation
     const outflowValue = relocation.fromLocation
 
-    const { category, maxNumberOfCategories, combineRemainingCategories } =
-      chartConfig
+    const {
+      category,
+      maxNumberOfCategories,
+      combineRemainingCategories,
+      excludeSelectedArea,
+    } = chartConfig
 
     let inflowCategoryValue
     let outflowCategoryValue
@@ -91,6 +95,10 @@ export const buildNetFlowCategoryChart: BuildNetFlowCategoryChartFunction =
         net: inflow - outflow,
       }
     })
+
+    if (excludeSelectedArea && area) {
+      rows = rows.filter((row) => row.dimension !== area)
+    }
 
     if (category === 'relocationYear') {
       rows.sort((a, b) => Number(a.dimension) - Number(b.dimension))

@@ -24,6 +24,7 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
       maxNumberOfCategories,
       combineRemainingCategories,
       measureCalculation,
+      excludeSelectedArea,
     } = chartConfig
 
     const measureValue = {
@@ -68,8 +69,13 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
       .groupBy(relocation.relocationYear, categoryValue)
       .orderBy(asc(relocation.relocationYear))
 
+    let filteredResult = result
+    if (excludeSelectedArea && area) {
+      filteredResult = result.filter((row) => row.category !== area)
+    }
+
     const totalsByCategory: Record<string, number> = {}
-    for (const row of result) {
+    for (const row of filteredResult) {
       totalsByCategory[row.category] =
         (totalsByCategory[row.category] ?? 0) + Number(row.value)
     }
@@ -79,7 +85,7 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
     )
     const topCategories = sortedCategories.slice(0, maxNumberOfCategories)
 
-    const years = Array.from(new Set(result.map((r) => r.year)))
+    const years = Array.from(new Set(filteredResult.map((r) => r.year)))
 
     const data: ChartDataPoint[] = []
     const dimensionKey = 'year'
@@ -87,7 +93,7 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
       const point: ChartDataPoint = { [dimensionKey]: String(year) }
       let otherSum = 0
 
-      for (const row of result) {
+      for (const row of filteredResult) {
         if (row.year === year) {
           if (topCategories.includes(row.category)) {
             point[row.category] = Number(row.value)
