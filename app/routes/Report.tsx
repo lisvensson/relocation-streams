@@ -19,7 +19,7 @@ import { buildTemporalChart } from '~/shared/database/buildCharts/buildTemporalC
 import { buildCategoryChart } from '~/shared/database/buildCharts/buildCategoryChart'
 import { buildTemporalCategoryChart } from '~/shared/database/buildCharts/buildTemporalCategoryChart'
 import ChartRenderer from '~/components/charts/ChartRenderer'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import type { Route } from './+types/Report'
 import { Input } from '~/components/ui/input'
 import { CircleXIcon, SaveIcon, SquarePenIcon, Trash2Icon } from 'lucide-react'
@@ -37,16 +37,27 @@ import {
 } from '~/components/ui/alert-dialog'
 import { Textarea } from '~/components/ui/textarea'
 import { generateExampleChartTitle } from '~/lib/generateExampleChartTitle'
+import { userSessionContext } from '~/context/userSessionContext'
 
-export async function loader({ params, request }: Route.LoaderArgs) {
+export async function loader({ params, request, context }: Route.LoaderArgs) {
   const start = performance.now()
+
+  const userSession = context.get(userSessionContext)
+  if (!userSession) throw new Error('Användare saknas')
 
   const [report] = await db
     .select()
     .from(reports)
-    .where(eq(reports.id, params.reportId))
+    .where(
+      and(
+        eq(reports.id, params.reportId),
+        eq(reports.userId, userSession.user.id)
+      )
+    )
 
-  if (!report) throw new Response('Rapporten hittades inte', { status: 404 })
+  if (!report) {
+    throw new Response('Rapporten hittades inte', { status: 404 })
+  }
 
   const savedCharts = await db
     .select()
@@ -313,9 +324,24 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   }
 }
 
-export async function action({ request, params }: Route.ActionArgs) {
+export async function action({ request, params, context }: Route.ActionArgs) {
+  const userSession = context.get(userSessionContext)
+  if (!userSession) throw new Error('Användare saknas')
+
   const formData = await request.formData()
   const reportId = params.reportId
+  const [report] = await db
+    .select()
+    .from(reports)
+    .where(
+      and(eq(reports.id, reportId), eq(reports.userId, userSession.user.id))
+    )
+
+  if (!report) {
+    throw new Response('Du har inte behörighet att ändra denna rapport', {
+      status: 403,
+    })
+  }
   const intent = formData.get('intent')
   const chartSettingParams = [
     'type',
