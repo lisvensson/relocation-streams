@@ -29,6 +29,7 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
   const [type, setType] = useState<string>('')
   const [measure, setMeasure] = useState<string>('')
   const [category, setCategory] = useState<string>('')
+  const [excludeSelectedArea, setExcludeSelectedArea] = useState(false)
   const [maxNumberOfCategories, setMaxNumberOfCategories] = useState<
     number | undefined
   >()
@@ -44,6 +45,7 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
     'type',
     'measure',
     'category',
+    'excludeSelectedArea',
     'maxNumberOfCategories',
     'combineRemainingCategories',
     'chartType',
@@ -195,6 +197,31 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
                       </Select>
                     </div>
                   )}
+
+                  {/* excludeSelectedArea */}
+                  {(type === 'category' ||
+                    type === 'temporal+category' ||
+                    type === 'netflow+category') &&
+                    (category === 'postalArea' ||
+                      category === 'municipality' ||
+                      category === 'county') && (
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="excludeSelectedArea"
+                          name="excludeSelectedArea"
+                          checked={excludeSelectedArea}
+                          onCheckedChange={(v) =>
+                            setExcludeSelectedArea(Boolean(v))
+                          }
+                        />
+                        <label
+                          htmlFor="excludeSelectedArea"
+                          className="text-sm font-medium"
+                        >
+                          Exkludera valt område
+                        </label>
+                      </div>
+                    )}
 
                   {/* maxNumberOfCategories */}
                   {(type === 'category' ||
@@ -407,6 +434,11 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
               <input type="hidden" name="chartDescription" value={''} />
               <input type="hidden" name="measure" value={measure} />
               <input type="hidden" name="category" value={category} />
+              <input
+                type="hidden"
+                name="excludeSelectedArea"
+                value={excludeSelectedArea ? 'on' : 'off'}
+              />
               <input
                 type="hidden"
                 name="maxNumberOfCategories"
