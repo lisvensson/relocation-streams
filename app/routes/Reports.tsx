@@ -1,6 +1,6 @@
-import { desc, eq } from 'drizzle-orm'
+import { desc, eq, and } from 'drizzle-orm'
 import { db } from '~/shared/database'
-import { charts, reports } from '~/shared/database/schema'
+import { reports } from '~/shared/database/schema'
 import type { Route } from './+types/Reports'
 import {
   Table,
@@ -35,7 +35,10 @@ import {
 import { CreateReport } from '~/components/reports/CreateReport'
 import { userSessionContext } from '~/context/userSessionContext'
 
-export async function loader({}: Route.LoaderArgs) {
+export async function loader({ context }: Route.LoaderArgs) {
+  const userSession = context.get(userSessionContext)
+  if (!userSession) throw new Error('Användare saknas')
+
   const report = await db
     .select({
       id: reports.id,
@@ -43,6 +46,7 @@ export async function loader({}: Route.LoaderArgs) {
       createdAt: reports.createdAt,
     })
     .from(reports)
+    .where(eq(reports.userId, userSession.user.id))
     .orderBy(desc(reports.createdAt))
 
   return { report }
@@ -50,7 +54,7 @@ export async function loader({}: Route.LoaderArgs) {
 
 export async function action({ context, request }: Route.ActionArgs) {
   const userSession = context.get(userSessionContext)
-  if (!userSession) throw new Error('User session missing')
+  if (!userSession) throw new Error('Användare saknas')
 
   const formData = await request.formData()
   const intent = formData.get('intent')
@@ -70,6 +74,20 @@ export async function action({ context, request }: Route.ActionArgs) {
 
   if (intent === 'deleteReport') {
     const reportId = formData.get('id') as string
+
+    const [report] = await db
+      .select()
+      .from(reports)
+      .where(
+        and(eq(reports.id, reportId), eq(reports.userId, userSession.user.id))
+      )
+
+    if (!report) {
+      throw new Response('Du har inte behörighet att radera denna rapport', {
+        status: 403,
+      })
+    }
+
     await db.delete(reports).where(eq(reports.id, reportId))
     return redirect(`/rapporter`)
   }
