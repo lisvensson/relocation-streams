@@ -203,6 +203,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const type = searchParams.get('type')
   const measure = searchParams.get('measure')
   const category = searchParams.get('category')
+  const excludeSelectedArea = searchParams.get('excludeSelectedArea')
   const maxNumberOfCategories = searchParams.get('maxNumberOfCategories')
   const combineRemainingCategories = searchParams.get(
     'combineRemainingCategories'
@@ -227,6 +228,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     measure,
     uiSettings: { containerSize, legendPlacement, tablePlacement },
     category,
+    excludeSelectedArea: excludeSelectedArea === 'on',
     maxNumberOfCategories: maxNumberOfCategories
       ? Number(maxNumberOfCategories)
       : null,
@@ -319,6 +321,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     'type',
     'measure',
     'category',
+    'excludeSelectedArea',
     'maxNumberOfCategories',
     'combineRemainingCategories',
     'chartType',
@@ -333,6 +336,7 @@ export async function action({ request, params }: Route.ActionArgs) {
       description: formData.get('chartDescription'),
       measure: formData.get('measure'),
       category: formData.get('category'),
+      excludeSelectedArea: formData.get('excludeSelectedArea') === 'on',
       maxNumberOfCategories: Number(formData.get('maxNumberOfCategories')),
       combineRemainingCategories:
         formData.get('combineRemainingCategories') === 'on',
@@ -363,6 +367,7 @@ export async function action({ request, params }: Route.ActionArgs) {
       description: formData.get('chartDescription'),
       measure: formData.get('measure'),
       category: formData.get('category'),
+      excludeSelectedArea: formData.get('excludeSelectedArea') === 'on',
       maxNumberOfCategories: Number(formData.get('maxNumberOfCategories')),
       combineRemainingCategories:
         formData.get('combineRemainingCategories') === 'on',
