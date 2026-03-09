@@ -15,7 +15,7 @@ const filters: Filter[] = [
   {
     key: 'relocationYear',
     operator: 'in',
-    value: [],
+    value: [2020, 2021, 2022, 2023, 2024],
   },
 ]
 
@@ -23,9 +23,10 @@ const chartConfig: NetFlowCategoryChartConfig = {
   type: 'netflow+category',
   title: 'Nettoflytt per kategori',
   description: '',
-  category: 'relocationYear',
-  maxNumberOfCategories: 0,
+  category: 'municipality',
+  maxNumberOfCategories: 5,
   combineRemainingCategories: true,
+  excludeSelectedArea: true,
 }
 
 async function testBuildNetFlowCategoryChart() {

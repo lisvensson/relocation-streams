@@ -34,6 +34,7 @@ export type CategoryChartConfig = {
   category: Category
   maxNumberOfCategories: number
   combineRemainingCategories: boolean
+  excludeSelectedArea: boolean
   chartType: 'pie' | 'bar'
 }
 
@@ -47,6 +48,7 @@ export type TemporalCategoryChartConfig = {
   category: Category
   maxNumberOfCategories: number
   combineRemainingCategories: boolean
+  excludeSelectedArea: boolean
   measureCalculation: 'volume' | 'percent'
 }
 
@@ -59,6 +61,7 @@ export type NetFlowCategoryChartConfig = {
   category: Category
   maxNumberOfCategories: number
   combineRemainingCategories: boolean
+  excludeSelectedArea: boolean
 }
 
 export type ChartConfig =

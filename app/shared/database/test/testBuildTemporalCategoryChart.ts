@@ -32,6 +32,7 @@ const chartConfig: TemporalCategoryChartConfig = {
   category: 'municipality',
   maxNumberOfCategories: 5,
   combineRemainingCategories: true,
+  excludeSelectedArea: true,
   measureCalculation: 'volume', //volume eller percent
 }
 

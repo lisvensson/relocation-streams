@@ -29,6 +29,7 @@ const chartConfig: CategoryChartConfig = {
   category: 'municipality',
   maxNumberOfCategories: 5,
   combineRemainingCategories: true,
+  excludeSelectedArea: false,
   chartType: 'bar', // pie eller bar
 }
 
