@@ -272,24 +272,25 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                   {/* combineRemainingCategories */}
                   {(type === 'category' ||
                     type === 'temporal+category' ||
-                    type === 'netflow+category') && (
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="combineRemainingCategories"
-                        name="combineRemainingCategories"
-                        checked={combineRemainingCategories}
-                        onCheckedChange={(v) =>
-                          setCombineRemainingCategories(Boolean(v))
-                        }
-                      />
-                      <label
-                        htmlFor="combineRemainingCategories"
-                        className="text-sm font-medium"
-                      >
-                        Visa resterande kategorier som övrigt
-                      </label>
-                    </div>
-                  )}
+                    type === 'netflow+category') &&
+                    category !== 'relocationYear' && (
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="combineRemainingCategories"
+                          name="combineRemainingCategories"
+                          checked={combineRemainingCategories}
+                          onCheckedChange={(v) =>
+                            setCombineRemainingCategories(Boolean(v))
+                          }
+                        />
+                        <label
+                          htmlFor="combineRemainingCategories"
+                          className="text-sm font-medium"
+                        >
+                          Visa resterande kategorier som övrigt
+                        </label>
+                      </div>
+                    )}
 
                   {/* chartType */}
                   {type === 'category' && (
