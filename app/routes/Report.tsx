@@ -509,7 +509,7 @@ export default function Report({ loaderData }: Route.ComponentProps) {
 
   return (
     <div className="flex">
-      <aside className="w-75 border-r p-4">
+      <aside className="w-1/6 border-r p-4">
         <Form method="get" className="flex flex-col">
           <Accordion type="multiple" className="space-y-4">
             <AccordionItem value="location">
@@ -721,9 +721,6 @@ export default function Report({ loaderData }: Route.ComponentProps) {
                   Lägg till beskrivning...
                 </p>
               )}
-              <p className="text-sm text-muted-foreground">
-                {report.description}
-              </p>
               <Button
                 variant="ghost"
                 className="text-muted-foreground hover:text-primary transition"
