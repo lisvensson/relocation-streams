@@ -76,8 +76,8 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
       </SheetTrigger>
 
       <SheetContent className="!max-w-none w-full max-w-full overflow-y-auto">
-        <div className="mt-6 flex gap-8">
-          <div className="w-75 border-r p-4">
+        <div className="mt-10 flex gap-8">
+          <div className="w-1/6 border-r p-4">
             <Form
               method="get"
               className="space-y-6 mt-6"
@@ -358,9 +358,12 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
                           <SelectValue placeholder="Välj storlek" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="small">Liten</SelectItem>
-                          <SelectItem value="medium">Medium</SelectItem>
-                          <SelectItem value="large">Stor</SelectItem>
+                          <SelectItem value="25">25 %</SelectItem>
+                          <SelectItem value="1/3">1/3</SelectItem>
+                          <SelectItem value="50">50 %</SelectItem>
+                          <SelectItem value="2/3">2/3</SelectItem>
+                          <SelectItem value="75">75 %</SelectItem>
+                          <SelectItem value="100">100 %</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -499,8 +502,10 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
               </SheetClose>
             </Form>
           </div>
-          <div className="flex-1 p-6">
-            {chart && <ChartRenderer {...chart} readOnly={true} />}
+          <div className="flex-1">
+            <div className="grid grid-cols-12">
+              {chart && <ChartRenderer {...chart} readOnly={true} />}
+            </div>
           </div>
         </div>
       </SheetContent>

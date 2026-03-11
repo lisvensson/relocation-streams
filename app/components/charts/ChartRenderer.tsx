@@ -102,325 +102,334 @@ export default function ChartRenderer({
   })
 
   return (
-    <Card
+    <div
       className={
-        'relative w-full ' +
-        (uiSettings?.containerSize === 'small'
-          ? 'max-w-xl'
-          : uiSettings?.containerSize === 'medium'
-            ? 'max-w-3xl'
-            : uiSettings?.containerSize === 'large'
-              ? 'max-w-5xl'
-              : 'max-w-3xl')
+        uiSettings?.containerSize === '25'
+          ? 'col-span-3'
+          : uiSettings?.containerSize === '1/3'
+            ? 'col-span-4'
+            : uiSettings?.containerSize === '50'
+              ? 'col-span-6'
+              : uiSettings?.containerSize === '2/3'
+                ? 'col-span-8'
+                : uiSettings?.containerSize === '75'
+                  ? 'col-span-9'
+                  : uiSettings?.containerSize === '100'
+                    ? 'col-span-12'
+                    : 'col-span-9'
       }
     >
-      {!readOnly && id && (
-        <div className="absolute top-3 right-3 flex gap-2">
-          <ChartEditor chartId={id} />
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="ghost"
-                className="text-muted-foreground hover:text-red-500 transition"
-              >
-                <Trash2Icon className="size-4" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent size="sm">
-              <AlertDialogHeader>
-                <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
-                  <Trash2Icon />
-                </AlertDialogMedia>
-                <AlertDialogTitle>Radera diagram?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Detta går inte att ångra. Diagrammet tas bort permanent från
-                  rapporten
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel variant="outline">Avbryt</AlertDialogCancel>
-                <Form method="post">
-                  <input type="hidden" name="intent" value="deleteChart" />
-                  <input type="hidden" name="id" value={id} />
-                  <AlertDialogAction variant="destructive" asChild>
-                    <button type="submit" className="w-full">
-                      Radera
-                    </button>
-                  </AlertDialogAction>
-                </Form>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      )}
-
-      <CardHeader className="space-y-2">
-        {/* chartTitle */}
-        {isEditingChartTitle ? (
-          !readOnly &&
-          id && (
-            <Form
-              method="post"
-              className="flex items-center"
-              onSubmit={() => setIsEditingChartTitle(false)}
-            >
-              <Input
-                type="text"
-                name="chartTitle"
-                defaultValue={title}
-                className="w-1/2"
-              />
-              <input type="hidden" name="id" value={id} />
-              <Button
-                type="submit"
-                name="intent"
-                value="updateChartTitle"
-                variant="ghost"
-                className="text-muted-foreground hover:text-primary transition"
-              >
-                <SaveIcon className="size-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                className="text-muted-foreground hover:text-destructive transition"
-                onClick={() => setIsEditingChartTitle(false)}
-              >
-                <CircleXIcon className="size-4" />
-              </Button>
-            </Form>
-          )
-        ) : (
-          <div className="flex items-center gap-1">
-            {title && title.trim() !== '' ? (
-              <CardTitle>{title}</CardTitle>
-            ) : (
-              !readOnly && <CardTitle>Lägg till titel…</CardTitle>
-            )}
-
-            {!readOnly && id && (
-              <Button
-                variant="ghost"
-                className="text-muted-foreground hover:text-primary transition"
-                onClick={() => setIsEditingChartTitle(true)}
-              >
-                <SquarePenIcon className="size-4" />
-              </Button>
-            )}
-          </div>
-        )}
-        {/* chartDescription */}
-        {isEditingChartDescription ? (
-          !readOnly &&
-          id && (
-            <Form
-              method="post"
-              className="flex items-center"
-              onSubmit={() => setIsEditingChartDescription(false)}
-            >
-              <Textarea
-                name="chartDescription"
-                defaultValue={description ?? ''}
-                className="w-full text-sm"
-              />
-              <input type="hidden" name="id" value={id} />
-              <Button
-                type="submit"
-                name="intent"
-                value="updateChartDescription"
-                variant="ghost"
-                className="text-muted-foreground hover:text-primary transition"
-              >
-                <SaveIcon className="size-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                className="text-muted-foreground hover:text-destructive transition"
-                onClick={() => setIsEditingChartDescription(false)}
-              >
-                <CircleXIcon className="size-4" />
-              </Button>
-            </Form>
-          )
-        ) : (
-          <div className="flex items-center gap-1">
-            {description && description.trim() !== '' ? (
-              <CardDescription>{description}</CardDescription>
-            ) : (
-              !readOnly && (
-                <CardDescription>Lägg till beskrivning…</CardDescription>
-              )
-            )}
-            {!readOnly && id && (
-              <Button
-                variant="ghost"
-                className="text-muted-foreground hover:text-primary transition"
-                onClick={() => setIsEditingChartDescription(true)}
-              >
-                <SquarePenIcon className="size-4" />
-              </Button>
-            )}
-          </div>
-        )}
-      </CardHeader>
-
-      <CardContent>
-        {uiSettings?.tablePlacement === 'top' && (
-          <ChartTable data={data} dimension={dimension} series={series} />
-        )}
-
-        <ChartContainer config={config}>
-          {chartType === 'column' ? (
-            <BarChart data={data} layout="horizontal">
-              <CartesianGrid vertical={false} />
-              <YAxis tickLine={false} tickMargin={10} axisLine={false} />
-              <XAxis
-                dataKey={dimension}
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-              />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
-              />
-              {uiSettings?.legendPlacement !== 'hidden' && (
-                <ChartLegend
-                  verticalAlign={
-                    uiSettings?.legendPlacement === 'top' ? 'top' : 'bottom'
-                  }
-                  content={<ChartLegendContent />}
-                />
-              )}
-              {series.map((s, i) => (
-                <Bar
-                  key={s}
-                  dataKey={s}
-                  fill={s === 'net' ? undefined : `var(--chart-${i + 1})`}
-                  radius={8}
+      <Card className="relative w-full">
+        {!readOnly && id && (
+          <div className="absolute top-3 right-3 flex gap-2">
+            <ChartEditor chartId={id} />
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="text-muted-foreground hover:text-destructive transition"
                 >
-                  {s === 'net' &&
-                    data.map((d, i) => (
-                      <Cell
-                        key={i}
-                        fill={
-                          Number(d.net ?? 0) >= 0
-                            ? 'var(--chart-positive)'
-                            : 'var(--chart-negative)'
-                        }
-                      />
-                    ))}
-                </Bar>
-              ))}
-            </BarChart>
-          ) : chartType === 'bar' ? (
-            <BarChart data={data} layout="vertical">
-              <CartesianGrid vertical={false} />
-              <YAxis
-                type="category"
-                dataKey={dimension}
-                width={150}
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-              />
-              <XAxis
-                type="number"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-              />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
-              />
-              {uiSettings?.legendPlacement !== 'hidden' && (
-                <ChartLegend
-                  verticalAlign={
-                    uiSettings?.legendPlacement === 'top' ? 'top' : 'bottom'
-                  }
-                  content={<ChartLegendContent />}
-                />
-              )}
-              {series.map((s, i) => (
-                <Bar
-                  key={s}
-                  dataKey={s}
-                  fill={`var(--chart-${i + 1})`}
-                  radius={8}
-                />
-              ))}
-            </BarChart>
-          ) : chartType === 'line' ? (
-            <LineChart data={data}>
-              <CartesianGrid vertical={false} />
-              <YAxis tickLine={false} tickMargin={10} axisLine={false} />
-              <XAxis
-                dataKey={dimension}
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-              />
-              <ChartTooltip
-                cursor={false}
-                content={
-                  <ChartTooltipContent
-                    hideLabel
-                    formatter={
-                      measureCalculation === 'percent'
-                        ? (value) => `${value} %`
-                        : undefined
-                    }
-                  />
-                }
-              />
-              {uiSettings?.legendPlacement !== 'hidden' && (
-                <ChartLegend
-                  verticalAlign={
-                    uiSettings?.legendPlacement === 'top' ? 'top' : 'bottom'
-                  }
-                  content={<ChartLegendContent />}
-                />
-              )}
-              {series.map((s, i) => (
-                <Line
-                  key={s}
-                  dataKey={s}
-                  stroke={`var(--chart-${i + 1})`}
-                  strokeWidth={2}
-                  dot={false}
-                />
-              ))}
-            </LineChart>
-          ) : chartType === 'pie' ? (
-            <PieChart>
-              <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-              <Pie data={data} dataKey={series[0]} nameKey={dimension} label>
-                {data.map((_, i) => (
-                  <Cell key={i} fill={`var(--chart-${(i % 11) + 1})`} />
-                ))}
-              </Pie>
-              {uiSettings?.legendPlacement !== 'hidden' && (
-                <ChartLegend
-                  verticalAlign={
-                    uiSettings?.legendPlacement === 'top' ? 'top' : 'bottom'
-                  }
-                  content={<ChartLegendContent nameKey={dimension} />}
-                />
-              )}
-            </PieChart>
-          ) : (
-            <div>Inga diagram tillgängliga</div>
-          )}
-        </ChartContainer>
-        {uiSettings?.tablePlacement === 'bottom' && (
-          <ChartTable
-            data={data}
-            dimension={dimension}
-            series={series}
-            measureCalculation={measureCalculation}
-          />
+                  <Trash2Icon className="size-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent size="sm">
+                <AlertDialogHeader>
+                  <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
+                    <Trash2Icon />
+                  </AlertDialogMedia>
+                  <AlertDialogTitle>Radera diagram?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Detta går inte att ångra. Diagrammet tas bort permanent från
+                    rapporten
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel variant="outline">
+                    Avbryt
+                  </AlertDialogCancel>
+                  <Form method="post">
+                    <input type="hidden" name="intent" value="deleteChart" />
+                    <input type="hidden" name="id" value={id} />
+                    <AlertDialogAction variant="destructive" asChild>
+                      <button type="submit" className="w-full">
+                        Radera
+                      </button>
+                    </AlertDialogAction>
+                  </Form>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         )}
-      </CardContent>
-    </Card>
+
+        <CardHeader className="space-y-2">
+          {/* chartTitle */}
+          {isEditingChartTitle ? (
+            !readOnly &&
+            id && (
+              <Form
+                method="post"
+                className="flex items-center"
+                onSubmit={() => setIsEditingChartTitle(false)}
+              >
+                <Input
+                  type="text"
+                  name="chartTitle"
+                  defaultValue={title}
+                  className="w-1/2"
+                />
+                <input type="hidden" name="id" value={id} />
+                <Button
+                  type="submit"
+                  name="intent"
+                  value="updateChartTitle"
+                  variant="ghost"
+                  className="text-muted-foreground hover:text-primary transition"
+                >
+                  <SaveIcon className="size-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="text-muted-foreground hover:text-destructive transition"
+                  onClick={() => setIsEditingChartTitle(false)}
+                >
+                  <CircleXIcon className="size-4" />
+                </Button>
+              </Form>
+            )
+          ) : (
+            <div className="flex items-center gap-1">
+              {title && title.trim() !== '' ? (
+                <CardTitle>{title}</CardTitle>
+              ) : (
+                !readOnly && <CardTitle>Lägg till titel…</CardTitle>
+              )}
+
+              {!readOnly && id && (
+                <Button
+                  variant="ghost"
+                  className="text-muted-foreground hover:text-primary transition"
+                  onClick={() => setIsEditingChartTitle(true)}
+                >
+                  <SquarePenIcon className="size-4" />
+                </Button>
+              )}
+            </div>
+          )}
+          {/* chartDescription */}
+          {isEditingChartDescription ? (
+            !readOnly &&
+            id && (
+              <Form
+                method="post"
+                className="flex items-center"
+                onSubmit={() => setIsEditingChartDescription(false)}
+              >
+                <Textarea
+                  name="chartDescription"
+                  defaultValue={description ?? ''}
+                  className="w-full text-sm"
+                />
+                <input type="hidden" name="id" value={id} />
+                <Button
+                  type="submit"
+                  name="intent"
+                  value="updateChartDescription"
+                  variant="ghost"
+                  className="text-muted-foreground hover:text-primary transition"
+                >
+                  <SaveIcon className="size-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="text-muted-foreground hover:text-destructive transition"
+                  onClick={() => setIsEditingChartDescription(false)}
+                >
+                  <CircleXIcon className="size-4" />
+                </Button>
+              </Form>
+            )
+          ) : (
+            <div className="flex items-center gap-1">
+              {description && description.trim() !== '' ? (
+                <CardDescription>{description}</CardDescription>
+              ) : (
+                !readOnly && (
+                  <CardDescription>Lägg till beskrivning…</CardDescription>
+                )
+              )}
+              {!readOnly && id && (
+                <Button
+                  variant="ghost"
+                  className="text-muted-foreground hover:text-primary transition"
+                  onClick={() => setIsEditingChartDescription(true)}
+                >
+                  <SquarePenIcon className="size-4" />
+                </Button>
+              )}
+            </div>
+          )}
+        </CardHeader>
+
+        <CardContent>
+          {uiSettings?.tablePlacement === 'top' && (
+            <ChartTable data={data} dimension={dimension} series={series} />
+          )}
+
+          <ChartContainer config={config}>
+            {chartType === 'column' ? (
+              <BarChart data={data} layout="horizontal">
+                <CartesianGrid vertical={false} />
+                <YAxis tickLine={false} tickMargin={10} axisLine={false} />
+                <XAxis
+                  dataKey={dimension}
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
+                />
+                {uiSettings?.legendPlacement !== 'hidden' && (
+                  <ChartLegend
+                    verticalAlign={
+                      uiSettings?.legendPlacement === 'top' ? 'top' : 'bottom'
+                    }
+                    content={<ChartLegendContent />}
+                  />
+                )}
+                {series.map((s, i) => (
+                  <Bar
+                    key={s}
+                    dataKey={s}
+                    fill={s === 'net' ? undefined : `var(--chart-${i + 1})`}
+                    radius={8}
+                  >
+                    {s === 'net' &&
+                      data.map((d, i) => (
+                        <Cell
+                          key={i}
+                          fill={
+                            Number(d.net ?? 0) >= 0
+                              ? 'var(--chart-positive)'
+                              : 'var(--chart-negative)'
+                          }
+                        />
+                      ))}
+                  </Bar>
+                ))}
+              </BarChart>
+            ) : chartType === 'bar' ? (
+              <BarChart data={data} layout="vertical">
+                <CartesianGrid vertical={false} />
+                <YAxis
+                  type="category"
+                  dataKey={dimension}
+                  width={150}
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                />
+                <XAxis
+                  type="number"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent hideLabel />}
+                />
+                {uiSettings?.legendPlacement !== 'hidden' && (
+                  <ChartLegend
+                    verticalAlign={
+                      uiSettings?.legendPlacement === 'top' ? 'top' : 'bottom'
+                    }
+                    content={<ChartLegendContent />}
+                  />
+                )}
+                {series.map((s, i) => (
+                  <Bar
+                    key={s}
+                    dataKey={s}
+                    fill={`var(--chart-${i + 1})`}
+                    radius={8}
+                  />
+                ))}
+              </BarChart>
+            ) : chartType === 'line' ? (
+              <LineChart data={data}>
+                <CartesianGrid vertical={false} />
+                <YAxis tickLine={false} tickMargin={10} axisLine={false} />
+                <XAxis
+                  dataKey={dimension}
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                />
+                <ChartTooltip
+                  cursor={false}
+                  content={
+                    <ChartTooltipContent
+                      hideLabel
+                      formatter={
+                        measureCalculation === 'percent'
+                          ? (value) => `${value} %`
+                          : undefined
+                      }
+                    />
+                  }
+                />
+                {uiSettings?.legendPlacement !== 'hidden' && (
+                  <ChartLegend
+                    verticalAlign={
+                      uiSettings?.legendPlacement === 'top' ? 'top' : 'bottom'
+                    }
+                    content={<ChartLegendContent />}
+                  />
+                )}
+                {series.map((s, i) => (
+                  <Line
+                    key={s}
+                    dataKey={s}
+                    stroke={`var(--chart-${i + 1})`}
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                ))}
+              </LineChart>
+            ) : chartType === 'pie' ? (
+              <PieChart>
+                <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+                <Pie data={data} dataKey={series[0]} nameKey={dimension} label>
+                  {data.map((_, i) => (
+                    <Cell key={i} fill={`var(--chart-${(i % 11) + 1})`} />
+                  ))}
+                </Pie>
+                {uiSettings?.legendPlacement !== 'hidden' && (
+                  <ChartLegend
+                    verticalAlign={
+                      uiSettings?.legendPlacement === 'top' ? 'top' : 'bottom'
+                    }
+                    content={<ChartLegendContent nameKey={dimension} />}
+                  />
+                )}
+              </PieChart>
+            ) : (
+              <div>Inga diagram tillgängliga</div>
+            )}
+          </ChartContainer>
+          {uiSettings?.tablePlacement === 'bottom' && (
+            <ChartTable
+              data={data}
+              dimension={dimension}
+              series={series}
+              measureCalculation={measureCalculation}
+            />
+          )}
+        </CardContent>
+      </Card>
+    </div>
   )
 }

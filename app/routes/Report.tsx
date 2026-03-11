@@ -732,7 +732,7 @@ export default function Report({ loaderData }: Route.ComponentProps) {
           )}
         </div>
 
-        <div className="flex flex-col gap-6">
+        <div className="grid grid-cols-12 gap-6">
           {charts.map((chart) => (
             <ChartRenderer key={chart.id} {...chart} readOnly={false} />
           ))}

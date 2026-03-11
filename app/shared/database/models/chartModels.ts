@@ -10,7 +10,7 @@ type Category =
   | 'county'
 
 export type ChartUiSettings = {
-  containerSize: 'small' | 'medium' | 'large' // ??
+  containerSize: '25' | '1/3' | '50' | '2/3' | '75' | '100' // ??
   legendPlacement: 'hidden' | 'top' | 'bottom' /* | 'left' | 'right' */
   tablePlacement: 'hidden' | 'top' | 'bottom' /* | 'left' | 'right' */
 }
