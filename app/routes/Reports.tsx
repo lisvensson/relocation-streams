@@ -1,6 +1,6 @@
 import { desc, eq, and } from 'drizzle-orm'
 import { db } from '~/shared/database'
-import { reports } from '~/shared/database/schema'
+import { reports, sharedReports } from '~/shared/database/schema'
 import type { Route } from './+types/Reports'
 import {
   Table,
@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '~/components/ui/table'
-import { MoreHorizontalIcon, Trash2Icon } from 'lucide-react'
+import { ArrowUpRightIcon, MoreHorizontalIcon, Trash2Icon } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -34,6 +34,7 @@ import {
 } from '~/components/ui/alert-dialog'
 import { CreateReport } from '~/components/reports/CreateReport'
 import { userSessionContext } from '~/context/userSessionContext'
+import { Badge } from '~/components/ui/badge'
 
 export async function loader({ context }: Route.LoaderArgs) {
   const userSession = context.get(userSessionContext)
@@ -44,8 +45,10 @@ export async function loader({ context }: Route.LoaderArgs) {
       id: reports.id,
       title: reports.title,
       createdAt: reports.createdAt,
+      sharedId: sharedReports.id,
     })
     .from(reports)
+    .leftJoin(sharedReports, eq(sharedReports.reportId, reports.id))
     .where(eq(reports.userId, userSession.user.id))
     .orderBy(desc(reports.createdAt))
 
@@ -110,6 +113,7 @@ export default function Reports({ loaderData }: Route.ComponentProps) {
           <TableRow>
             <TableHead>Titel</TableHead>
             <TableHead>Skapad</TableHead>
+            <TableHead>Delningsstatus</TableHead>
             <TableHead className="text-right">Åtgärder</TableHead>
           </TableRow>
         </TableHeader>
@@ -130,6 +134,22 @@ export default function Reports({ loaderData }: Route.ComponentProps) {
                 })}
               </TableCell>
 
+              <TableCell>
+                {r.sharedId ? (
+                  <Badge asChild variant="secondary" className="cursor-pointer">
+                    <a
+                      href={`/delad-rapport/${r.sharedId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Delad länk <ArrowUpRightIcon className="size-3 ml-1" />
+                    </a>
+                  </Badge>
+                ) : (
+                  <Badge variant="outline">Ej delad</Badge>
+                )}
+              </TableCell>
+
               <TableCell className="text-right">
                 <AlertDialog>
                   <DropdownMenu>
@@ -143,7 +163,6 @@ export default function Reports({ loaderData }: Route.ComponentProps) {
                       <DropdownMenuItem asChild>
                         <Link to={`/rapport/${r.id}`}>Redigera</Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem>Dela</DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <AlertDialogTrigger asChild>
                         <DropdownMenuItem variant="destructive">
