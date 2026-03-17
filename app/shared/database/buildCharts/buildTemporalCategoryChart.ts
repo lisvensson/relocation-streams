@@ -93,6 +93,10 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
       const point: ChartDataPoint = { [dimensionKey]: String(year) }
       let otherSum = 0
 
+      for (const category of topCategories) {
+        point[category] = 0
+      }
+
       for (const row of filteredResult) {
         if (row.year === year) {
           if (topCategories.includes(row.category)) {
