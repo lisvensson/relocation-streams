@@ -1,9 +1,8 @@
 import { redirect } from 'react-router'
-import { Button } from '~/components/ui/button'
 import { userSessionContext } from '~/context/userSessionContext'
 import type { Route } from './+types/home'
 import { db } from '~/shared/database'
-import { charts, reports } from '~/shared/database/schema'
+import { reports } from '~/shared/database/schema'
 import { CreateReport } from '~/components/reports/CreateReport'
 
 export async function loader({ context }: Route.LoaderArgs) {
