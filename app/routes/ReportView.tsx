@@ -322,7 +322,9 @@ export default function ReportView({
       </div>
 
       {report.description && (
-        <p className="text-muted-foreground">{report.description}</p>
+        <p className="text-muted-foreground whitespace-pre-wrap">
+          {report.description}
+        </p>
       )}
 
       <div className="grid grid-cols-12 gap-6">

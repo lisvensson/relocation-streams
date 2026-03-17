@@ -252,7 +252,9 @@ export default function ChartRenderer({
           ) : (
             <div className="flex items-center gap-1">
               {description && description.trim() !== '' ? (
-                <CardDescription>{description}</CardDescription>
+                <CardDescription className="whitespace-pre-wrap">
+                  {description}
+                </CardDescription>
               ) : (
                 !readOnly && (
                   <CardDescription>Lägg till beskrivning…</CardDescription>

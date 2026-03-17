@@ -713,11 +713,11 @@ export default function Report({ loaderData }: Route.ComponentProps) {
           ) : (
             <div className="flex items-center gap-2">
               {report.description && report.description.trim() !== '' ? (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground whitespace-pre-wrap">
                   {report.description}
                 </p>
               ) : (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground">
                   Lägg till beskrivning...
                 </p>
               )}

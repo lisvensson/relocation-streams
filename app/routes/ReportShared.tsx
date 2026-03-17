@@ -31,7 +31,9 @@ export default function ReportShared({ loaderData }: Route.ComponentProps) {
           </div>
 
           {sharedReport.description && (
-            <p className="text-muted-foreground">{sharedReport.description}</p>
+            <p className="text-muted-foreground whitespace-pre-wrap">
+              {sharedReport.description}
+            </p>
           )}
 
           <div className="grid grid-cols-12 gap-6">
