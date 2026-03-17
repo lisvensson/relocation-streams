@@ -9,6 +9,7 @@ export default [
   route('signin', './routes/SignIn.tsx'),
   route('signin/otp', './routes/SignInOtp.tsx'),
   route('api/auth/*', 'routes/auth.ts'),
+  route('delad-rapport/:sharedId/', './routes/ReportShared.tsx'),
   layout('./routes/shell.tsx', [
     index('routes/home.tsx'),
     route('rapport/:reportId', './routes/Report.tsx'),
