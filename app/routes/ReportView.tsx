@@ -186,7 +186,7 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
 
   if (intent === 'deleteSharedReport') {
-    const sharedReportId = formData.get('sharedReportId')
+    const sharedReportId = formData.get('sharedReportId') as string
 
     if (!sharedReportId) {
       throw new Response('Ingen delning att ta bort', { status: 400 })
@@ -209,9 +209,10 @@ export default function ReportView({
     actionData?.sharedReportId ?? loaderData.report.sharedId ?? ''
   const [open, setOpen] = useState(false)
 
-  const sharedReportUrl = sharedReportId
-    ? `${window.location.origin}/delad-rapport/${sharedReportId}`
-    : ''
+  const sharedReportUrl =
+    typeof window !== 'undefined' && sharedReportId
+      ? `${window.location.origin}/delad-rapport/${sharedReportId}`
+      : ''
 
   return (
     <div className="space-y-6">
