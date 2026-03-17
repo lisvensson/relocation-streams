@@ -137,3 +137,16 @@ export const charts = pgTable('charts', {
   config: jsonb().notNull(),
   createdAt: timestamp().defaultNow().notNull(),
 })
+
+export const sharedReports = pgTable('shared_reports', {
+  id: uuid()
+    .primaryKey()
+    .default(sql`uuidv7()`),
+  reportId: uuid()
+    .notNull()
+    .references(() => reports.id, { onDelete: 'cascade' }),
+  title: text().notNull(),
+  description: text().notNull(),
+  charts: jsonb().notNull(),
+  createdAt: timestamp().defaultNow().notNull(),
+})

@@ -57,6 +57,20 @@
       "when": 1772188054627,
       "tag": "0007_closed_legion",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1773320208798,
+      "tag": "0008_boring_sugar_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1773649492964,
+      "tag": "0009_low_sebastian_shaw",
+      "breakpoints": true
     }
   ]
 }
