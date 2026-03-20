@@ -69,7 +69,7 @@ export function ChartBuilder({ chart }: ChartBuilderProps) {
       <SheetTrigger asChild>
         <Button>
           <PlusIcon className="size-4 mr-2" />
-          Lägg till diagram
+          Skapa nytt diagram
         </Button>
       </SheetTrigger>
 
