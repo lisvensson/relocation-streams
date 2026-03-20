@@ -39,7 +39,7 @@ export default function Home({ loaderData }: { loaderData: any }) {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Välkommen {loaderData.userName}</h1>
-      <p>Här kan du skapa och hantera dina rapporter.</p>
+      <p>Här kan du skapa och hantera rapporter</p>
       <CreateReport />
     </div>
   )
