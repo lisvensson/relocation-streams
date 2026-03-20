@@ -1,4 +1,4 @@
-import { Form, Link, redirect, useSearchParams } from 'react-router'
+import { Form, redirect, useSearchParams } from 'react-router'
 import {
   Accordion,
   AccordionContent,
@@ -7,7 +7,12 @@ import {
 } from '~/components/ui/accordion'
 import { Button } from '~/components/ui/button'
 import { db } from '~/shared/database'
-import { charts, relocation, reports } from '~/shared/database/schema'
+import {
+  charts,
+  relocation,
+  reports,
+  sharedReports,
+} from '~/shared/database/schema'
 import { union } from 'drizzle-orm/pg-core'
 import { useState } from 'react'
 import { LocationSelector } from '~/components/reports/LocationSelector'
@@ -22,18 +27,6 @@ import ChartRenderer from '~/components/charts/ChartRenderer'
 import { eq, and } from 'drizzle-orm'
 import type { Route } from './+types/Report'
 import { Input } from '~/components/ui/input'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '~/components/ui/alert-dialog'
 import { Textarea } from '~/components/ui/textarea'
 import { generateExampleChartTitle } from '~/lib/generateExampleChartTitle'
 import { userSessionContext } from '~/context/userSessionContext'
@@ -46,8 +39,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '~/components/ui/dialog'
-import { ArrowLeft, ChevronDown, SaveIcon, Trash2Icon } from 'lucide-react'
+import {
+  ArrowLeft,
+  ChevronDown,
+  Copy,
+  EyeIcon,
+  LinkIcon,
+  ShareIcon,
+} from 'lucide-react'
 import { Badge } from '~/components/ui/badge'
+import { buildSharedReportSnapshot } from '~/lib/buildSharedReportSnapshot'
+import { toast } from 'sonner'
 
 export async function loader({ params, request, context }: Route.LoaderArgs) {
   const start = performance.now()
@@ -56,15 +58,23 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
   if (!userSession) throw new Error('Användare saknas')
 
   const [report] = await db
-    .select()
+    .select({
+      id: reports.id,
+      title: reports.title,
+      description: reports.description,
+      createdAt: reports.createdAt,
+      location: reports.location,
+      filters: reports.filters,
+      sharedId: sharedReports.id,
+    })
     .from(reports)
+    .leftJoin(sharedReports, eq(sharedReports.reportId, reports.id))
     .where(
       and(
         eq(reports.id, params.reportId),
         eq(reports.userId, userSession.user.id)
       )
     )
-
   if (!report) {
     throw new Response('Rapporten hittades inte', { status: 404 })
   }
@@ -487,11 +497,6 @@ export async function action({ request, params, context }: Route.ActionArgs) {
     return redirect(url.toString())
   }
 
-  if (intent === 'deleteReport') {
-    await db.delete(reports).where(eq(reports.id, reportId))
-    return redirect(`/rapporter`)
-  }
-
   if (intent === 'saveReport') {
     const location = formData.get('location') as string | null
     const filters = formData.get('filters') as string | null
@@ -503,31 +508,134 @@ export async function action({ request, params, context }: Route.ActionArgs) {
       .set({ location, filters: parsedFilters })
       .where(eq(reports.id, reportId))
 
+    const existing = await db
+      .select()
+      .from(sharedReports)
+      .where(eq(sharedReports.reportId, reportId))
+
+    if (existing.length === 0) {
+      return redirect(`/rapporter`)
+    }
+
+    const snapshot = await buildSharedReportSnapshot(reportId)
+
+    await db
+      .update(sharedReports)
+      .set({
+        title: snapshot.report.title,
+        description: snapshot.report.description,
+        charts: snapshot.charts,
+      })
+      .where(eq(sharedReports.reportId, reportId))
+
     return redirect(`/rapporter`)
+  }
+
+  if (intent === 'saveAndViewReport') {
+    const location = formData.get('location') as string | null
+    const filters = formData.get('filters') as string | null
+
+    const parsedFilters = filters ? JSON.parse(filters) : []
+
+    await db
+      .update(reports)
+      .set({ location, filters: parsedFilters })
+      .where(eq(reports.id, reportId))
+
+    return redirect(`/visa-rapport/${reportId}`)
+  }
+
+  if (intent === 'saveAndShareReport') {
+    const location = formData.get('location') as string | null
+    const filters = formData.get('filters') as string | null
+
+    const parsedFilters = filters ? JSON.parse(filters) : []
+
+    await db
+      .update(reports)
+      .set({ location, filters: parsedFilters })
+      .where(eq(reports.id, reportId))
+
+    const snapshot = await buildSharedReportSnapshot(reportId)
+
+    const existing = await db
+      .select()
+      .from(sharedReports)
+      .where(eq(sharedReports.reportId, reportId))
+
+    if (existing.length > 0) {
+      const [updated] = await db
+        .update(sharedReports)
+        .set({
+          title: snapshot.report.title,
+          description: snapshot.report.description,
+          charts: snapshot.charts,
+        })
+        .where(eq(sharedReports.reportId, reportId))
+        .returning()
+
+      return { sharedReportId: updated.id }
+    }
+
+    const [sharedReport] = await db
+      .insert(sharedReports)
+      .values({
+        title: snapshot.report.title,
+        description: snapshot.report.description,
+        reportId,
+        charts: snapshot.charts,
+      })
+      .returning()
+
+    return { sharedReportId: sharedReport.id }
   }
 
   return null
 }
 
-export default function Report({ loaderData }: Route.ComponentProps) {
+export default function Report({
+  loaderData,
+  actionData,
+}: Route.ComponentProps) {
   const [searchParams] = useSearchParams()
   const { report, filterOptions, filters, preview, charts } = loaderData
+  const sharedReportId =
+    actionData?.sharedReportId ?? loaderData.report.sharedId ?? ''
   const [location, setLocation] = useState(searchParams.get('location') ?? '')
   const [isEditingReportTitle, setIsEditingReportTitle] = useState(false)
   const [isEditingReportDescription, setIsEditingReportDescription] =
     useState(false)
+  const [open, setOpen] = useState(false)
+
+  const sharedReportUrl =
+    typeof window !== 'undefined' && sharedReportId
+      ? `${window.location.origin}/delad-rapport/${sharedReportId}`
+      : ''
 
   return (
     <div className="flex flex-col w-full cursor-default">
       <header className="border-b p-6 space-y-6">
         <div className="pb-4 border-b flex items-start justify-between gap-4">
           <div className="flex items-center gap-6">
-            <Button asChild variant="outline" className="transition">
-              <Link to="/rapporter" className="flex items-center">
+            <Form method="post">
+              <input type="hidden" name="location" value={location ?? ''} />
+              <input
+                type="hidden"
+                name="filters"
+                value={JSON.stringify(filters)}
+              />
+              <Button
+                type="submit"
+                name="intent"
+                value="saveReport"
+                variant="outline"
+                className="transition"
+              >
                 <ArrowLeft className="size-4 mr-2" />
                 Tillbaka
-              </Link>
-            </Button>
+              </Button>
+            </Form>
+
             {isEditingReportTitle ? (
               <Form
                 method="post"
@@ -575,6 +683,66 @@ export default function Report({ loaderData }: Route.ComponentProps) {
           </div>
 
           <div className="flex items-center gap-2">
+            <Dialog open={open} onOpenChange={setOpen}>
+              {sharedReportId ? (
+                <DialogTrigger asChild>
+                  <Button className="transition">
+                    <LinkIcon className="size-4 mr-2" />
+                    Visa delad länk
+                  </Button>
+                </DialogTrigger>
+              ) : (
+                <DialogTrigger asChild>
+                  <Form method="post">
+                    <input
+                      type="hidden"
+                      name="location"
+                      value={location ?? ''}
+                    />
+                    <input
+                      type="hidden"
+                      name="filters"
+                      value={JSON.stringify(filters)}
+                    />
+                    <Button
+                      type="submit"
+                      name="intent"
+                      value="saveAndShareReport"
+                      className="transition"
+                    >
+                      <ShareIcon className="size-4 mr-2" />
+                      Dela rapport
+                    </Button>
+                  </Form>
+                </DialogTrigger>
+              )}
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Delad länk</DialogTitle>
+                  <DialogDescription>
+                    Alla med denna länk kan se rapporten.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="flex items-center gap-2">
+                  <Input readOnly value={sharedReportUrl} className="flex-1" />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(sharedReportUrl)
+                      toast.success('Länk kopierad!', {
+                        description: 'Länken har kopierats till urklipp.',
+                        position: 'top-right',
+                      })
+                    }}
+                  >
+                    <Copy className="size-4" />
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
             <Form method="post">
               <input type="hidden" name="location" value={location ?? ''} />
               <input
@@ -585,47 +753,14 @@ export default function Report({ loaderData }: Route.ComponentProps) {
               <Button
                 type="submit"
                 name="intent"
-                value="saveReport"
+                value="saveAndViewReport"
+                variant="outline"
                 className="transition"
               >
-                <SaveIcon className="size-4 mr-2" />
-                Spara
+                <EyeIcon className="size-4 mr-2" />
+                Förhandsgranska rapport
               </Button>
             </Form>
-
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="transition">
-                  <Trash2Icon className="size-4 mr-2" />
-                  Radera
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent size="sm">
-                <AlertDialogHeader>
-                  <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
-                    <Trash2Icon />
-                  </AlertDialogMedia>
-                  <AlertDialogTitle>Radera rapport?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Detta går inte att ångra. Hela rapporten och alla dess
-                    diagram tas bort permanent.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel variant="outline">
-                    Avbryt
-                  </AlertDialogCancel>
-                  <Form method="post">
-                    <input type="hidden" name="intent" value="deleteReport" />
-                    <AlertDialogAction variant="destructive" asChild>
-                      <button type="submit" className="w-full">
-                        Radera
-                      </button>
-                    </AlertDialogAction>
-                  </Form>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
           </div>
         </div>
 
@@ -857,9 +992,10 @@ export default function Report({ loaderData }: Route.ComponentProps) {
       </header>
 
       <main className="p-6 space-y-6">
-        <div>
+        <div className="flex justify-end">
           <ChartBuilder chart={preview} />
         </div>
+
         <div className="grid grid-cols-12 gap-6">
           {charts.map((chart) => (
             <ChartRenderer key={chart.id} {...chart} readOnly={false} />
