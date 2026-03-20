@@ -13,16 +13,15 @@ import { Form, Link } from 'react-router'
 import { useState } from 'react'
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
 import { toast } from 'sonner'
+import { buildSharedReportSnapshot } from '~/lib/buildSharedReportSnapshot'
 
 export async function loader({ params }: Route.LoaderArgs) {
   const [report] = await db
@@ -104,97 +103,38 @@ export async function action({ request, params }: Route.ActionArgs) {
       throw new Response('Rapporten hittades inte', { status: 404 })
     }
 
-    const savedCharts = await db
-      .select()
-      .from(charts)
-      .where(eq(charts.reportId, params.reportId))
-      .orderBy(charts.id)
+    const snapshot = await buildSharedReportSnapshot(params.reportId)
 
-    const buildCharts = await Promise.all(
-      savedCharts.map(async (chart) => {
-        const config = chart.config
-        if (config.type === 'netflow+category') {
-          const buildChart = await buildNetFlowCategoryChart(
-            report.location?.toLowerCase(),
-            report.filters,
-            config
-          )
-          return { id: chart.id, ...buildChart, config }
-        }
-
-        if (config.type === 'temporal') {
-          const buildChart = await buildTemporalChart(
-            report.location?.toLowerCase(),
-            report.filters,
-            config
-          )
-          return { id: chart.id, ...buildChart, config }
-        }
-
-        if (config.type === 'category') {
-          const built = await buildCategoryChart(
-            report.location?.toLowerCase(),
-            report.filters,
-            config
-          )
-          return { id: chart.id, ...built, config }
-        }
-
-        if (config.type === 'temporal+category') {
-          const built = await buildTemporalCategoryChart(
-            report.location?.toLowerCase(),
-            report.filters,
-            config
-          )
-          return { id: chart.id, ...built, config }
-        }
-
-        return null
-      })
-    )
-
-    const existingSharedReport = await db
+    const existing = await db
       .select()
       .from(sharedReports)
       .where(eq(sharedReports.reportId, report.id))
 
-    if (existingSharedReport.length > 0) {
-      const [updateSharedReport] = await db
+    if (existing.length > 0) {
+      const [updated] = await db
         .update(sharedReports)
         .set({
-          title: report.title,
-          description: report.description,
-          charts: buildCharts,
+          title: snapshot.report.title,
+          description: snapshot.report.description,
+          charts: snapshot.charts,
         })
-        .where(eq(sharedReports.reportId, report.id))
+        .where(eq(sharedReports.reportId, params.reportId))
         .returning()
 
-      return { sharedReportId: updateSharedReport.id }
+      return { sharedReportId: updated.id }
     }
 
     const [sharedReport] = await db
       .insert(sharedReports)
       .values({
-        title: report.title,
-        reportId: report.id,
-        description: report.description,
-        charts: buildCharts,
+        title: snapshot.report.title,
+        description: snapshot.report.description,
+        reportId: params.reportId,
+        charts: snapshot.charts,
       })
       .returning()
 
     return { sharedReportId: sharedReport.id }
-  }
-
-  if (intent === 'deleteSharedReport') {
-    const sharedReportId = formData.get('sharedReportId') as string
-
-    if (!sharedReportId) {
-      throw new Response('Ingen delning att ta bort', { status: 400 })
-    }
-
-    await db.delete(sharedReports).where(eq(sharedReports.id, sharedReportId))
-
-    return { sharedReportDeleted: true }
   }
 
   return null
@@ -265,53 +205,11 @@ export default function ReportView({
                   <Copy className="size-4" />
                 </Button>
               </div>
-              <DialogFooter className="flex flex-col items-start gap-2 mt-4">
-                <Form method="post" className="w-full">
-                  <input type="hidden" name="intent" value="shareReport" />
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    onClick={() => {
-                      toast.success('Delning uppdaterad!', {
-                        description: 'Delningen av rapporten har uppdaterats.',
-                        position: 'top-right',
-                      })
-                    }}
-                  >
-                    <ShareIcon className="size-4 mr-2" />
-                    Uppdatera delning
-                  </Button>
-                </Form>
-                <Form method="post" className="w-full">
-                  <input
-                    type="hidden"
-                    name="sharedReportId"
-                    value={sharedReportId}
-                  />
-                  <DialogClose asChild>
-                    <Button
-                      type="submit"
-                      name="intent"
-                      value="deleteSharedReport"
-                      variant="destructive"
-                      className="w-full"
-                      onClick={() => {
-                        toast.info('Delning borttagen', {
-                          description: 'Delningen av rapporten har raderats.',
-                          position: 'top-right',
-                        })
-                      }}
-                    >
-                      Ta bort delning
-                    </Button>
-                  </DialogClose>
-                </Form>
-              </DialogFooter>
             </DialogContent>
           </Dialog>
 
           <Button asChild variant="outline" className="transition">
-            <Link to="/rapporter" className="flex items-center">
+            <Link to={`/rapport/${report.id}`} className="flex items-center">
               <XIcon className="size-4 mr-2" />
               Stäng
             </Link>
