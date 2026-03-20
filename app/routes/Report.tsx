@@ -1,4 +1,4 @@
-import { Form, redirect, useSearchParams } from 'react-router'
+import { Form, Link, redirect, useSearchParams } from 'react-router'
 import {
   Accordion,
   AccordionContent,
@@ -10,8 +10,8 @@ import { db } from '~/shared/database'
 import { charts, relocation, reports } from '~/shared/database/schema'
 import { union } from 'drizzle-orm/pg-core'
 import { useState } from 'react'
-import { LocationSelector } from '~/components/charts/LocationSelector'
-import { FilterSelector } from '~/components/charts/FilterSelector'
+import { LocationSelector } from '~/components/reports/LocationSelector'
+import { FilterSelector } from '~/components/reports/FilterSelector'
 import type { ChartModel, Filter } from '~/shared/database/models/chartModels'
 import { ChartBuilder } from '~/components/charts/ChartBuilder'
 import { buildNetFlowCategoryChart } from '~/shared/database/buildCharts/buildNetFlowCategoryChart'
@@ -22,7 +22,6 @@ import ChartRenderer from '~/components/charts/ChartRenderer'
 import { eq, and } from 'drizzle-orm'
 import type { Route } from './+types/Report'
 import { Input } from '~/components/ui/input'
-import { CircleXIcon, SaveIcon, SquarePenIcon, Trash2Icon } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +37,23 @@ import {
 import { Textarea } from '~/components/ui/textarea'
 import { generateExampleChartTitle } from '~/lib/generateExampleChartTitle'
 import { userSessionContext } from '~/context/userSessionContext'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '~/components/ui/dialog'
+import {
+  ArrowLeft,
+  ChevronDown,
+  SaveIcon,
+  SquarePenIcon,
+  Trash2Icon,
+} from 'lucide-react'
+import { Badge } from '~/components/ui/badge'
 
 export async function loader({ params, request, context }: Route.LoaderArgs) {
   const start = performance.now()
@@ -508,111 +524,61 @@ export default function Report({ loaderData }: Route.ComponentProps) {
     useState(false)
 
   return (
-    <div className="flex">
-      <aside className="w-1/6 border-r p-4">
-        <Form method="get" className="flex flex-col">
-          <Accordion type="multiple" className="space-y-4">
-            <AccordionItem value="location">
-              <AccordionTrigger className="pr-4">Område</AccordionTrigger>
-              <AccordionContent>
-                <LocationSelector
-                  locations={filterOptions.locations}
-                  value={location}
-                  onChange={setLocation}
-                />
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="years">
-              <AccordionTrigger className="pr-4">Flyttår</AccordionTrigger>
-              <AccordionContent>
-                <FilterSelector
-                  name="years"
-                  items={filterOptions.years}
-                  searchParams={searchParams}
-                />
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="employeeRanges">
-              <AccordionTrigger className="pr-4">
-                Antal anställda
-              </AccordionTrigger>
-              <AccordionContent>
-                <FilterSelector
-                  name="employeeRanges"
-                  items={filterOptions.employeeRanges}
-                  searchParams={searchParams}
-                />
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="companyTypes">
-              <AccordionTrigger className="pr-4">Företagsform</AccordionTrigger>
-              <AccordionContent>
-                <FilterSelector
-                  name="companyTypes"
-                  items={filterOptions.companyTypes}
-                  searchParams={searchParams}
-                />
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="industryClusters">
-              <AccordionTrigger className="pr-4">Kluster</AccordionTrigger>
-              <AccordionContent>
-                <FilterSelector
-                  name="industryClusters"
-                  items={filterOptions.industryClusters}
-                  searchParams={searchParams}
-                />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-          <Button type="submit" className="mt-4 w-full">
-            Filtrera
-          </Button>
-        </Form>
-      </aside>
-
-      <div className="flex-1 p-6 space-y-6">
-        <div className="border-b pb-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+    <div className="flex flex-col w-full">
+      <header className="border-b p-6 space-y-6">
+        <div className="pb-4 border-b flex items-start justify-between gap-4">
+          <div className="flex items-center gap-6">
+            <Button asChild variant="outline" className="transition">
+              <Link to="/rapporter" className="flex items-center">
+                <ArrowLeft className="size-4 mr-2" />
+                Tillbaka
+              </Link>
+            </Button>
             {isEditingReportTitle ? (
               <Form
                 method="post"
-                className="flex items-center gap-2"
                 onSubmit={() => setIsEditingReportTitle(false)}
               >
                 <Input
+                  autoFocus
                   type="text"
                   name="reportTitle"
                   defaultValue={report.title}
-                  className="w-full"
+                  className="w-full font-semibold"
+                  onBlur={(e) => {
+                    const newValue = e.target.value.trim()
+                    if (newValue !== report.title) {
+                      e.target.form?.requestSubmit()
+                    }
+                    setIsEditingReportTitle(false)
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      const newValue = e.currentTarget.value.trim()
+                      if (newValue !== report.title) {
+                        e.currentTarget.form?.requestSubmit()
+                      }
+                      setIsEditingReportTitle(false)
+                    }
+                    if (e.key === 'Escape') {
+                      setIsEditingReportTitle(false)
+                    }
+                  }}
                 />
-                <Button
-                  type="submit"
-                  name="intent"
-                  value="updateReportTitle"
-                  variant="ghost"
-                  className="text-muted-foreground hover:text-primary transition"
-                >
-                  <SaveIcon className="size-5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="text-muted-foreground hover:text-destructive transition"
-                  onClick={() => setIsEditingReportTitle(false)}
-                >
-                  <CircleXIcon className="size-5" />
-                </Button>
+                <input type="hidden" name="intent" value="updateReportTitle" />
               </Form>
             ) : (
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-semibold">{report.title}</h1>
+              <div className="flex items-center gap-1">
+                <h1 className="text-xl font-semibold">
+                  {report.title?.trim().length > 0
+                    ? report.title
+                    : 'Lägg till titel...'}
+                </h1>
+
                 <Button
                   variant="ghost"
-                  className="text-muted-foreground hover:text-primary transition"
+                  className="text-muted-foreground transition"
                   onClick={() => setIsEditingReportTitle(true)}
                 >
                   <SquarePenIcon className="size-5" />
@@ -621,11 +587,7 @@ export default function Report({ loaderData }: Route.ComponentProps) {
             )}
           </div>
 
-          <div className="flex items-center gap-1">
-            <div className="flex items-center">
-              <ChartBuilder chart={preview} />
-            </div>
-
+          <div className="flex items-center gap-2">
             <Form method="post">
               <input type="hidden" name="location" value={location ?? ''} />
               <input
@@ -637,20 +599,18 @@ export default function Report({ loaderData }: Route.ComponentProps) {
                 type="submit"
                 name="intent"
                 value="saveReport"
-                variant="ghost"
-                className="text-muted-foreground hover:text-green-700 transition"
+                className="transition"
               >
-                <SaveIcon className="size-5" />
+                <SaveIcon className="size-4 mr-2" />
+                Spara
               </Button>
             </Form>
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="text-muted-foreground hover:text-destructive transition"
-                >
-                  <Trash2Icon className="size-5" />
+                <Button variant="destructive" className="transition">
+                  <Trash2Icon className="size-4 mr-2" />
+                  Radera
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent size="sm">
@@ -682,48 +642,220 @@ export default function Report({ loaderData }: Route.ComponentProps) {
           </div>
         </div>
 
-        <div>
+        <div className="flex items-start gap-12">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-medium">Område & filter</span>
+              <Dialog modal={false}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="inline-flex items-center gap-2"
+                  >
+                    <span>Lägg till område & filter</span>
+                    <ChevronDown className="size-4" />
+                  </Button>
+                </DialogTrigger>
+
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Område & filter</DialogTitle>
+                  </DialogHeader>
+                  <DialogDescription className="text-sm text-muted-foreground">
+                    Välj område och filter för rapporten.
+                  </DialogDescription>
+
+                  <Form method="get" className="flex flex-col space-y-4">
+                    <Accordion type="multiple" className="space-y-4">
+                      <AccordionItem value="location">
+                        <AccordionTrigger className="pr-4">
+                          Område
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <LocationSelector
+                            locations={filterOptions.locations}
+                            value={location}
+                            onChange={setLocation}
+                          />
+                        </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="years">
+                        <AccordionTrigger className="pr-4">
+                          Flyttår
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <FilterSelector
+                            name="years"
+                            items={filterOptions.years}
+                            searchParams={searchParams}
+                          />
+                        </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="employeeRanges">
+                        <AccordionTrigger className="pr-4">
+                          Antal anställda
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <FilterSelector
+                            name="employeeRanges"
+                            items={filterOptions.employeeRanges}
+                            searchParams={searchParams}
+                          />
+                        </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="companyTypes">
+                        <AccordionTrigger className="pr-4">
+                          Företagsform
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <FilterSelector
+                            name="companyTypes"
+                            items={filterOptions.companyTypes}
+                            searchParams={searchParams}
+                          />
+                        </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="industryClusters">
+                        <AccordionTrigger className="pr-4">
+                          Kluster
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <FilterSelector
+                            name="industryClusters"
+                            items={filterOptions.industryClusters}
+                            searchParams={searchParams}
+                          />
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                    <DialogClose asChild>
+                      <Button type="submit" className="w-full">
+                        Filtrera
+                      </Button>
+                    </DialogClose>
+                  </Form>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">Område:</span>
+                <Badge variant="secondary">{location || 'Alla'}</Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">Flyttår:</span>
+                <div className="flex flex-wrap gap-2">
+                  {filters.find((f) => f.key === 'relocationYear')?.value
+                    ?.length ? (
+                    filters
+                      .find((f) => f.key === 'relocationYear')!
+                      .value.map((v) => (
+                        <Badge key={`year-${v}`} variant="secondary">
+                          {v}
+                        </Badge>
+                      ))
+                  ) : (
+                    <span className="text-muted-foreground">Alla</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">Antal anställda:</span>
+                <div className="flex flex-wrap gap-2">
+                  {filters.find((f) => f.key === 'employeeRange')?.value
+                    ?.length ? (
+                    filters
+                      .find((f) => f.key === 'employeeRange')!
+                      .value.map((v) => (
+                        <Badge key={`emp-${v}`} variant="secondary">
+                          {v}
+                        </Badge>
+                      ))
+                  ) : (
+                    <span className="text-muted-foreground">Alla</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">Företagsform:</span>
+                <div className="flex flex-wrap gap-2">
+                  {filters.find((f) => f.key === 'companyType')?.value
+                    ?.length ? (
+                    filters
+                      .find((f) => f.key === 'companyType')!
+                      .value.map((v) => (
+                        <Badge key={`type-${v}`} variant="secondary">
+                          {v}
+                        </Badge>
+                      ))
+                  ) : (
+                    <span className="text-muted-foreground">Alla</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">Kluster:</span>
+                <div className="flex flex-wrap gap-2">
+                  {filters.find((f) => f.key === 'industryCluster')?.value
+                    ?.length ? (
+                    filters
+                      .find((f) => f.key === 'industryCluster')!
+                      .value.map((v) => (
+                        <Badge key={`cluster-${v}`} variant="secondary">
+                          {v}
+                        </Badge>
+                      ))
+                  ) : (
+                    <span className="text-muted-foreground">Alla</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <span className="font-medium">Beskrivning</span>
           {isEditingReportDescription ? (
             <Form
               method="post"
-              className="flex items-center gap-2"
               onSubmit={() => setIsEditingReportDescription(false)}
             >
               <Textarea
+                autoFocus
                 name="reportDescription"
                 defaultValue={report.description}
+                className="w-full"
+                onBlur={(e) => {
+                  const newValue = e.target.value.trim()
+                  if (newValue !== report.description) {
+                    e.target.form?.requestSubmit()
+                  }
+                  setIsEditingReportDescription(false)
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    e.preventDefault()
+                    setIsEditingReportDescription(false)
+                  }
+                }}
               />
-              <Button
-                type="submit"
+              <input
+                type="hidden"
                 name="intent"
                 value="updateReportDescription"
-                variant="ghost"
-                className="text-muted-foreground hover:text-primary transition"
-              >
-                <SaveIcon className="size-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                className="text-muted-foreground hover:text-destructive transition"
-                onClick={() => setIsEditingReportDescription(false)}
-              >
-                <CircleXIcon className="size-4" />
-              </Button>
+              />
             </Form>
           ) : (
-            <div className="flex items-center gap-2">
-              {report.description && report.description.trim() !== '' ? (
-                <p className="text-muted-foreground whitespace-pre-wrap">
-                  {report.description}
-                </p>
-              ) : (
-                <p className="text-muted-foreground">
-                  Lägg till beskrivning...
-                </p>
-              )}
+            <div className="flex items-center gap-1">
+              <p className="text-muted-foreground whitespace-pre-wrap">
+                {report.description || 'Lägg till beskrivning...'}
+              </p>
+
               <Button
                 variant="ghost"
-                className="text-muted-foreground hover:text-primary transition"
+                className="text-muted-foreground transition mt-1"
                 onClick={() => setIsEditingReportDescription(true)}
               >
                 <SquarePenIcon className="size-4" />
@@ -731,13 +863,18 @@ export default function Report({ loaderData }: Route.ComponentProps) {
             </div>
           )}
         </div>
+      </header>
 
+      <main className="p-6 space-y-6">
+        <div>
+          <ChartBuilder chart={preview} />
+        </div>
         <div className="grid grid-cols-12 gap-6">
           {charts.map((chart) => (
             <ChartRenderer key={chart.id} {...chart} readOnly={false} />
           ))}
         </div>
-      </div>
+      </main>
     </div>
   )
 }
