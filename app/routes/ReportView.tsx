@@ -222,7 +222,7 @@ export default function ReportView({
           <Dialog open={open} onOpenChange={setOpen}>
             {sharedReportId ? (
               <DialogTrigger asChild>
-                <Button variant="outline" className="transition">
+                <Button className="transition">
                   <LinkIcon className="size-4 mr-2" />
                   Visa delad länk
                 </Button>
@@ -234,7 +234,6 @@ export default function ReportView({
                     type="submit"
                     name="intent"
                     value="shareReport"
-                    variant="outline"
                     className="transition"
                   >
                     <ShareIcon className="size-4 mr-2" />
@@ -271,7 +270,6 @@ export default function ReportView({
                   <input type="hidden" name="intent" value="shareReport" />
                   <Button
                     type="submit"
-                    variant="secondary"
                     className="w-full"
                     onClick={() => {
                       toast.success('Delning uppdaterad!', {
@@ -322,9 +320,12 @@ export default function ReportView({
       </div>
 
       {report.description && (
-        <p className="text-muted-foreground whitespace-pre-wrap">
-          {report.description}
-        </p>
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold">Beskrivning</h2>
+          <p className="text-muted-foreground whitespace-pre-wrap">
+            {report.description}
+          </p>
+        </div>
       )}
 
       <div className="grid grid-cols-12 gap-6">
