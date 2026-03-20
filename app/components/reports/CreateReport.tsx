@@ -2,6 +2,7 @@ import { Form, useNavigation } from 'react-router'
 import { Spinner } from '../ui/spinner'
 import { Button } from '../ui/button'
 import { useEffect, useState } from 'react'
+import { PlusIcon } from 'lucide-react'
 
 export function CreateReport() {
   const navigation = useNavigation()
@@ -25,6 +26,7 @@ export function CreateReport() {
         className="relative flex items-center gap-2 cursor-pointer"
       >
         {isCreating && <Spinner className="size-4" />}
+        {!isCreating && <PlusIcon className="size-4" />}
         {isCreating ? 'Skapar rapport...' : 'Skapa rapport'}
       </Button>
     </Form>
