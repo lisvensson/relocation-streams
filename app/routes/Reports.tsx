@@ -67,7 +67,7 @@ export async function action({ context, request }: Route.ActionArgs) {
       .insert(reports)
       .values({
         userId: userSession.user.id,
-        title: 'Ny rapport',
+        title: '',
         description: '',
       })
       .returning({ id: reports.id })
