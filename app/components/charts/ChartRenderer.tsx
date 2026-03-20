@@ -384,6 +384,7 @@ export default function ChartRenderer({
                   <Line
                     key={s}
                     dataKey={s}
+                    type="monotone"
                     stroke={`var(--chart-${i + 1})`}
                     strokeWidth={2}
                     dot={false}
