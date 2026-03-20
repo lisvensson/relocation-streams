@@ -165,111 +165,100 @@ export default function ChartRenderer({
         <CardHeader className="space-y-2">
           {/* chartTitle */}
           {isEditingChartTitle ? (
-            !readOnly &&
-            id && (
-              <Form
-                method="post"
-                className="flex items-center"
-                onSubmit={() => setIsEditingChartTitle(false)}
-              >
-                <Input
-                  type="text"
-                  name="chartTitle"
-                  defaultValue={title}
-                  className="w-1/2"
-                />
-                <input type="hidden" name="id" value={id} />
-                <Button
-                  type="submit"
-                  name="intent"
-                  value="updateChartTitle"
-                  variant="ghost"
-                  className="text-muted-foreground hover:text-primary transition"
-                >
-                  <SaveIcon className="size-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="text-muted-foreground hover:text-destructive transition"
-                  onClick={() => setIsEditingChartTitle(false)}
-                >
-                  <CircleXIcon className="size-4" />
-                </Button>
-              </Form>
-            )
-          ) : (
-            <div className="flex items-center gap-1">
-              {title && title.trim() !== '' ? (
-                <CardTitle>{title}</CardTitle>
-              ) : (
-                !readOnly && <CardTitle>Lägg till titel…</CardTitle>
-              )}
+            <Form method="post" onSubmit={() => setIsEditingChartTitle(false)}>
+              <Input
+                autoFocus
+                type="text"
+                name="chartTitle"
+                defaultValue={title}
+                className="w-full font-semibold !text-base border-none shadow-none focus-visible:ring-0 p-0 h-auto"
+                onBlur={(e) => {
+                  const newValue = e.target.value.trim()
+                  if (newValue !== title) {
+                    e.target.form?.requestSubmit()
+                  }
+                  setIsEditingChartTitle(false)
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    const newValue = e.currentTarget.value.trim()
+                    if (newValue !== title) {
+                      e.currentTarget.form?.requestSubmit()
+                    }
+                    setIsEditingChartTitle(false)
+                  }
+                  if (e.key === 'Escape') {
+                    e.preventDefault()
+                    setIsEditingChartTitle(false)
+                  }
+                }}
+              />
 
-              {!readOnly && id && (
-                <Button
-                  variant="ghost"
-                  className="text-muted-foreground hover:text-primary transition"
-                  onClick={() => setIsEditingChartTitle(true)}
-                >
-                  <SquarePenIcon className="size-4" />
-                </Button>
-              )}
-            </div>
+              <input type="hidden" name="id" value={id} />
+              <input type="hidden" name="intent" value="updateChartTitle" />
+            </Form>
+          ) : (
+            <CardTitle
+              className="cursor-text"
+              onClick={() => !readOnly && setIsEditingChartTitle(true)}
+            >
+              {title?.trim() !== '' ? title : !readOnly && 'Lägg till titel…'}
+            </CardTitle>
           )}
           {/* chartDescription */}
           {isEditingChartDescription ? (
-            !readOnly &&
-            id && (
-              <Form
-                method="post"
-                className="flex items-center"
-                onSubmit={() => setIsEditingChartDescription(false)}
-              >
-                <Textarea
-                  name="chartDescription"
-                  defaultValue={description ?? ''}
-                  className="w-full text-sm"
-                />
-                <input type="hidden" name="id" value={id} />
-                <Button
-                  type="submit"
-                  name="intent"
-                  value="updateChartDescription"
-                  variant="ghost"
-                  className="text-muted-foreground hover:text-primary transition"
-                >
-                  <SaveIcon className="size-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="text-muted-foreground hover:text-destructive transition"
-                  onClick={() => setIsEditingChartDescription(false)}
-                >
-                  <CircleXIcon className="size-4" />
-                </Button>
-              </Form>
-            )
+            <Form
+              method="post"
+              onSubmit={() => setIsEditingChartDescription(false)}
+            >
+              <Textarea
+                autoFocus
+                name="chartDescription"
+                defaultValue={description ?? ''}
+                className="w-full border-none shadow-none focus-visible:ring-0 p-0 resize-none !text-sm text-muted-foreground"
+                onBlur={(e) => {
+                  const newValue = e.target.value.trim()
+                  if (newValue !== (description ?? '')) {
+                    e.target.form?.requestSubmit()
+                  }
+                  setIsEditingChartDescription(false)
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.shiftKey) {
+                    return
+                  }
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    const newValue = e.currentTarget.value.trim()
+                    if (newValue !== (description ?? '')) {
+                      e.currentTarget.form?.requestSubmit()
+                    }
+                    setIsEditingChartDescription(false)
+                  }
+                  if (e.key === 'Escape') {
+                    e.preventDefault()
+                    setIsEditingChartDescription(false)
+                  }
+                }}
+              />
+
+              <input type="hidden" name="id" value={id} />
+              <input
+                type="hidden"
+                name="intent"
+                value="updateChartDescription"
+              />
+            </Form>
           ) : (
-            <div className="flex items-center gap-1">
-              {description && description.trim() !== '' ? (
-                <CardDescription className="whitespace-pre-wrap">
-                  {description}
-                </CardDescription>
-              ) : (
-                !readOnly && (
-                  <CardDescription>Lägg till beskrivning…</CardDescription>
-                )
-              )}
-              {!readOnly && id && (
-                <Button
-                  variant="ghost"
-                  className="text-muted-foreground hover:text-primary transition"
-                  onClick={() => setIsEditingChartDescription(true)}
-                >
-                  <SquarePenIcon className="size-4" />
-                </Button>
-              )}
-            </div>
+            <CardDescription
+              className="whitespace-pre-wrap cursor-text"
+              onClick={() => !readOnly && setIsEditingChartDescription(true)}
+            >
+              {description?.trim() !== ''
+                ? description
+                : !readOnly && 'Lägg till beskrivning…'}
+            </CardDescription>
           )}
         </CardHeader>
 

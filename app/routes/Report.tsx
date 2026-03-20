@@ -46,13 +46,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '~/components/ui/dialog'
-import {
-  ArrowLeft,
-  ChevronDown,
-  SaveIcon,
-  SquarePenIcon,
-  Trash2Icon,
-} from 'lucide-react'
+import { ArrowLeft, ChevronDown, SaveIcon, Trash2Icon } from 'lucide-react'
 import { Badge } from '~/components/ui/badge'
 
 export async function loader({ params, request, context }: Route.LoaderArgs) {
@@ -524,7 +518,7 @@ export default function Report({ loaderData }: Route.ComponentProps) {
     useState(false)
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full cursor-default">
       <header className="border-b p-6 space-y-6">
         <div className="pb-4 border-b flex items-start justify-between gap-4">
           <div className="flex items-center gap-6">
@@ -544,7 +538,7 @@ export default function Report({ loaderData }: Route.ComponentProps) {
                   type="text"
                   name="reportTitle"
                   defaultValue={report.title}
-                  className="w-full font-semibold"
+                  className="w-full font-semibold !text-xl border-none shadow-none focus-visible:ring-0 p-0 h-auto"
                   onBlur={(e) => {
                     const newValue = e.target.value.trim()
                     if (newValue !== report.title) {
@@ -569,21 +563,14 @@ export default function Report({ loaderData }: Route.ComponentProps) {
                 <input type="hidden" name="intent" value="updateReportTitle" />
               </Form>
             ) : (
-              <div className="flex items-center gap-1">
-                <h1 className="text-xl font-semibold">
-                  {report.title?.trim().length > 0
-                    ? report.title
-                    : 'Lägg till titel...'}
-                </h1>
-
-                <Button
-                  variant="ghost"
-                  className="text-muted-foreground transition"
-                  onClick={() => setIsEditingReportTitle(true)}
-                >
-                  <SquarePenIcon className="size-5" />
-                </Button>
-              </div>
+              <h1
+                className="text-xl font-semibold cursor-text"
+                onClick={() => setIsEditingReportTitle(true)}
+              >
+                {report.title?.trim().length > 0
+                  ? report.title
+                  : 'Lägg till titel...'}
+              </h1>
             )}
           </div>
 
@@ -649,7 +636,7 @@ export default function Report({ loaderData }: Route.ComponentProps) {
               <Dialog modal={false}>
                 <DialogTrigger asChild>
                   <Button
-                    variant="ghost"
+                    variant="secondary"
                     className="inline-flex items-center gap-2"
                   >
                     <span>Lägg till område & filter</span>
@@ -826,7 +813,7 @@ export default function Report({ loaderData }: Route.ComponentProps) {
                 autoFocus
                 name="reportDescription"
                 defaultValue={report.description}
-                className="w-full"
+                className="w-full border-none shadow-none focus-visible:ring-0 p-0 resize-none !text-base text-muted-foreground"
                 onBlur={(e) => {
                   const newValue = e.target.value.trim()
                   if (newValue !== report.description) {
@@ -835,6 +822,17 @@ export default function Report({ loaderData }: Route.ComponentProps) {
                   setIsEditingReportDescription(false)
                 }}
                 onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.shiftKey) {
+                    return
+                  }
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    const newValue = e.currentTarget.value.trim()
+                    if (newValue !== report.description) {
+                      e.currentTarget.form?.requestSubmit()
+                    }
+                    setIsEditingReportDescription(false)
+                  }
                   if (e.key === 'Escape') {
                     e.preventDefault()
                     setIsEditingReportDescription(false)
@@ -848,19 +846,12 @@ export default function Report({ loaderData }: Route.ComponentProps) {
               />
             </Form>
           ) : (
-            <div className="flex items-center gap-1">
-              <p className="text-muted-foreground whitespace-pre-wrap">
-                {report.description || 'Lägg till beskrivning...'}
-              </p>
-
-              <Button
-                variant="ghost"
-                className="text-muted-foreground transition mt-1"
-                onClick={() => setIsEditingReportDescription(true)}
-              >
-                <SquarePenIcon className="size-4" />
-              </Button>
-            </div>
+            <p
+              className="text-muted-foreground whitespace-pre-wrap cursor-text"
+              onClick={() => setIsEditingReportDescription(true)}
+            >
+              {report.description || 'Lägg till beskrivning...'}
+            </p>
           )}
         </div>
       </header>
