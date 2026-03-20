@@ -121,7 +121,7 @@ export default function Reports({ loaderData }: Route.ComponentProps) {
           {report.map((r) => (
             <TableRow key={r.id}>
               <TableCell className="font-medium">
-                <Link to={`/visa-rapport/${r.id}`} className="hover:underline">
+                <Link to={`/rapport/${r.id}`} className="hover:underline">
                   {r.title}
                 </Link>
               </TableCell>
