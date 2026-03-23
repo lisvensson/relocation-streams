@@ -35,6 +35,7 @@ import {
 import { CreateReport } from '~/components/reports/CreateReport'
 import { userSessionContext } from '~/context/userSessionContext'
 import { Badge } from '~/components/ui/badge'
+import { buildSharedReportSnapshot } from '~/lib/buildSharedReportSnapshot'
 
 export async function loader({ context }: Route.LoaderArgs) {
   const userSession = context.get(userSessionContext)
@@ -73,6 +74,52 @@ export async function action({ context, request }: Route.ActionArgs) {
       .returning({ id: reports.id })
 
     return redirect(`/rapport/${report.id}`)
+  }
+
+  if (intent === 'shareReport') {
+    const reportId = formData.get('id') as string
+
+    const [report] = await db
+      .select()
+      .from(reports)
+      .where(eq(reports.id, reportId))
+
+    if (!report) {
+      throw new Response('Rapporten hittades inte', { status: 404 })
+    }
+
+    const snapshot = await buildSharedReportSnapshot(reportId)
+
+    const existing = await db
+      .select()
+      .from(sharedReports)
+      .where(eq(sharedReports.reportId, report.id))
+
+    if (existing.length > 0) {
+      const [updated] = await db
+        .update(sharedReports)
+        .set({
+          title: snapshot.report.title,
+          description: snapshot.report.description,
+          charts: snapshot.charts,
+        })
+        .where(eq(sharedReports.reportId, reportId))
+        .returning()
+
+      return { sharedReportId: updated.id }
+    }
+
+    await db
+      .insert(sharedReports)
+      .values({
+        title: snapshot.report.title,
+        description: snapshot.report.description,
+        reportId: reportId,
+        charts: snapshot.charts,
+      })
+      .returning()
+
+    return redirect(`/rapporter`)
   }
 
   if (intent === 'deleteReport') {
@@ -122,7 +169,7 @@ export default function Reports({ loaderData }: Route.ComponentProps) {
             <TableRow key={r.id}>
               <TableCell className="font-medium">
                 <Link to={`/rapport/${r.id}`} className="hover:underline">
-                  {r.title}
+                  {r.title || 'Titel saknas'}
                 </Link>
               </TableCell>
 
@@ -163,6 +210,28 @@ export default function Reports({ loaderData }: Route.ComponentProps) {
                       <DropdownMenuItem asChild>
                         <Link to={`/rapport/${r.id}`}>Redigera</Link>
                       </DropdownMenuItem>
+                      {r.sharedId ? (
+                        <DropdownMenuItem
+                          disabled
+                          className="opacity-50 pointer-events-none"
+                        >
+                          Delad
+                        </DropdownMenuItem>
+                      ) : (
+                        <Form method="post">
+                          <input
+                            type="hidden"
+                            name="intent"
+                            value="shareReport"
+                          />
+                          <input type="hidden" name="id" value={r.id} />
+                          <DropdownMenuItem asChild>
+                            <button type="submit" className="w-full text-left">
+                              Dela
+                            </button>
+                          </DropdownMenuItem>
+                        </Form>
+                      )}
                       <DropdownMenuSeparator />
                       <AlertDialogTrigger asChild>
                         <DropdownMenuItem variant="destructive">
