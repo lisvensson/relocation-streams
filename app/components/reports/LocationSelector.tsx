@@ -25,9 +25,9 @@ export function LocationSelector({
         value={value}
         onValueChange={(val) => onChange(val ?? '')}
       >
-        <ComboboxInput placeholder="Välj område" />
+        <ComboboxInput placeholder="Välj område..." />
         <ComboboxContent>
-          <ComboboxEmpty>Inga träffar</ComboboxEmpty>
+          <ComboboxEmpty>Inga resultat hittades.</ComboboxEmpty>
           <ComboboxList>
             {(item) => (
               <ComboboxItem key={item} value={item}>
