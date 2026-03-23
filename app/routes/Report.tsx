@@ -1,10 +1,4 @@
 import { Form, redirect, useSearchParams } from 'react-router'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '~/components/ui/accordion'
 import { Button } from '~/components/ui/button'
 import { db } from '~/shared/database'
 import {
@@ -40,12 +34,12 @@ import {
   DialogTrigger,
 } from '~/components/ui/dialog'
 import {
-  ArrowLeft,
-  ChevronDown,
-  Copy,
+  ArrowLeftIcon,
+  CopyIcon,
   EyeIcon,
   LinkIcon,
   ShareIcon,
+  SlidersHorizontalIcon,
 } from 'lucide-react'
 import { Badge } from '~/components/ui/badge'
 import { buildSharedReportSnapshot } from '~/lib/buildSharedReportSnapshot'
@@ -631,7 +625,7 @@ export default function Report({
                 variant="outline"
                 className="transition"
               >
-                <ArrowLeft className="size-4 mr-2" />
+                <ArrowLeftIcon className="size-4 mr-2" />
                 Tillbaka
               </Button>
             </Form>
@@ -686,10 +680,27 @@ export default function Report({
             <Dialog open={open} onOpenChange={setOpen}>
               {sharedReportId ? (
                 <DialogTrigger asChild>
-                  <Button className="transition">
-                    <LinkIcon className="size-4 mr-2" />
-                    Visa delad länk
-                  </Button>
+                  <Form method="post">
+                    <input
+                      type="hidden"
+                      name="location"
+                      value={location ?? ''}
+                    />
+                    <input
+                      type="hidden"
+                      name="filters"
+                      value={JSON.stringify(filters)}
+                    />
+                    <Button
+                      type="submit"
+                      name="intent"
+                      value="saveAndShareReport"
+                      className="transition"
+                    >
+                      <LinkIcon className="size-4 mr-2" />
+                      Visa delad länk
+                    </Button>
+                  </Form>
                 </DialogTrigger>
               ) : (
                 <DialogTrigger asChild>
@@ -737,7 +748,7 @@ export default function Report({
                       })
                     }}
                   >
-                    <Copy className="size-4" />
+                    <CopyIcon className="size-4" />
                   </Button>
                 </div>
               </DialogContent>
@@ -766,90 +777,65 @@ export default function Report({
 
         <div className="flex items-start gap-12">
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-medium">Område & filter</span>
+            <div className="flex items-center gap-3">
+              <h2 className="font-medium">Filter</h2>
               <Dialog modal={false}>
                 <DialogTrigger asChild>
-                  <Button
-                    variant="secondary"
-                    className="inline-flex items-center gap-2"
-                  >
-                    <span>Lägg till område & filter</span>
-                    <ChevronDown className="size-4" />
+                  <Button variant="outline" size="sm" className="h-7 text-xs">
+                    <SlidersHorizontalIcon className="size-4" />
+                    Filter
                   </Button>
                 </DialogTrigger>
 
                 <DialogContent className="max-w-md">
                   <DialogHeader>
-                    <DialogTitle>Område & filter</DialogTitle>
+                    <DialogTitle>Filter</DialogTitle>
+                    <DialogDescription className="text-sm text-muted-foreground">
+                      Välj filter för rapporten.
+                    </DialogDescription>
                   </DialogHeader>
-                  <DialogDescription className="text-sm text-muted-foreground">
-                    Välj område och filter för rapporten.
-                  </DialogDescription>
 
-                  <Form method="get" className="flex flex-col space-y-4">
-                    <Accordion type="multiple" className="space-y-4">
-                      <AccordionItem value="location">
-                        <AccordionTrigger className="pr-4">
-                          Område
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <LocationSelector
-                            locations={filterOptions.locations}
-                            value={location}
-                            onChange={setLocation}
-                          />
-                        </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="years">
-                        <AccordionTrigger className="pr-4">
-                          Flyttår
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <FilterSelector
-                            name="years"
-                            items={filterOptions.years}
-                            searchParams={searchParams}
-                          />
-                        </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="employeeRanges">
-                        <AccordionTrigger className="pr-4">
-                          Antal anställda
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <FilterSelector
-                            name="employeeRanges"
-                            items={filterOptions.employeeRanges}
-                            searchParams={searchParams}
-                          />
-                        </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="companyTypes">
-                        <AccordionTrigger className="pr-4">
-                          Företagsform
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <FilterSelector
-                            name="companyTypes"
-                            items={filterOptions.companyTypes}
-                            searchParams={searchParams}
-                          />
-                        </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="industryClusters">
-                        <AccordionTrigger className="pr-4">
-                          Kluster
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <FilterSelector
-                            name="industryClusters"
-                            items={filterOptions.industryClusters}
-                            searchParams={searchParams}
-                          />
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
+                  <Form method="get" className="space-y-6">
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium">Område</h3>
+                      <LocationSelector
+                        locations={filterOptions.locations}
+                        value={location}
+                        onChange={setLocation}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium">Flyttår</h3>
+                      <FilterSelector
+                        name="years"
+                        items={filterOptions.years}
+                        searchParams={searchParams}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium">Antal anställda</h3>
+                      <FilterSelector
+                        name="employeeRanges"
+                        items={filterOptions.employeeRanges}
+                        searchParams={searchParams}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium">Företagsform</h3>
+                      <FilterSelector
+                        name="companyTypes"
+                        items={filterOptions.companyTypes}
+                        searchParams={searchParams}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium">Kluster</h3>
+                      <FilterSelector
+                        name="industryClusters"
+                        items={filterOptions.industryClusters}
+                        searchParams={searchParams}
+                      />
+                    </div>
                     <DialogClose asChild>
                       <Button type="submit" className="w-full">
                         Filtrera
@@ -860,7 +846,7 @@ export default function Report({
               </Dialog>
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+            <div className="flex flex-wrap items-center gap-x-6 text-sm">
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">Område:</span>
                 <Badge variant="secondary">{location || 'Alla'}</Badge>
@@ -878,7 +864,7 @@ export default function Report({
                         </Badge>
                       ))
                   ) : (
-                    <span className="text-muted-foreground">Alla</span>
+                    <Badge variant="secondary">Alla</Badge>
                   )}
                 </div>
               </div>
@@ -895,7 +881,7 @@ export default function Report({
                         </Badge>
                       ))
                   ) : (
-                    <span className="text-muted-foreground">Alla</span>
+                    <Badge variant="secondary">Alla</Badge>
                   )}
                 </div>
               </div>
@@ -912,7 +898,7 @@ export default function Report({
                         </Badge>
                       ))
                   ) : (
-                    <span className="text-muted-foreground">Alla</span>
+                    <Badge variant="secondary">Alla</Badge>
                   )}
                 </div>
               </div>
@@ -929,7 +915,7 @@ export default function Report({
                         </Badge>
                       ))
                   ) : (
-                    <span className="text-muted-foreground">Alla</span>
+                    <Badge variant="secondary">Alla</Badge>
                   )}
                 </div>
               </div>
@@ -938,7 +924,7 @@ export default function Report({
         </div>
 
         <div className="space-y-1">
-          <span className="font-medium">Beskrivning</span>
+          <h2 className="font-medium">Beskrivning</h2>
           {isEditingReportDescription ? (
             <Form
               method="post"
