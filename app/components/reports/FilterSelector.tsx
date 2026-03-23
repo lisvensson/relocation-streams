@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import { MultiSelect } from '../ui/multi-select'
+
 interface FilterSelectorProps<T extends string | number> {
   name: string
   items: T[]
@@ -9,23 +12,39 @@ export function FilterSelector<T extends string | number>({
   items,
   searchParams,
 }: FilterSelectorProps<T>) {
+  const defaultValues = items
+    .filter((item) => searchParams.has(name, String(item)))
+    .map((item) => String(item))
+
+  const [selected, setSelected] = useState<string[]>(defaultValues)
+
+  const options = items.map((item) => ({
+    label: String(item),
+    value: String(item),
+  }))
+
   return (
-    <div className="grid grid-cols-2 gap-2">
-      {items.map((item) => (
-        <label
-          key={item}
-          className="flex items-center gap-2 text-sm cursor-pointer"
-        >
-          <input
-            type="checkbox"
-            name={name}
-            value={item}
-            defaultChecked={searchParams.has(name, String(item))}
-            className="h-4 w-4"
-          />
-          <span>{item}</span>
-        </label>
-      ))}
-    </div>
+    <>
+      <MultiSelect
+        name={name}
+        options={options}
+        value={selected}
+        defaultValue={defaultValues}
+        onValueChange={setSelected}
+        placeholder="Välj..."
+        variant="default"
+        maxCount={3}
+      />
+
+      {[...selected]
+        .sort(
+          (a, b) =>
+            items.findIndex((i) => String(i) === a) -
+            items.findIndex((i) => String(i) === b)
+        )
+        .map((value) => (
+          <input key={value} type="hidden" name={name} value={value} />
+        ))}
+    </>
   )
 }
