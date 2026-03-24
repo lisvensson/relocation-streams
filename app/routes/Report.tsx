@@ -536,6 +536,26 @@ export async function action({ request, params, context }: Route.ActionArgs) {
       .set({ location, filters: parsedFilters })
       .where(eq(reports.id, reportId))
 
+    const existing = await db
+      .select()
+      .from(sharedReports)
+      .where(eq(sharedReports.reportId, reportId))
+
+    if (existing.length === 0) {
+      return redirect(`/visa-rapport/${reportId}`)
+    }
+
+    const snapshot = await buildSharedReportSnapshot(reportId)
+
+    await db
+      .update(sharedReports)
+      .set({
+        title: snapshot.report.title,
+        description: snapshot.report.description,
+        charts: snapshot.charts,
+      })
+      .where(eq(sharedReports.reportId, reportId))
+
     return redirect(`/visa-rapport/${reportId}`)
   }
 
