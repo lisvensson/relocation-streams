@@ -351,7 +351,7 @@ export async function action({ request, params, context }: Route.ActionArgs) {
 
     await db.delete(charts).where(eq(charts.id, chartId))
 
-    return redirect(url.toString())
+    return null
   }
 
   if (intent === 'updateChartTitle') {
