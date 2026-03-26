@@ -786,7 +786,7 @@ export default function Report({
               </Dialog>
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-6 text-sm">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm">
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">Område:</span>
                 <Badge variant="secondary">{location || 'Alla'}</Badge>
