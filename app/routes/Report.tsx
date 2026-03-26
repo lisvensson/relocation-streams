@@ -290,17 +290,6 @@ export async function action({ request, params, context }: Route.ActionArgs) {
     })
   }
   const intent = formData.get('intent')
-  const chartSettingParams = [
-    'type',
-    'measure',
-    'category',
-    'excludeSelectedArea',
-    'maxNumberOfCategories',
-    'combineRemainingCategories',
-    'chartType',
-    'measureCalculation',
-  ]
-  let url = new URL(request.url)
 
   if (intent === 'addChart') {
     const config = {
@@ -327,8 +316,7 @@ export async function action({ request, params, context }: Route.ActionArgs) {
       config,
     })
 
-    chartSettingParams.forEach((p) => url.searchParams.delete(p))
-    return redirect(url.toString())
+    return null
   }
 
   if (intent === 'updateChart') {
@@ -355,8 +343,7 @@ export async function action({ request, params, context }: Route.ActionArgs) {
 
     await db.update(charts).set({ config }).where(eq(charts.id, chartId))
 
-    chartSettingParams.forEach((p) => url.searchParams.delete(p))
-    return redirect(url.toString())
+    return null
   }
 
   if (intent === 'deleteChart') {
@@ -383,7 +370,7 @@ export async function action({ request, params, context }: Route.ActionArgs) {
       .set({ config: updatedConfig })
       .where(eq(charts.id, chartId))
 
-    return redirect(url.toString())
+    return null
   }
 
   if (intent === 'updateChartDescription') {
@@ -402,7 +389,7 @@ export async function action({ request, params, context }: Route.ActionArgs) {
       .set({ config: updatedConfig })
       .where(eq(charts.id, chartId))
 
-    return redirect(url.toString())
+    return null
   }
 
   if (intent === 'updateReportTitle') {
@@ -410,7 +397,7 @@ export async function action({ request, params, context }: Route.ActionArgs) {
 
     await db.update(reports).set({ title }).where(eq(reports.id, reportId))
 
-    return redirect(url.toString())
+    return null
   }
 
   if (intent === 'updateReportDescription') {
@@ -421,7 +408,7 @@ export async function action({ request, params, context }: Route.ActionArgs) {
       .set({ description })
       .where(eq(reports.id, reportId))
 
-    return redirect(url.toString())
+    return null
   }
 
   if (intent === 'saveReport') {
