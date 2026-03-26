@@ -26,7 +26,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { SquarePenIcon, Trash2Icon, XIcon } from 'lucide-react'
+import { SaveIcon, SquarePenIcon, Trash2Icon } from 'lucide-react'
 import { Form } from 'react-router'
 import { ChartEditor } from './ChartEditor'
 import {
@@ -122,6 +122,59 @@ export default function ChartRenderer({
       }
     >
       <Card className="relative w-full">
+        {!readOnly && id && (
+          <div className="absolute top-3 right-3 flex gap-2">
+            <Button
+              variant="ghost"
+              className="flex-1"
+              onClick={() => setChartEditorOpen(!chartEditorOpen)}
+            >
+              {chartEditorOpen ? (
+                <>
+                  <SaveIcon className="size-4" />
+                </>
+              ) : (
+                <>
+                  <SquarePenIcon className="size-4" />
+                </>
+              )}
+            </Button>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" className="hover:text-destructive">
+                  <Trash2Icon className="size-4" />
+                </Button>
+              </AlertDialogTrigger>
+
+              <AlertDialogContent size="sm">
+                <AlertDialogHeader>
+                  <AlertDialogMedia className="bg-destructive/10 text-destructive">
+                    <Trash2Icon />
+                  </AlertDialogMedia>
+                  <AlertDialogTitle>Radera diagram?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Detta går inte att ångra. Diagrammet tas bort permanent.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel variant="outline">
+                    Avbryt
+                  </AlertDialogCancel>
+                  <Form method="post">
+                    <input type="hidden" name="intent" value="deleteChart" />
+                    <input type="hidden" name="id" value={id} />
+                    <AlertDialogAction variant="destructive" asChild>
+                      <button type="submit" className="w-full">
+                        Radera
+                      </button>
+                    </AlertDialogAction>
+                  </Form>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        )}
         <CardHeader className="space-y-2">
           {/* chartTitle */}
           {isEditingChartTitle ? (
@@ -401,66 +454,12 @@ export default function ChartRenderer({
         </CardContent>
 
         {!readOnly && id && (
-          <CardFooter className="relative px-4 flex flex-col gap-4 mt-2">
+          <CardFooter className="px-4 flex flex-col gap-4 mt-2">
             <ChartEditor
               chartId={id}
               open={chartEditorOpen}
               setOpen={setChartEditorOpen}
             />
-
-            <div className="flex gap-2 w-full">
-              <Button
-                className="flex-1"
-                onClick={() => setChartEditorOpen(!chartEditorOpen)}
-              >
-                {chartEditorOpen ? (
-                  <>
-                    <XIcon className="size-4 mr-2" />
-                    Stäng
-                  </>
-                ) : (
-                  <>
-                    <SquarePenIcon className="size-4 mr-2" />
-                    Redigera
-                  </>
-                )}
-              </Button>
-
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive" className="flex-1">
-                    <Trash2Icon className="size-4 mr-2" />
-                    Radera
-                  </Button>
-                </AlertDialogTrigger>
-
-                <AlertDialogContent size="sm">
-                  <AlertDialogHeader>
-                    <AlertDialogMedia className="bg-destructive/10 text-destructive">
-                      <Trash2Icon />
-                    </AlertDialogMedia>
-                    <AlertDialogTitle>Radera diagram?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Detta går inte att ångra. Diagrammet tas bort permanent.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel variant="outline">
-                      Avbryt
-                    </AlertDialogCancel>
-                    <Form method="post">
-                      <input type="hidden" name="intent" value="deleteChart" />
-                      <input type="hidden" name="id" value={id} />
-                      <AlertDialogAction variant="destructive" asChild>
-                        <button type="submit" className="w-full">
-                          Radera
-                        </button>
-                      </AlertDialogAction>
-                    </Form>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
           </CardFooter>
         )}
       </Card>
