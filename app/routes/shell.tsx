@@ -13,22 +13,33 @@ export async function loader({ context }: { context: any }) {
   const userSession = context.get(userSessionContext)
 
   let isLoggedIn = false
+  let userData = null
 
   if (userSession.user?.email) {
-    const existingUser = await db
+    const [existingUser] = await db
       .select()
       .from(user)
       .where(eq(user.email, userSession.user.email))
-    isLoggedIn = existingUser.length > 0
+
+    if (existingUser) {
+      isLoggedIn = true
+      userData = {
+        name: existingUser.name,
+        email: existingUser.email,
+      }
+    }
   }
 
-  return { isLoggedIn }
+  return { isLoggedIn, user: userData }
 }
 
 export default function Shell({
   loaderData,
 }: {
-  loaderData: { isLoggedIn: boolean }
+  loaderData: {
+    isLoggedIn: boolean
+    user: { name: string; email: string } | null
+  }
 }) {
   const location = useLocation()
 
@@ -39,7 +50,9 @@ export default function Shell({
 
   return (
     <div className="min-h-screen flex">
-      {!hideNavbar && <Navbar isLoggedIn={loaderData.isLoggedIn} />}
+      {!hideNavbar && (
+        <Navbar isLoggedIn={loaderData.isLoggedIn} user={loaderData.user} />
+      )}
       <main className="flex-1 p-6">
         <Outlet />
       </main>
