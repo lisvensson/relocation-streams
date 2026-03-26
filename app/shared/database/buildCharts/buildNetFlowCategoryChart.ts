@@ -28,6 +28,19 @@ export const buildNetFlowCategoryChart: BuildNetFlowCategoryChartFunction =
       excludeSelectedArea,
     } = chartConfig
 
+    if (!category) {
+      return {
+        type: chartConfig.type,
+        title: chartConfig.title,
+        description: chartConfig.description,
+        chartType: 'column',
+        dimension: null,
+        series: [],
+        data: [],
+        uiSettings: chartConfig.uiSettings,
+      }
+    }
+
     let inflowCategoryValue
     let outflowCategoryValue
 
@@ -153,7 +166,6 @@ export const buildNetFlowCategoryChart: BuildNetFlowCategoryChartFunction =
       title: chartConfig.title,
       description: chartConfig.description,
       chartType: 'column',
-      measure: 'inflow',
       dimension: dimensionKey,
       series: ['inflow', 'outflow', 'net'],
       data,

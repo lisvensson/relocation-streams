@@ -76,8 +76,8 @@ export type ChartModel = {
   title: string
   description: string
   chartType: ChartType
-  measure: Measure // ??
-  dimension: Dimension
+  measure?: Measure // ??
+  dimension: Dimension | null
   series: string[]
   data: ChartDataPoint[]
   uiSettings?: ChartUiSettings

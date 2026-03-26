@@ -23,6 +23,20 @@ export const buildTemporalChart: BuildTemporalChartFunction = async (
 
   const { measure } = chartConfig
 
+  if (!measure) {
+    return {
+      type: chartConfig.type,
+      title: chartConfig.title,
+      description: chartConfig.description,
+      chartType: 'column',
+      measure,
+      dimension: null,
+      series: [],
+      data: [],
+      uiSettings: chartConfig.uiSettings,
+    }
+  }
+
   const measureValue = {
     inflow: relocation.toLocation,
     outflow: relocation.fromLocation,

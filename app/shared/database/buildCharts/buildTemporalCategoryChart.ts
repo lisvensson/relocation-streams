@@ -27,6 +27,21 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
       excludeSelectedArea,
     } = chartConfig
 
+    if (!measure || !category || !measureCalculation) {
+      return {
+        type: chartConfig.type,
+        title: chartConfig.title,
+        description: chartConfig.description,
+        chartType: 'line',
+        measure,
+        dimension: null,
+        series: [],
+        data: [],
+        uiSettings: chartConfig.uiSettings,
+        measureCalculation,
+      }
+    }
+
     const measureValue = {
       inflow: relocation.toLocation,
       outflow: relocation.fromLocation,

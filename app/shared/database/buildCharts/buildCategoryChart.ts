@@ -30,6 +30,20 @@ export const buildCategoryChart: buildCategoryChartFunction = async (
     chartType,
   } = chartConfig
 
+  if (!measure || !category || !chartType) {
+    return {
+      type: chartConfig.type,
+      title: chartConfig.title,
+      description: chartConfig.description,
+      chartType: chartConfig.chartType,
+      measure,
+      dimension: null,
+      series: [],
+      data: [],
+      uiSettings: chartConfig.uiSettings,
+    }
+  }
+
   const measureValue = {
     inflow: relocation.toLocation,
     outflow: relocation.fromLocation,
