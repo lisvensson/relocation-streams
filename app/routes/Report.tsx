@@ -225,72 +225,6 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
       value: industryClusters,
     })
 
-  const type = searchParams.get('type')
-  const measure = searchParams.get('measure')
-  const category = searchParams.get('category')
-  const excludeSelectedArea = searchParams.get('excludeSelectedArea')
-  const maxNumberOfCategories = searchParams.get('maxNumberOfCategories')
-  const combineRemainingCategories = searchParams.get(
-    'combineRemainingCategories'
-  )
-  const chartType = searchParams.get('chartType')
-  const measureCalculation = searchParams.get('measureCalculation')
-  const containerSize = searchParams.get('containerSize')
-  const legendPlacement = searchParams.get('legendPlacement')
-  const tablePlacement = searchParams.get('tablePlacement')
-
-  const previewTitle = generateExampleChartTitle({
-    type: type,
-    measure: measure,
-    measureCalculation: measureCalculation,
-  })
-
-  const chartConfig = {
-    type,
-    title: previewTitle,
-    description:
-      'Exempel: Här kan du lägga till en beskrivning av diagrammet...',
-    measure,
-    uiSettings: { containerSize, legendPlacement, tablePlacement },
-    category,
-    excludeSelectedArea: excludeSelectedArea === 'on',
-    maxNumberOfCategories: maxNumberOfCategories
-      ? Number(maxNumberOfCategories)
-      : null,
-    combineRemainingCategories: combineRemainingCategories === 'on',
-    chartType,
-    measureCalculation,
-  }
-
-  let preview: ChartModel | null = null
-
-  if (type === 'temporal' && measure) {
-    preview = await buildTemporalChart(location, filters, chartConfig)
-  }
-
-  if (type === 'category' && measure && category && chartType) {
-    preview = await buildCategoryChart(location, filters, chartConfig)
-  }
-
-  if (
-    type === 'temporal+category' &&
-    measure &&
-    category &&
-    maxNumberOfCategories &&
-    measureCalculation
-  ) {
-    preview = await buildTemporalCategoryChart(location, filters, chartConfig)
-  }
-
-  if (
-    type === 'netflow+category' &&
-    measure &&
-    category &&
-    maxNumberOfCategories
-  ) {
-    preview = await buildNetFlowCategoryChart(location, filters, chartConfig)
-  }
-
   const buildCharts = await Promise.all(
     savedCharts.map(async (chart) => {
       const config = chart.config
@@ -333,7 +267,6 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     report,
     filterOptions,
     filters,
-    preview,
     charts: buildCharts,
   }
 }
@@ -612,7 +545,7 @@ export default function Report({
   actionData,
 }: Route.ComponentProps) {
   const [searchParams] = useSearchParams()
-  const { report, filterOptions, filters, preview, charts } = loaderData
+  const { report, filterOptions, filters, charts } = loaderData
   const sharedReportId =
     actionData?.sharedReportId ?? loaderData.report.sharedId ?? ''
   const [location, setLocation] = useState(searchParams.get('location') ?? '')
@@ -998,8 +931,8 @@ export default function Report({
       </header>
 
       <main className="p-6 space-y-6">
-        <div className="flex justify-end">
-          <ChartBuilder chart={preview} />
+        <div className="flex justify-start">
+          <ChartBuilder />
         </div>
 
         <div className="grid grid-cols-12 gap-6">
