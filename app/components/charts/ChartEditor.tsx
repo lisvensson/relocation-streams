@@ -118,7 +118,7 @@ export function ChartEditor({ chartId, open, setOpen }: ChartEditorProps) {
               type === 'category' ||
               type === 'temporal+category') && (
               <div>
-                <label className="block mb-1 font-medium">Mått</label>
+                <label className="block mb-1 font-medium">Mätvärde</label>
                 <Select
                   name="measure"
                   value={measure}
@@ -126,7 +126,7 @@ export function ChartEditor({ chartId, open, setOpen }: ChartEditorProps) {
                   required
                 >
                   <SelectTrigger className="w-full" aria-invalid={!measure}>
-                    <SelectValue placeholder="Välj mått" />
+                    <SelectValue placeholder="Välj mätvärde" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="inflow">Inflytt</SelectItem>
