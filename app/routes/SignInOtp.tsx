@@ -1,8 +1,14 @@
-import { Form, redirect, useSearchParams, useSubmit } from 'react-router'
+import { Form, redirect, useSearchParams } from 'react-router'
 import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
 import { auth } from '~/shared/auth'
 import type { Route } from './+types/SignInOtp'
+import { useState } from 'react'
+import { FieldDescription, FieldGroup } from '~/components/ui/field'
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from '~/components/ui/input-otp'
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData()
@@ -28,34 +34,42 @@ export async function action({ request }: Route.ActionArgs) {
 export default function SignInOTP({ actionData }: Route.ComponentProps) {
   const [searchParams] = useSearchParams()
   const email = searchParams.get('email') ?? ''
-  const otp = searchParams.get('otp') ?? ''
+  const [value, setValue] = useState('')
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center px-4 py-12">
-      <div className="max-w-md w-full text-center">
-        <h1 className="text-2xl font-bold mb-4 text-gray-900">
-          Verifiera engångskod för att logga in
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Ange koden du fått skickad till din e-postadress.
-        </p>
-        {actionData?.error && (
-          <div className="text-red-600">{actionData.error}</div>
-        )}
-        <Form method="post" className="mt-4">
-          <Input type="hidden" name="email" value={email} />
-          <Input
-            type="text"
-            name="otp"
-            defaultValue={otp}
-            required
-            placeholder="OTP-kod"
-            className="mt-4 w-full"
-          />
-          <Button type="submit" className="mt-4 w-full">
-            Verifiera
-          </Button>
-        </Form>
+      <div className="max-w-md w-full">
+        <FieldGroup className="flex flex-col gap-6 text-center">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-2xl font-bold">
+              Verifiera engångskod för att logga in
+            </h1>
+            <FieldDescription>
+              Ange koden du fått skickad till din e-postadress.
+            </FieldDescription>
+          </div>
+          {actionData?.error && (
+            <div className="text-red-600 text-sm">{actionData.error}</div>
+          )}
+          <Form method="post" className="flex flex-col gap-4 items-center">
+            <input type="hidden" name="email" value={email} />
+
+            <InputOTP maxLength={6} value={value} onChange={setValue}>
+              <InputOTPGroup>
+                <InputOTPSlot index={0} />
+                <InputOTPSlot index={1} />
+                <InputOTPSlot index={2} />
+                <InputOTPSlot index={3} />
+                <InputOTPSlot index={4} />
+                <InputOTPSlot index={5} />
+              </InputOTPGroup>
+            </InputOTP>
+            <input type="hidden" name="otp" value={value} />
+            <Button type="submit" className="w-full">
+              Verifiera
+            </Button>
+          </Form>
+        </FieldGroup>
       </div>
     </div>
   )
