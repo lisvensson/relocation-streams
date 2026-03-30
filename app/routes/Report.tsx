@@ -346,6 +346,25 @@ export async function action({ request, params, context }: Route.ActionArgs) {
     return null
   }
 
+  if (intent === 'duplicateChart') {
+    const chartId = formData.get('id') as string
+
+    const [chart] = await db.select().from(charts).where(eq(charts.id, chartId))
+
+    if (!chart) {
+      throw new Response('Diagrammet finns inte', { status: 404 })
+    }
+
+    await db.insert(charts).values({
+      reportId,
+      config: {
+        ...(chart.config as any),
+      },
+    })
+
+    return null
+  }
+
   if (intent === 'deleteChart') {
     const chartId = formData.get('id') as string
 
