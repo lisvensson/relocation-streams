@@ -26,7 +26,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { SaveIcon, SquarePenIcon, Trash2Icon } from 'lucide-react'
+import { CopyIcon, SaveIcon, SquarePenIcon, Trash2Icon } from 'lucide-react'
 import { Form } from 'react-router'
 import { ChartEditor } from './ChartEditor'
 import {
@@ -139,6 +139,14 @@ export default function ChartRenderer({
                 </>
               )}
             </Button>
+
+            <Form method="post">
+              <input type="hidden" name="intent" value="duplicateChart" />
+              <input type="hidden" name="id" value={id} />
+              <Button variant="ghost" className="flex-1">
+                <CopyIcon className="size-4" />
+              </Button>
+            </Form>
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
