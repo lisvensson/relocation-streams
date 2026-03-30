@@ -209,14 +209,9 @@ export function ChartEditor({ chartId, open, setOpen }: ChartEditorProps) {
                       submit(e.currentTarget.form, { preventScrollReset: true })
                     }}
                     aria-invalid={
-                      (type === 'temporal+category' ||
-                        type === 'netflow+category') &&
-                      !maxNumberOfCategories
+                      type === 'temporal+category' && !maxNumberOfCategories
                     }
-                    required={
-                      type === 'temporal+category' ||
-                      type === 'netflow+category'
-                    }
+                    required={type === 'temporal+category'}
                   />
                 </div>
               )}
