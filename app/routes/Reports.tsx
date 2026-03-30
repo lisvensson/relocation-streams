@@ -1,6 +1,6 @@
 import { desc, eq, and } from 'drizzle-orm'
 import { db } from '~/shared/database'
-import { reports, sharedReports } from '~/shared/database/schema'
+import { charts, reports, sharedReports } from '~/shared/database/schema'
 import type { Route } from './+types/Reports'
 import {
   Table,
@@ -119,7 +119,48 @@ export async function action({ context, request }: Route.ActionArgs) {
       })
       .returning()
 
-    return redirect(`/rapporter`)
+    return null
+  }
+
+  if (intent === 'duplicateReport') {
+    const reportId = formData.get('id') as string
+
+    const [report] = await db
+      .select()
+      .from(reports)
+      .where(
+        and(eq(reports.id, reportId), eq(reports.userId, userSession.user.id))
+      )
+
+    if (!report) {
+      throw new Response('Rapporten hittades inte', { status: 404 })
+    }
+
+    const [newReport] = await db
+      .insert(reports)
+      .values({
+        userId: userSession.user.id,
+        title: report.title ? `${report.title} (kopia)` : 'Kopia',
+        description: report.description,
+        location: report.location,
+        filters: report.filters,
+      })
+      .returning({ id: reports.id })
+
+    const chartsFromReport = await db
+      .select()
+      .from(charts)
+      .where(eq(charts.reportId, reportId))
+      .orderBy(charts.id)
+
+    for (const chart of chartsFromReport) {
+      await db.insert(charts).values({
+        reportId: newReport.id,
+        config: chart.config as any,
+      })
+    }
+
+    return null
   }
 
   if (intent === 'deleteReport') {
@@ -139,7 +180,7 @@ export async function action({ context, request }: Route.ActionArgs) {
     }
 
     await db.delete(reports).where(eq(reports.id, reportId))
-    return redirect(`/rapporter`)
+    return null
   }
 
   return null
@@ -232,6 +273,21 @@ export default function Reports({ loaderData }: Route.ComponentProps) {
                           </DropdownMenuItem>
                         </Form>
                       )}
+
+                      <Form method="post">
+                        <input
+                          type="hidden"
+                          name="intent"
+                          value="duplicateReport"
+                        />
+                        <input type="hidden" name="id" value={r.id} />
+                        <DropdownMenuItem asChild>
+                          <button type="submit" className="w-full text-left">
+                            Duplicera
+                          </button>
+                        </DropdownMenuItem>
+                      </Form>
+
                       <DropdownMenuSeparator />
                       <AlertDialogTrigger asChild>
                         <DropdownMenuItem variant="destructive">
