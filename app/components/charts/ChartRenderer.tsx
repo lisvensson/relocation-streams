@@ -46,6 +46,7 @@ import { Button } from '../ui/button'
 import { useState } from 'react'
 import { Input } from '../ui/input'
 import { Textarea } from '../ui/textarea'
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 
 export default function ChartRenderer({
   id,
@@ -124,35 +125,65 @@ export default function ChartRenderer({
       <Card className="relative w-full">
         {!readOnly && id && (
           <div className="absolute top-3 right-3 flex gap-2">
-            <Button
-              variant="ghost"
-              className="flex-1"
-              onClick={() => setChartEditorOpen(!chartEditorOpen)}
-            >
-              {chartEditorOpen ? (
-                <>
-                  <SaveIcon className="size-4" />
-                </>
-              ) : (
-                <>
-                  <SquarePenIcon className="size-4" />
-                </>
-              )}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    className="flex-1"
+                    onClick={() => setChartEditorOpen(!chartEditorOpen)}
+                  >
+                    {chartEditorOpen ? (
+                      <>
+                        <SaveIcon className="size-4" />
+                      </>
+                    ) : (
+                      <>
+                        <SquarePenIcon className="size-4" />
+                      </>
+                    )}
+                  </Button>
+                }
+              />
+              <TooltipContent>
+                <p>{chartEditorOpen ? 'Spara' : 'Redigera'}</p>
+              </TooltipContent>
+            </Tooltip>
 
             <Form method="post">
               <input type="hidden" name="intent" value="duplicateChart" />
               <input type="hidden" name="id" value={id} />
-              <Button variant="ghost" className="flex-1">
-                <CopyIcon className="size-4" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button variant="ghost" className="flex-1">
+                      <CopyIcon className="size-4" />
+                    </Button>
+                  }
+                />
+                <TooltipContent>
+                  <p>Duplicera</p>
+                </TooltipContent>
+              </Tooltip>
             </Form>
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="ghost" className="hover:text-destructive">
-                  <Trash2Icon className="size-4" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        className="hover:text-destructive"
+                      >
+                        <Trash2Icon className="size-4" />
+                      </Button>
+                    }
+                  />
+                  <TooltipContent>
+                    <p>Radera</p>
+                  </TooltipContent>
+                </Tooltip>
               </AlertDialogTrigger>
 
               <AlertDialogContent size="sm">
