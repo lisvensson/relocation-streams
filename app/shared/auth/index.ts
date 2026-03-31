@@ -31,7 +31,7 @@ export const auth = betterAuth({
           console.log(`Engångskod för inloggning har skickats till ${email}`)
         }
         const { data, error } = await resend.emails.send({
-          from: 'app@booiq.com',
+          from: `${process.env.SEND_OTP_EMAIL_FROM}`,
           to: email,
           subject,
           html,
