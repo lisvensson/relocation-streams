@@ -10,6 +10,7 @@ import {
 } from '../ui/select'
 import { Checkbox } from '../ui/checkbox'
 import type { loader } from '~/routes/Report'
+import { generateChartTitle } from '~/lib/generateChartTitle'
 
 interface ChartEditorProps {
   chartId: string
@@ -60,7 +61,16 @@ export function ChartEditor({ chartId, open, setOpen }: ChartEditorProps) {
         <input type="hidden" name="intent" value="updateChart" />
         <input type="hidden" name="id" value={chartId} />
         <input type="hidden" name="type" value={type} />
-        <input type="hidden" name="chartTitle" value={chartConfig.title} />
+        <input
+          type="hidden"
+          name="chartTitle"
+          value={generateChartTitle({
+            type,
+            measure,
+            measureCalculation,
+            category,
+          })}
+        />
         <input
           type="hidden"
           name="chartDescription"

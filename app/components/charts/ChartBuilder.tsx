@@ -17,6 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../ui/dialog'
+import { generateChartTitle } from '~/lib/generateChartTitle'
 
 export function ChartBuilder() {
   const [type, setType] = useState<string>('')
@@ -53,7 +54,16 @@ export function ChartBuilder() {
 
         <Form method="post" className="space-y-6">
           <input type="hidden" name="intent" value="addChart" />
-          <input type="hidden" name="chartTitle" value={''} />
+          <input
+            type="hidden"
+            name="chartTitle"
+            value={generateChartTitle({
+              type,
+              measure,
+              measureCalculation,
+              category,
+            })}
+          />
           <input type="hidden" name="chartDescription" value={''} />
           <input type="hidden" name="excludeSelectedArea" value="off" />
           <input type="hidden" name="maxNumberOfCategories" value="10" />
