@@ -33,7 +33,7 @@ export function FilterSelector<T extends string | number>({
         onValueChange={setSelected}
         placeholder="Välj..."
         variant="default"
-        maxCount={3}
+        maxCount={2}
       />
 
       {[...selected]

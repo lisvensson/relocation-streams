@@ -40,7 +40,7 @@ export function ChartBuilder() {
         }
       }}
     >
-      <DialogTrigger asChild>
+      <DialogTrigger>
         <Button>
           <ChartColumnIcon className="size-4 mr-2" />
           Skapa nytt diagram
@@ -206,7 +206,7 @@ export function ChartBuilder() {
             </div>
           )}
 
-          <DialogClose asChild>
+          <DialogClose className="w-full block">
             <Button
               type="submit"
               className="w-full"

@@ -637,7 +637,7 @@ export default function Report({
           <div className="flex items-center gap-2">
             <Dialog open={open} onOpenChange={setOpen}>
               {sharedReportId ? (
-                <DialogTrigger asChild>
+                <DialogTrigger>
                   <Form method="post">
                     <input
                       type="hidden"
@@ -661,7 +661,7 @@ export default function Report({
                   </Form>
                 </DialogTrigger>
               ) : (
-                <DialogTrigger asChild>
+                <DialogTrigger>
                   <Form method="post">
                     <input
                       type="hidden"
@@ -737,8 +737,8 @@ export default function Report({
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <h2 className="font-medium">Filter</h2>
-              <Dialog modal={false}>
-                <DialogTrigger asChild>
+              <Dialog>
+                <DialogTrigger>
                   <Button variant="outline" size="sm" className="h-7 text-xs">
                     <SlidersHorizontalIcon className="size-4" />
                     Filter
@@ -794,7 +794,7 @@ export default function Report({
                         searchParams={searchParams}
                       />
                     </div>
-                    <DialogClose asChild>
+                    <DialogClose className="w-full block">
                       <Button type="submit" className="w-full">
                         Filtrera
                       </Button>
