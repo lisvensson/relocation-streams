@@ -168,8 +168,8 @@ export default function ChartRenderer({
             </Form>
 
             <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Tooltip>
+              <Tooltip>
+                <AlertDialogTrigger asChild>
                   <TooltipTrigger
                     render={
                       <Button
@@ -180,11 +180,12 @@ export default function ChartRenderer({
                       </Button>
                     }
                   />
-                  <TooltipContent>
-                    <p>Radera</p>
-                  </TooltipContent>
-                </Tooltip>
-              </AlertDialogTrigger>
+                </AlertDialogTrigger>
+
+                <TooltipContent>
+                  <p>Radera</p>
+                </TooltipContent>
+              </Tooltip>
 
               <AlertDialogContent size="sm">
                 <AlertDialogHeader>
