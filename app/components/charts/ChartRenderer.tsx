@@ -217,48 +217,54 @@ export default function ChartRenderer({
         )}
         <CardHeader className="space-y-2">
           {/* chartTitle */}
-          {isEditingChartTitle ? (
-            <Form method="post" onSubmit={() => setIsEditingChartTitle(false)}>
-              <Input
-                autoFocus
-                type="text"
-                name="chartTitle"
-                defaultValue={title}
-                className="w-full font-semibold !text-base border-none shadow-none focus-visible:ring-0 p-0 h-auto"
-                onBlur={(e) => {
-                  const newValue = e.target.value.trim()
-                  if (newValue !== title) {
-                    e.target.form?.requestSubmit()
-                  }
-                  setIsEditingChartTitle(false)
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    const newValue = e.currentTarget.value.trim()
+          <div className="flex items-center">
+            {isEditingChartTitle ? (
+              <Form
+                method="post"
+                onSubmit={() => setIsEditingChartTitle(false)}
+                className="inline-block"
+              >
+                <Input
+                  autoFocus
+                  type="text"
+                  name="chartTitle"
+                  defaultValue={title}
+                  className="inline-block font-semibold !text-base border-none shadow-none rounded-sm bg-primary/5 px-2 py-0.5 focus-visible:ring-0"
+                  onBlur={(e) => {
+                    const newValue = e.target.value.trim()
                     if (newValue !== title) {
-                      e.currentTarget.form?.requestSubmit()
+                      e.target.form?.requestSubmit()
                     }
                     setIsEditingChartTitle(false)
-                  }
-                  if (e.key === 'Escape') {
-                    e.preventDefault()
-                    setIsEditingChartTitle(false)
-                  }
-                }}
-              />
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      const newValue = e.currentTarget.value.trim()
+                      if (newValue !== title) {
+                        e.currentTarget.form?.requestSubmit()
+                      }
+                      setIsEditingChartTitle(false)
+                    }
+                    if (e.key === 'Escape') {
+                      e.preventDefault()
+                      setIsEditingChartTitle(false)
+                    }
+                  }}
+                />
 
-              <input type="hidden" name="id" value={id} />
-              <input type="hidden" name="intent" value="updateChartTitle" />
-            </Form>
-          ) : (
-            <CardTitle
-              className="cursor-text"
-              onClick={() => !readOnly && setIsEditingChartTitle(true)}
-            >
-              {title?.trim() !== '' ? title : !readOnly && 'Lägg till titel…'}
-            </CardTitle>
-          )}
+                <input type="hidden" name="id" value={id} />
+                <input type="hidden" name="intent" value="updateChartTitle" />
+              </Form>
+            ) : (
+              <CardTitle
+                className="inline-block cursor-text rounded-sm transition hover:bg-primary/5"
+                onClick={() => !readOnly && setIsEditingChartTitle(true)}
+              >
+                {title?.trim() !== '' ? title : !readOnly && 'Lägg till titel…'}
+              </CardTitle>
+            )}
+          </div>
           {/* chartDescription */}
           {isEditingChartDescription ? (
             <Form
@@ -269,7 +275,7 @@ export default function ChartRenderer({
                 autoFocus
                 name="chartDescription"
                 defaultValue={description ?? ''}
-                className="w-full border-none shadow-none focus-visible:ring-0 p-0 resize-none !text-sm text-muted-foreground"
+                className="w-full border-none shadow-none bg-primary/5 rounded-sm px-2 py-1 focus-visible:ring-0 resize-none !text-sm text-muted-foreground"
                 onBlur={(e) => {
                   const newValue = e.target.value.trim()
                   if (newValue !== (description ?? '')) {
@@ -305,7 +311,7 @@ export default function ChartRenderer({
             </Form>
           ) : (
             <CardDescription
-              className="whitespace-pre-wrap cursor-text"
+              className="whitespace-pre-wrap cursor-text rounded-sm transition hover:bg-primary/5"
               onClick={() => !readOnly && setIsEditingChartDescription(true)}
             >
               {description?.trim() !== ''

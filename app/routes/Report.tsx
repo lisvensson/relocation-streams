@@ -598,7 +598,7 @@ export default function Report({
                   type="text"
                   name="reportTitle"
                   defaultValue={report.title}
-                  className="w-full font-semibold !text-xl border-none shadow-none focus-visible:ring-0 p-0 h-auto"
+                  className="w-full font-semibold !text-xl border-none shadow-none rounded-sm bg-primary/5 px-2 py-0.5 focus-visible:ring-0"
                   onBlur={(e) => {
                     const newValue = e.target.value.trim()
                     if (newValue !== report.title) {
@@ -624,7 +624,7 @@ export default function Report({
               </Form>
             ) : (
               <h1
-                className="text-xl font-semibold cursor-text"
+                className="text-xl font-semibold cursor-text rounded-sm transition hover:bg-primary/5"
                 onClick={() => setIsEditingReportTitle(true)}
               >
                 {report.title?.trim().length > 0
@@ -892,7 +892,7 @@ export default function Report({
                 autoFocus
                 name="reportDescription"
                 defaultValue={report.description}
-                className="w-full border-none shadow-none focus-visible:ring-0 p-0 resize-none !text-base text-muted-foreground"
+                className="w-full border-none shadow-none bg-primary/5 rounded-sm px-2 py-1 focus-visible:ring-0 resize-none !text-base text-muted-foreground"
                 onBlur={(e) => {
                   const newValue = e.target.value.trim()
                   if (newValue !== report.description) {
@@ -926,7 +926,7 @@ export default function Report({
             </Form>
           ) : (
             <p
-              className="text-muted-foreground whitespace-pre-wrap cursor-text"
+              className="text-muted-foreground whitespace-pre-wrap cursor-text rounded-sm transition hover:bg-primary/5"
               onClick={() => setIsEditingReportDescription(true)}
             >
               {report.description || 'Lägg till beskrivning...'}
