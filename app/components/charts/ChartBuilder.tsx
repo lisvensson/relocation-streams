@@ -25,6 +25,13 @@ export function ChartBuilder() {
   const [category, setCategory] = useState<string>('')
   const [chartType, setChartType] = useState<string>('')
   const [measureCalculation, setMeasureCalculation] = useState<string>('')
+  const [validation, setValidation] = useState({
+    type: false,
+    measure: false,
+    category: false,
+    chartType: false,
+    measureCalculation: false,
+  })
 
   return (
     <Dialog
@@ -36,6 +43,13 @@ export function ChartBuilder() {
             setCategory('')
             setChartType('')
             setMeasureCalculation('')
+            setValidation({
+              type: false,
+              measure: false,
+              category: false,
+              chartType: false,
+              measureCalculation: false,
+            })
           }, 0)
         }
       }}
@@ -75,8 +89,19 @@ export function ChartBuilder() {
           {/* type */}
           <div>
             <label className="block mb-1 font-medium">Välj diagram</label>
-            <Select name="type" value={type} onValueChange={setType} required>
-              <SelectTrigger className="w-full" aria-invalid={!type}>
+            <Select
+              name="type"
+              value={type}
+              onValueChange={(value) => {
+                setType(value)
+                setValidation((prev) => ({ ...prev, type: true }))
+              }}
+              required
+            >
+              <SelectTrigger
+                className="w-full"
+                aria-invalid={validation.type && !type}
+              >
                 <SelectValue placeholder="Välj diagramtyp" />
               </SelectTrigger>
               <SelectContent>
@@ -108,10 +133,16 @@ export function ChartBuilder() {
                   <Select
                     name="measure"
                     value={measure}
-                    onValueChange={setMeasure}
+                    onValueChange={(value) => {
+                      setMeasure(value)
+                      setValidation((prev) => ({ ...prev, measure: true }))
+                    }}
                     required
                   >
-                    <SelectTrigger className="w-full" aria-invalid={!measure}>
+                    <SelectTrigger
+                      className="w-full"
+                      aria-invalid={validation.measure && !measure}
+                    >
                       <SelectValue placeholder="Välj mätvärde" />
                     </SelectTrigger>
                     <SelectContent>
@@ -134,10 +165,16 @@ export function ChartBuilder() {
                   <Select
                     name="category"
                     value={category}
-                    onValueChange={setCategory}
+                    onValueChange={(value) => {
+                      setCategory(value)
+                      setValidation((prev) => ({ ...prev, category: true }))
+                    }}
                     required
                   >
-                    <SelectTrigger className="w-full" aria-invalid={!category}>
+                    <SelectTrigger
+                      className="w-full"
+                      aria-invalid={validation.category && !category}
+                    >
                       <SelectValue placeholder="Välj kategori" />
                     </SelectTrigger>
                     <SelectContent>
@@ -164,10 +201,16 @@ export function ChartBuilder() {
                   <Select
                     name="chartType"
                     value={chartType}
-                    onValueChange={setChartType}
+                    onValueChange={(value) => {
+                      setChartType(value)
+                      setValidation((prev) => ({ ...prev, chartType: true }))
+                    }}
                     required
                   >
-                    <SelectTrigger className="w-full" aria-invalid={!chartType}>
+                    <SelectTrigger
+                      className="w-full"
+                      aria-invalid={validation.chartType && !chartType}
+                    >
                       <SelectValue placeholder="Välj diagramtyp" />
                     </SelectTrigger>
                     <SelectContent>
@@ -187,12 +230,20 @@ export function ChartBuilder() {
                   <Select
                     name="measureCalculation"
                     value={measureCalculation}
-                    onValueChange={setMeasureCalculation}
+                    onValueChange={(value) => {
+                      setMeasureCalculation(value)
+                      setValidation((prev) => ({
+                        ...prev,
+                        measureCalculation: true,
+                      }))
+                    }}
                     required
                   >
                     <SelectTrigger
                       className="w-full"
-                      aria-invalid={!measureCalculation}
+                      aria-invalid={
+                        validation.measureCalculation && !measureCalculation
+                      }
                     >
                       <SelectValue placeholder="Välj beräkning" />
                     </SelectTrigger>
@@ -210,6 +261,14 @@ export function ChartBuilder() {
             <Button
               type="submit"
               className="w-full"
+              onClick={() => {
+                setTimeout(() => {
+                  window.scrollTo({
+                    top: document.body.scrollHeight,
+                    behavior: 'smooth',
+                  })
+                }, 1000)
+              }}
               disabled={
                 !type ||
                 (['temporal', 'category', 'temporal+category'].includes(type) &&
