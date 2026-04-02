@@ -1,2 +1,0 @@
-ALTER TABLE "shared_reports" ADD COLUMN "report_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "shared_reports" ADD CONSTRAINT "shared_reports_report_id_reports_id_fk" FOREIGN KEY ("report_id") REFERENCES "public"."reports"("id") ON DELETE cascade ON UPDATE no action;

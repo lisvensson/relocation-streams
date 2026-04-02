@@ -1,1 +1,0 @@
-ALTER TABLE "reports" ADD COLUMN "description" text NOT NULL;

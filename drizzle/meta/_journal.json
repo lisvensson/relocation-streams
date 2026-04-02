@@ -5,71 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1770806777701,
-      "tag": "0000_lethal_ultimates",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1771245594307,
-      "tag": "0001_busy_the_call",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1771578965031,
-      "tag": "0002_nappy_saracen",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1771835659348,
-      "tag": "0003_right_mariko_yashida",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1771838660840,
-      "tag": "0004_easy_wallop",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1771838740704,
-      "tag": "0005_powerful_steel_serpent",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1771839929735,
-      "tag": "0006_stiff_human_cannonball",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1772188054627,
-      "tag": "0007_closed_legion",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1773320208798,
-      "tag": "0008_boring_sugar_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1773649492964,
-      "tag": "0009_low_sebastian_shaw",
+      "when": 1775126146693,
+      "tag": "0000_tidy_big_bertha",
       "breakpoints": true
     }
   ]
