@@ -78,22 +78,44 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     .where(eq(charts.reportId, params.reportId))
     .orderBy(charts.id)
 
+  const toPostalAreas = db
+    .selectDistinct({ location: relocation.toPostalArea })
+    .from(relocation)
+
+  const toMunicipalities = db
+    .selectDistinct({ location: relocation.toMunicipality })
+    .from(relocation)
+
+  const toCounties = db
+    .selectDistinct({ location: relocation.toCounty })
+    .from(relocation)
+
+  const fromPostalAreas = db
+    .selectDistinct({ location: relocation.fromPostalArea })
+    .from(relocation)
+
+  const fromMunicipalities = db
+    .selectDistinct({ location: relocation.fromMunicipality })
+    .from(relocation)
+
+  const fromCounties = db
+    .selectDistinct({ location: relocation.fromCounty })
+    .from(relocation)
+
   const locations = await union(
-    db.selectDistinct({ location: relocation.toLocation }).from(relocation),
-    db.selectDistinct({ location: relocation.fromLocation }).from(relocation)
+    toPostalAreas,
+    toMunicipalities,
+    toCounties,
+    fromPostalAreas,
+    fromMunicipalities,
+    fromCounties
   )
 
   const allLocations = Array.from(
     new Set(
       locations
         .map((r) => r.location)
-        .flatMap((loc) => (Array.isArray(loc) ? loc : [loc]))
-        .map((loc) =>
-          loc
-            .split(' ')
-            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-            .join(' ')
-        )
+        .filter((loc): loc is string => typeof loc === 'string')
     )
   ).sort((a, b) => a.localeCompare(b))
 
@@ -200,7 +222,7 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     return redirect(url.toString())
   }
 
-  const location = searchParams.get('location')?.toLowerCase()
+  const location = searchParams.get('location')
   const years = searchParams.getAll('years').map(Number)
   const employeeRanges = searchParams.getAll('employeeRanges')
   const companyTypes = searchParams.getAll('companyTypes')
