@@ -78,49 +78,54 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     .where(eq(charts.reportId, params.reportId))
     .orderBy(charts.id)
 
-  const toPostalAreas = db
-    .selectDistinct({ location: relocation.toPostalArea })
-    .from(relocation)
-
-  const toMunicipalities = db
-    .selectDistinct({ location: relocation.toMunicipality })
-    .from(relocation)
-
-  const toCounties = db
-    .selectDistinct({ location: relocation.toCounty })
-    .from(relocation)
-
-  const fromPostalAreas = db
-    .selectDistinct({ location: relocation.fromPostalArea })
-    .from(relocation)
-
-  const fromMunicipalities = db
-    .selectDistinct({ location: relocation.fromMunicipality })
-    .from(relocation)
-
-  const fromCounties = db
-    .selectDistinct({ location: relocation.fromCounty })
-    .from(relocation)
-
-  const locations = await union(
-    toPostalAreas,
-    toMunicipalities,
-    toCounties,
-    fromPostalAreas,
-    fromMunicipalities,
-    fromCounties
+  const postalAreasQuery = await union(
+    db.selectDistinct({ location: relocation.toPostalArea }).from(relocation),
+    db.selectDistinct({ location: relocation.fromPostalArea }).from(relocation)
   )
 
-  const allLocations = Array.from(
+  const municipalitiesQuery = await union(
+    db.selectDistinct({ location: relocation.toMunicipality }).from(relocation),
+    db
+      .selectDistinct({ location: relocation.fromMunicipality })
+      .from(relocation)
+  )
+
+  const countiesQuery = await union(
+    db.selectDistinct({ location: relocation.toCounty }).from(relocation),
+    db.selectDistinct({ location: relocation.fromCounty }).from(relocation)
+  )
+
+  const postalAreas = Array.from(
     new Set(
-      locations
+      postalAreasQuery
+        .map((r) => r.location)
+        .filter((loc): loc is string => typeof loc === 'string')
+    )
+  ).sort((a, b) => a.localeCompare(b))
+
+  const municipalities = Array.from(
+    new Set(
+      municipalitiesQuery
+        .map((r) => r.location)
+        .filter((loc): loc is string => typeof loc === 'string')
+    )
+  ).sort((a, b) => a.localeCompare(b))
+
+  const counties = Array.from(
+    new Set(
+      countiesQuery
         .map((r) => r.location)
         .filter((loc): loc is string => typeof loc === 'string')
     )
   ).sort((a, b) => a.localeCompare(b))
 
   const filterOptions = {
-    locations: allLocations,
+    locations: {
+      postalAreas,
+      municipalities,
+      counties,
+    },
+
     years: [
       2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025,
     ],
@@ -759,7 +764,13 @@ export default function Report({
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <h2 className="font-medium">Filter</h2>
-              <Dialog>
+              <Dialog
+                onOpenChange={(open) => {
+                  if (open) {
+                    setLocation(searchParams.get('location') ?? '')
+                  }
+                }}
+              >
                 <DialogTrigger>
                   <Button variant="outline" size="sm" className="h-7 text-xs">
                     <SlidersHorizontalIcon className="size-4" />
@@ -829,7 +840,9 @@ export default function Report({
             <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm">
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">Område:</span>
-                <Badge variant="secondary">{location || 'Alla'}</Badge>
+                <Badge variant="secondary">
+                  {searchParams.get('location') || 'Alla'}
+                </Badge>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">Flyttår:</span>
