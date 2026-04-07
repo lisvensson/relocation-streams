@@ -267,7 +267,7 @@ export function ChartBuilder() {
                     top: document.body.scrollHeight,
                     behavior: 'smooth',
                   })
-                }, 1500)
+                }, 2000)
               }}
               disabled={
                 !type ||

@@ -10,7 +10,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '~/components/ui/card'
@@ -26,7 +25,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { CopyIcon, SaveIcon, SquarePenIcon, Trash2Icon } from 'lucide-react'
+import { CopyIcon, Trash2Icon } from 'lucide-react'
 import { Form } from 'react-router'
 import { ChartEditor } from './ChartEditor'
 import {
@@ -125,30 +124,7 @@ export default function ChartRenderer({
       <Card className="relative w-full">
         {!readOnly && id && (
           <div className="absolute top-3 right-3 flex gap-2">
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <Button
-                    variant="ghost"
-                    className="flex-1"
-                    onClick={() => setChartEditorOpen(!chartEditorOpen)}
-                  >
-                    {chartEditorOpen ? (
-                      <>
-                        <SaveIcon className="size-4" />
-                      </>
-                    ) : (
-                      <>
-                        <SquarePenIcon className="size-4" />
-                      </>
-                    )}
-                  </Button>
-                }
-              />
-              <TooltipContent>
-                <p>{chartEditorOpen ? 'Spara' : 'Redigera'}</p>
-              </TooltipContent>
-            </Tooltip>
+            <ChartEditor chartId={id} />
 
             <Form method="post">
               <input type="hidden" name="intent" value="duplicateChart" />
@@ -498,16 +474,6 @@ export default function ChartRenderer({
             />
           )}
         </CardContent>
-
-        {!readOnly && id && (
-          <CardFooter className="px-4 flex flex-col gap-4 mt-2">
-            <ChartEditor
-              chartId={id}
-              open={chartEditorOpen}
-              setOpen={setChartEditorOpen}
-            />
-          </CardFooter>
-        )}
       </Card>
     </div>
   )
