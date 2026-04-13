@@ -62,6 +62,7 @@ export type NetFlowCategoryChartConfig = {
   maxNumberOfCategories: number
   combineRemainingCategories: boolean
   excludeSelectedArea: boolean
+  chartType: 'column' | 'bar'
 }
 
 export type ChartConfig =

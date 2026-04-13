@@ -26,6 +26,7 @@ export const buildNetFlowCategoryChart: BuildNetFlowCategoryChartFunction =
       maxNumberOfCategories,
       combineRemainingCategories,
       excludeSelectedArea,
+      chartType,
     } = chartConfig
 
     if (!category) {
@@ -165,7 +166,7 @@ export const buildNetFlowCategoryChart: BuildNetFlowCategoryChartFunction =
       type: chartConfig.type,
       title: chartConfig.title,
       description: chartConfig.description,
-      chartType: 'column',
+      chartType: chartType,
       dimension: dimensionKey,
       series: ['inflow', 'outflow', 'net'],
       data,

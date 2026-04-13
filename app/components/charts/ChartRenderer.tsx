@@ -389,9 +389,21 @@ export default function ChartRenderer({
                     <Bar
                       key={s}
                       dataKey={s}
-                      fill={`var(--chart-${i + 1})`}
+                      fill={s === 'net' ? undefined : `var(--chart-${i + 1})`}
                       radius={8}
-                    />
+                    >
+                      {s === 'net' &&
+                        data.map((d, i) => (
+                          <Cell
+                            key={i}
+                            fill={
+                              Number(d.net ?? 0) >= 0
+                                ? 'var(--chart-positive)'
+                                : 'var(--chart-negative)'
+                            }
+                          />
+                        ))}
+                    </Bar>
                   ))}
                 </BarChart>
               ) : chartType === 'line' ? (
