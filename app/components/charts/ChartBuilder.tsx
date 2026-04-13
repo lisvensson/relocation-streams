@@ -18,6 +18,7 @@ import {
   DialogTrigger,
 } from '../ui/dialog'
 import { generateChartTitle } from '~/lib/generateChartTitle'
+import { Label } from '../ui/label'
 
 export function ChartBuilder() {
   const [type, setType] = useState<string>('')
@@ -80,7 +81,15 @@ export function ChartBuilder() {
           />
           <input type="hidden" name="chartDescription" value={''} />
           <input type="hidden" name="excludeSelectedArea" value="off" />
-          <input type="hidden" name="maxNumberOfCategories" value="10" />
+          <input
+            type="hidden"
+            name="maxNumberOfCategories"
+            value={
+              type === 'netflow+category' && category === 'relocationYear'
+                ? 0
+                : 10
+            }
+          />
           <input type="hidden" name="combineRemainingCategories" value="off" />
           <input type="hidden" name="containerSize" value="50" />
           <input type="hidden" name="legendPlacement" value="hidden" />
@@ -88,7 +97,7 @@ export function ChartBuilder() {
 
           {/* type */}
           <div>
-            <label className="block mb-1 font-medium">Välj diagram</label>
+            <Label className="mb-2">Välj diagram</Label>
             <Select
               name="type"
               value={type}
@@ -129,7 +138,7 @@ export function ChartBuilder() {
                 type === 'category' ||
                 type === 'temporal+category') && (
                 <div>
-                  <label className="block mb-1 font-medium">Mätvärde</label>
+                  <Label className="mb-2">Mätvärde</Label>
                   <Select
                     name="measure"
                     value={measure}
@@ -161,7 +170,7 @@ export function ChartBuilder() {
                 type === 'temporal+category' ||
                 type === 'netflow+category') && (
                 <div>
-                  <label className="block mb-1 font-medium">Kategori</label>
+                  <Label className="mb-2">Kategori</Label>
                   <Select
                     name="category"
                     value={category}
@@ -195,9 +204,9 @@ export function ChartBuilder() {
               )}
 
               {/* chartType */}
-              {type === 'category' && (
+              {(type === 'category' || type === 'netflow+category') && (
                 <div>
-                  <label className="block mb-1 font-medium">Diagramtyp</label>
+                  <Label className="mb-2">Diagramtyp</Label>
                   <Select
                     name="chartType"
                     value={chartType}
@@ -214,10 +223,24 @@ export function ChartBuilder() {
                       <SelectValue placeholder="Välj diagramtyp" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="bar">
-                        Liggande stapeldiagram
-                      </SelectItem>
-                      <SelectItem value="pie">Cirkeldiagram</SelectItem>
+                      {type === 'category' && (
+                        <>
+                          <SelectItem value="bar">
+                            Liggande stapeldiagram
+                          </SelectItem>
+                          <SelectItem value="pie">Cirkeldiagram</SelectItem>
+                        </>
+                      )}
+                      {type === 'netflow+category' && (
+                        <>
+                          <SelectItem value="column">
+                            Stående stapeldiagram
+                          </SelectItem>
+                          <SelectItem value="bar">
+                            Liggande stapeldiagram
+                          </SelectItem>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -226,7 +249,7 @@ export function ChartBuilder() {
               {/* measureCalculation */}
               {type === 'temporal+category' && (
                 <div>
-                  <label className="block mb-1 font-medium">Beräkning</label>
+                  <Label className="mb-2">Beräkning</Label>
                   <Select
                     name="measureCalculation"
                     value={measureCalculation}
