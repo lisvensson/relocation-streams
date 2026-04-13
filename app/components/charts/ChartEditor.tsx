@@ -73,7 +73,7 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
       </Tooltip>
 
       <PopoverContent
-        className="w-[420px] p-4"
+        className="w-full max-w-[420px] p-4"
         side="right"
         align="start"
         sideOffset={10}
@@ -158,26 +158,114 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
           {/* chartSettings */}
           {type && (
             <div className="space-y-6">
-              {/* measure */}
               {(type === 'temporal' ||
                 type === 'category' ||
-                type === 'temporal+category') && (
-                <div>
-                  <Label className="mb-2">Mätvärde</Label>
-                  <Select
-                    name="measure"
-                    value={measure}
-                    onValueChange={setMeasure}
-                    required
-                  >
-                    <SelectTrigger className="w-full" aria-invalid={!measure}>
-                      <SelectValue placeholder="Välj mätvärde" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="inflow">Inflytt</SelectItem>
-                      <SelectItem value="outflow">Utflytt</SelectItem>
-                    </SelectContent>
-                  </Select>
+                type === 'temporal+category' ||
+                type === 'netflow+category') && (
+                <div
+                  className={
+                    type === 'category' ||
+                    type === 'temporal+category' ||
+                    type === 'netflow+category'
+                      ? 'grid grid-cols-5 gap-4'
+                      : 'block'
+                  }
+                >
+                  {/* measure */}
+                  {(type === 'temporal' ||
+                    type === 'category' ||
+                    type === 'temporal+category') && (
+                    <div className="col-span-2">
+                      <Label className="mb-2">Mätvärde</Label>
+                      <Select
+                        name="measure"
+                        value={measure}
+                        onValueChange={setMeasure}
+                        required
+                      >
+                        <SelectTrigger
+                          className="w-full"
+                          aria-invalid={!measure}
+                        >
+                          <SelectValue placeholder="Välj mätvärde" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="inflow">Inflytt</SelectItem>
+                          <SelectItem value="outflow">Utflytt</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {/* measureCalculation */}
+                  {type === 'temporal+category' && (
+                    <div className="col-span-3">
+                      <Label className="mb-2">Beräkning</Label>
+                      <Select
+                        name="measureCalculation"
+                        value={measureCalculation}
+                        onValueChange={setMeasureCalculation}
+                        required
+                      >
+                        <SelectTrigger
+                          className="w-full"
+                          aria-invalid={!measureCalculation}
+                        >
+                          <SelectValue placeholder="Välj beräkning" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="volume">Volym</SelectItem>
+                          <SelectItem value="percent">Procent</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {/* chartType */}
+                  {(type === 'category' || type === 'netflow+category') && (
+                    <div
+                      className={
+                        type === 'netflow+category'
+                          ? 'col-span-5'
+                          : 'col-span-3'
+                      }
+                    >
+                      <Label className="mb-2">Diagramtyp</Label>
+                      <Select
+                        name="chartType"
+                        value={chartType}
+                        onValueChange={setChartType}
+                        required
+                      >
+                        <SelectTrigger
+                          className="w-full"
+                          aria-invalid={!chartType}
+                        >
+                          <SelectValue placeholder="Välj diagramtyp" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {type === 'category' && (
+                            <>
+                              <SelectItem value="bar">
+                                Liggande stapeldiagram
+                              </SelectItem>
+                              <SelectItem value="pie">Cirkeldiagram</SelectItem>
+                            </>
+                          )}
+                          {type === 'netflow+category' && (
+                            <>
+                              <SelectItem value="column">
+                                Stående stapeldiagram
+                              </SelectItem>
+                              <SelectItem value="bar">
+                                Liggande stapeldiagram
+                              </SelectItem>
+                            </>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -185,237 +273,216 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
               {(type === 'category' ||
                 type === 'temporal+category' ||
                 type === 'netflow+category') && (
-                <div>
-                  <Label className="mb-2">Kategori</Label>
-                  <Select
-                    name="category"
-                    value={category}
-                    onValueChange={setCategory}
-                    required
-                  >
-                    <SelectTrigger className="w-full" aria-invalid={!category}>
-                      <SelectValue placeholder="Välj kategori" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {type === 'netflow+category' && (
-                        <SelectItem value="relocationYear">Flyttår</SelectItem>
-                      )}
-                      <SelectItem value="employeeRange">
-                        Antal anställda
-                      </SelectItem>
-                      <SelectItem value="industryCluster">Kluster</SelectItem>
-                      <SelectItem value="companyType">Företagsform</SelectItem>
-                      <SelectItem value="postalArea">Postområde</SelectItem>
-                      <SelectItem value="municipality">Kommun</SelectItem>
-                      <SelectItem value="county">Län</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {/* excludeSelectedArea */}
-              {(type === 'category' ||
-                type === 'temporal+category' ||
-                type === 'netflow+category') &&
-                (category === 'postalArea' ||
-                  category === 'municipality' ||
-                  category === 'county') && (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="excludeSelectedArea"
-                      name="excludeSelectedArea"
-                      checked={excludeSelectedArea}
-                      onCheckedChange={(v) =>
-                        setExcludeSelectedArea(Boolean(v))
-                      }
-                    />
-                    <Label htmlFor="excludeSelectedArea">
-                      Exkludera valt område
-                    </Label>
-                  </div>
-                )}
-
-              {/* maxNumberOfCategories */}
-              {(type === 'category' ||
-                type === 'temporal+category' ||
-                type === 'netflow+category') &&
-                category !== 'relocationYear' && (
+                <div
+                  className={
+                    category === 'postalArea' ||
+                    category === 'municipality' ||
+                    category === 'county'
+                      ? 'grid grid-cols-2 gap-4'
+                      : 'block'
+                  }
+                >
                   <div>
-                    <Label className="mb-2">Max antal kategorier</Label>
-                    <Input
-                      type="number"
-                      name="maxNumberOfCategories"
-                      value={maxNumberOfCategories ?? ''}
-                      onChange={(e) => {
-                        setMaxNumberOfCategories(Number(e.target.value))
-                        submit(e.currentTarget.form, {
-                          preventScrollReset: true,
-                        })
-                      }}
-                      aria-invalid={
-                        type === 'temporal+category' && !maxNumberOfCategories
-                      }
-                      required={type === 'temporal+category'}
-                    />
+                    <Label className="mb-2">Kategori</Label>
+                    <Select
+                      name="category"
+                      value={category}
+                      onValueChange={setCategory}
+                      required
+                    >
+                      <SelectTrigger
+                        className="w-full"
+                        aria-invalid={!category}
+                      >
+                        <SelectValue placeholder="Välj kategori" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {type === 'netflow+category' && (
+                          <SelectItem value="relocationYear">
+                            Flyttår
+                          </SelectItem>
+                        )}
+                        <SelectItem value="employeeRange">
+                          Antal anställda
+                        </SelectItem>
+                        <SelectItem value="industryCluster">Kluster</SelectItem>
+                        <SelectItem value="companyType">
+                          Företagsform
+                        </SelectItem>
+                        <SelectItem value="postalArea">Postområde</SelectItem>
+                        <SelectItem value="municipality">Kommun</SelectItem>
+                        <SelectItem value="county">Län</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                )}
-              {category === 'relocationYear' && (
-                <input type="hidden" name="maxNumberOfCategories" value={0} />
+
+                  {/* excludeSelectedArea */}
+                  {(type === 'category' ||
+                    type === 'temporal+category' ||
+                    type === 'netflow+category') &&
+                    (category === 'postalArea' ||
+                      category === 'municipality' ||
+                      category === 'county') && (
+                      <div className="flex items-center gap-2 pt-6">
+                        <Checkbox
+                          id="excludeSelectedArea"
+                          name="excludeSelectedArea"
+                          checked={excludeSelectedArea}
+                          onCheckedChange={(v) =>
+                            setExcludeSelectedArea(Boolean(v))
+                          }
+                        />
+                        <Label htmlFor="excludeSelectedArea">
+                          Exkludera valt område
+                        </Label>
+                      </div>
+                    )}
+                </div>
               )}
 
-              {/* combineRemainingCategories */}
               {(type === 'category' ||
                 type === 'temporal+category' ||
                 type === 'netflow+category') &&
                 category !== 'relocationYear' && (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="combineRemainingCategories"
-                      name="combineRemainingCategories"
-                      checked={combineRemainingCategories}
-                      onCheckedChange={(v) =>
-                        setCombineRemainingCategories(Boolean(v))
-                      }
-                    />
-                    <Label htmlFor="combineRemainingCategories">
-                      Visa resterande kategorier som övrigt
-                    </Label>
+                  <div
+                    className={
+                      combineRemainingCategories !== undefined
+                        ? 'grid grid-cols-5 gap-4'
+                        : 'block'
+                    }
+                  >
+                    {/* maxNumberOfCategories */}
+                    <div className="col-span-2">
+                      <Label className="mb-2">Max antal kategorier</Label>
+                      <Input
+                        type="number"
+                        name="maxNumberOfCategories"
+                        value={maxNumberOfCategories ?? ''}
+                        onChange={(e) => {
+                          setMaxNumberOfCategories(Number(e.target.value))
+                          submit(e.currentTarget.form, {
+                            preventScrollReset: true,
+                          })
+                        }}
+                        aria-invalid={
+                          type === 'temporal+category' && !maxNumberOfCategories
+                        }
+                        required={type === 'temporal+category'}
+                      />
+                    </div>
+                    {category === 'relocationYear' && (
+                      <input
+                        type="hidden"
+                        name="maxNumberOfCategories"
+                        value={0}
+                      />
+                    )}
+
+                    {/* combineRemainingCategories */}
+                    <div className="col-span-3 flex items-center gap-2 pt-6">
+                      <Checkbox
+                        id="combineRemainingCategories"
+                        name="combineRemainingCategories"
+                        checked={combineRemainingCategories}
+                        onCheckedChange={(v) =>
+                          setCombineRemainingCategories(Boolean(v))
+                        }
+                      />
+                      <Label htmlFor="combineRemainingCategories">
+                        Visa resterande som övrigt
+                      </Label>
+                    </div>
                   </div>
                 )}
-
-              {/* chartType */}
-              {type === 'category' && (
-                <div>
-                  <label className="block mb-1 font-medium">Diagramtyp</label>
-                  <Select
-                    name="chartType"
-                    value={chartType}
-                    onValueChange={setChartType}
-                    required
-                  >
-                    <SelectTrigger className="w-full" aria-invalid={!chartType}>
-                      <SelectValue placeholder="Välj diagramtyp" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="bar">
-                        Liggande stapeldiagram
-                      </SelectItem>
-                      <SelectItem value="pie">Cirkeldiagram</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {/* measureCalculation */}
-              {type === 'temporal+category' && (
-                <div>
-                  <Label className="mb-2">Beräkning</Label>
-                  <Select
-                    name="measureCalculation"
-                    value={measureCalculation}
-                    onValueChange={setMeasureCalculation}
-                    required
-                  >
-                    <SelectTrigger
-                      className="w-full"
-                      aria-invalid={!measureCalculation}
-                    >
-                      <SelectValue placeholder="Välj beräkning" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="volume">Volym</SelectItem>
-                      <SelectItem value="percent">Procent</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
 
               {/* containerSize */}
-              {(type === 'temporal' ||
-                type === 'category' ||
-                type === 'temporal+category' ||
-                type === 'netflow+category') && (
-                <div>
-                  <Label className="mb-2">Containerstorlek</Label>
-                  <Select
-                    name="containerSize"
-                    value={containerSize}
-                    onValueChange={setContainerSize}
-                    required
-                  >
-                    <SelectTrigger
-                      className="w-full"
-                      aria-invalid={!containerSize}
+              <div className="grid grid-cols-3 gap-4">
+                {(type === 'temporal' ||
+                  type === 'category' ||
+                  type === 'temporal+category' ||
+                  type === 'netflow+category') && (
+                  <div>
+                    <Label className="mb-2">Containerstorlek</Label>
+                    <Select
+                      name="containerSize"
+                      value={containerSize}
+                      onValueChange={setContainerSize}
+                      required
                     >
-                      <SelectValue placeholder="Välj storlek" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="25">25 %</SelectItem>
-                      <SelectItem value="1/3">1/3</SelectItem>
-                      <SelectItem value="50">50 %</SelectItem>
-                      <SelectItem value="2/3">2/3</SelectItem>
-                      <SelectItem value="75">75 %</SelectItem>
-                      <SelectItem value="100">100 %</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+                      <SelectTrigger
+                        className="w-full"
+                        aria-invalid={!containerSize}
+                      >
+                        <SelectValue placeholder="Välj storlek" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="25">25 %</SelectItem>
+                        <SelectItem value="1/3">1/3</SelectItem>
+                        <SelectItem value="50">50 %</SelectItem>
+                        <SelectItem value="2/3">2/3</SelectItem>
+                        <SelectItem value="75">75 %</SelectItem>
+                        <SelectItem value="100">100 %</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
-              {/* legendPlacement */}
-              {(type === 'temporal' ||
-                type === 'category' ||
-                type === 'temporal+category' ||
-                type === 'netflow+category') && (
-                <div>
-                  <Label className="mb-2">Legendplacering</Label>
-                  <Select
-                    name="legendPlacement"
-                    value={legendPlacement}
-                    onValueChange={setLegendPlacement}
-                    required
-                  >
-                    <SelectTrigger
-                      className="w-full"
-                      aria-invalid={!legendPlacement}
+                {/* legendPlacement */}
+                {(type === 'temporal' ||
+                  type === 'category' ||
+                  type === 'temporal+category' ||
+                  type === 'netflow+category') && (
+                  <div>
+                    <Label className="mb-2">Legendplacering</Label>
+                    <Select
+                      name="legendPlacement"
+                      value={legendPlacement}
+                      onValueChange={setLegendPlacement}
+                      required
                     >
-                      <SelectValue placeholder="Välj placering" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="hidden">Dölj</SelectItem>
-                      <SelectItem value="top">Ovanför</SelectItem>
-                      <SelectItem value="bottom">Under</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+                      <SelectTrigger
+                        className="w-full"
+                        aria-invalid={!legendPlacement}
+                      >
+                        <SelectValue placeholder="Välj placering" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="hidden">Dölj</SelectItem>
+                        <SelectItem value="top">Ovanför</SelectItem>
+                        <SelectItem value="bottom">Under</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
-              {/* tablePlacement */}
-              {(type === 'temporal' ||
-                type === 'category' ||
-                type === 'temporal+category' ||
-                type === 'netflow+category') && (
-                <div>
-                  <Label className="mb-2">Tabellplacering</Label>
-                  <Select
-                    name="tablePlacement"
-                    value={tablePlacement}
-                    onValueChange={setTablePlacement}
-                    required
-                  >
-                    <SelectTrigger
-                      className="w-full"
-                      aria-invalid={!tablePlacement}
+                {/* tablePlacement */}
+                {(type === 'temporal' ||
+                  type === 'category' ||
+                  type === 'temporal+category' ||
+                  type === 'netflow+category') && (
+                  <div>
+                    <Label className="mb-2">Tabellplacering</Label>
+                    <Select
+                      name="tablePlacement"
+                      value={tablePlacement}
+                      onValueChange={setTablePlacement}
+                      required
                     >
-                      <SelectValue placeholder="Välj placering" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="hidden">Dölj</SelectItem>
-                      <SelectItem value="top">Ovanför</SelectItem>
-                      <SelectItem value="bottom">Under</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+                      <SelectTrigger
+                        className="w-full"
+                        aria-invalid={!tablePlacement}
+                      >
+                        <SelectValue placeholder="Välj placering" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="hidden">Dölj</SelectItem>
+                        <SelectItem value="top">Ovanför</SelectItem>
+                        <SelectItem value="bottom">Under</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </Form>
