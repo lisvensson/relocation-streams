@@ -105,21 +105,21 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
         .where(whereOutflow)
         .groupBy(relocation.relocationYear, categoryValue)
 
-      const keysInflow = inflowResult.map((r) => `${r.year}-${r.category}`)
-      const keysOutflow = outflowResult.map((r) => `${r.year}-${r.category}`)
+      const keysInflow = inflowResult.map((r) => `${r.year}+${r.category}`)
+      const keysOutflow = outflowResult.map((r) => `${r.year}+${r.category}`)
 
       const allKeys = Array.from(new Set([...keysInflow, ...keysOutflow]))
 
       result = allKeys.map((key) => {
-        const [years, categories] = key.split('-')
+        const [years, categories] = key.split('+')
         const year = Number(years)
         const category = String(categories)
 
         const inflow =
-          inflowResult.find((r) => `${r.year}-${r.category}` === key)?.value ??
+          inflowResult.find((r) => `${r.year}+${r.category}` === key)?.value ??
           0
         const outflow =
-          outflowResult.find((r) => `${r.year}-${r.category}` === key)?.value ??
+          outflowResult.find((r) => `${r.year}+${r.category}` === key)?.value ??
           0
 
         return {
@@ -169,7 +169,7 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
     const totalsByCategory: Record<string, number> = {}
 
     for (const row of result) {
-      if (measure === 'inflow' || 'outflow') {
+      if (measure === 'inflow' || measure === 'outflow') {
         totalsByCategory[row.category] =
           (totalsByCategory[row.category] ?? 0) + Number(row.value)
       }
