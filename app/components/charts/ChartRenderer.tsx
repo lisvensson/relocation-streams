@@ -63,7 +63,6 @@ export default function ChartRenderer({
   const [isEditingChartTitle, setIsEditingChartTitle] = useState(false)
   const [isEditingChartDescription, setIsEditingChartDescription] =
     useState(false)
-  const [chartEditorOpen, setChartEditorOpen] = useState(false)
 
   const config = Object.fromEntries(
     series.map((s, i) => {
