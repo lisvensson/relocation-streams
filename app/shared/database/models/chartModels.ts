@@ -1,4 +1,4 @@
-export type Measure = 'inflow' | 'outflow'
+export type Measure = 'inflow' | 'outflow' | 'netflow'
 
 type Category =
   | 'relocationYear'

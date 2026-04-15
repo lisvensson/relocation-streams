@@ -192,6 +192,9 @@ export function ChartEditor({ chartId }: ChartEditorProps) {
                         <SelectContent>
                           <SelectItem value="inflow">Inflytt</SelectItem>
                           <SelectItem value="outflow">Utflytt</SelectItem>
+                          {type === 'temporal+category' && (
+                            <SelectItem value="netflow">Nettoflytt</SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>

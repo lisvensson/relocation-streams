@@ -9,8 +9,17 @@ export function generateChartTitle({
   measureCalculation?: string | null
   category?: string | null
 }) {
-  const measureWord = measure === 'inflow' ? 'Inflytt' : 'Utflytt'
+  const measureWord =
+    measure === 'inflow'
+      ? 'Inflytt'
+      : measure === 'outflow'
+        ? 'Utflytt'
+        : measure === 'netflow'
+          ? 'Nettoflytt'
+          : 'Mätvärde'
+
   const calculation = measureCalculation === 'percent' ? '(procent)' : '(volym)'
+
   const categoryLabel =
     category === 'employeeRange'
       ? 'antal anställda'

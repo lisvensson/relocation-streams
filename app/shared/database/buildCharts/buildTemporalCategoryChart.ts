@@ -42,10 +42,8 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
       }
     }
 
-    const measureValue = {
-      inflow: relocation.toLocation,
-      outflow: relocation.fromLocation,
-    }[measure]
+    const inflowValue = relocation.toLocation
+    const outflowValue = relocation.fromLocation
 
     let categoryValue
 
@@ -66,33 +64,121 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
       categoryValue = relocation[category]
     }
 
-    const where = and(
-      ...filters.map((f) =>
-        f.operator === 'in' ? inArray(relocation[f.key], f.value) : undefined
-      ),
-      area ? arrayContains(measureValue, [area]) : undefined
-    )
+    let result: {
+      year: number
+      category: string
+      value: number
+    }[] = []
 
-    const result = await db
-      .select({
-        year: relocation.relocationYear,
-        category: categoryValue,
-        value: count(),
+    if (measure === 'netflow') {
+      const whereInflow = and(
+        ...filters.map((f) =>
+          f.operator === 'in' ? inArray(relocation[f.key], f.value) : undefined
+        ),
+        area ? arrayContains(inflowValue, [area]) : undefined
+      )
+
+      const whereOutflow = and(
+        ...filters.map((f) =>
+          f.operator === 'in' ? inArray(relocation[f.key], f.value) : undefined
+        ),
+        area ? arrayContains(outflowValue, [area]) : undefined
+      )
+
+      const inflowResult = await db
+        .select({
+          year: relocation.relocationYear,
+          category: categoryValue,
+          value: count(),
+        })
+        .from(relocation)
+        .where(whereInflow)
+        .groupBy(relocation.relocationYear, categoryValue)
+
+      const outflowResult = await db
+        .select({
+          year: relocation.relocationYear,
+          category: categoryValue,
+          value: count(),
+        })
+        .from(relocation)
+        .where(whereOutflow)
+        .groupBy(relocation.relocationYear, categoryValue)
+
+      const keysInflow = inflowResult.map((r) => `${r.year}-${r.category}`)
+      const keysOutflow = outflowResult.map((r) => `${r.year}-${r.category}`)
+
+      const allKeys = Array.from(new Set([...keysInflow, ...keysOutflow]))
+
+      result = allKeys.map((key) => {
+        const [years, categories] = key.split('-')
+        const year = Number(years)
+        const category = String(categories)
+
+        const inflow =
+          inflowResult.find((r) => `${r.year}-${r.category}` === key)?.value ??
+          0
+        const outflow =
+          outflowResult.find((r) => `${r.year}-${r.category}` === key)?.value ??
+          0
+
+        return {
+          year,
+          category,
+          value: inflow - outflow,
+        }
       })
-      .from(relocation)
-      .where(where)
-      .groupBy(relocation.relocationYear, categoryValue)
-      .orderBy(asc(relocation.relocationYear))
+    }
 
-    let filteredResult = result
+    if (measure !== 'netflow') {
+      const measureValue = {
+        inflow: relocation.toLocation,
+        outflow: relocation.fromLocation,
+        netflow: null,
+      }[measure]
+
+      const where = and(
+        ...filters.map((f) =>
+          f.operator === 'in' ? inArray(relocation[f.key], f.value) : undefined
+        ),
+        area ? arrayContains(measureValue!, [area]) : undefined
+      )
+
+      result = (
+        await db
+          .select({
+            year: relocation.relocationYear,
+            category: categoryValue,
+            value: count(),
+          })
+          .from(relocation)
+          .where(where)
+          .groupBy(relocation.relocationYear, categoryValue)
+          .orderBy(asc(relocation.relocationYear))
+      ).map((r) => ({
+        year: r.year ?? 0,
+        category: String(r.category ?? ''),
+        value: r.value,
+      }))
+    }
+
     if (excludeSelectedArea && area) {
-      filteredResult = result.filter((row) => row.category !== area)
+      result = result.filter((row) => row.category !== area)
     }
 
     const totalsByCategory: Record<string, number> = {}
-    for (const row of filteredResult) {
-      totalsByCategory[row.category] =
-        (totalsByCategory[row.category] ?? 0) + Number(row.value)
+
+    for (const row of result) {
+      if (measure === 'inflow' || 'outflow') {
+        totalsByCategory[row.category] =
+          (totalsByCategory[row.category] ?? 0) + Number(row.value)
+      }
+
+      if (measure === 'netflow') {
+        const absoluteNetValue = Math.abs(row.value)
+        totalsByCategory[row.category] =
+          (totalsByCategory[row.category] ?? 0) + Number(absoluteNetValue)
+      }
     }
 
     const sortedCategories = Object.keys(totalsByCategory).sort(
@@ -100,8 +186,7 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
     )
     const topCategories = sortedCategories.slice(0, maxNumberOfCategories)
 
-    const years = Array.from(new Set(filteredResult.map((r) => r.year)))
-
+    const years = Array.from(new Set(result.map((r) => r.year)))
     const data: ChartDataPoint[] = []
     const dimensionKey = 'year'
     for (const year of years) {
@@ -112,7 +197,7 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
         point[category] = 0
       }
 
-      for (const row of filteredResult) {
+      for (const row of result) {
         if (row.year === year) {
           if (topCategories.includes(row.category)) {
             point[row.category] = Number(row.value)

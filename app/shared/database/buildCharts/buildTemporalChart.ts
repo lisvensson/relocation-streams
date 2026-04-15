@@ -40,13 +40,14 @@ export const buildTemporalChart: BuildTemporalChartFunction = async (
   const measureValue = {
     inflow: relocation.toLocation,
     outflow: relocation.fromLocation,
+    netflow: null,
   }[measure]
 
   const where = and(
     ...filters.map((f) =>
       f.operator === 'in' ? inArray(relocation[f.key], f.value) : undefined
     ),
-    area ? arrayContains(measureValue, [area]) : undefined
+    area ? arrayContains(measureValue!, [area]) : undefined
   )
 
   const result = await db
