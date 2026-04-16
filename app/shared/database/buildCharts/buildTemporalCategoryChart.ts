@@ -45,23 +45,21 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
     const inflowValue = relocation.toLocation
     const outflowValue = relocation.fromLocation
 
-    let categoryValue
+    let inflowCategoryValue
+    let outflowCategoryValue
 
     if (category === 'postalArea') {
-      categoryValue =
-        measure === 'inflow'
-          ? relocation.fromPostalArea
-          : relocation.toPostalArea
+      inflowCategoryValue = relocation.fromPostalArea
+      outflowCategoryValue = relocation.toPostalArea
     } else if (category === 'municipality') {
-      categoryValue =
-        measure === 'inflow'
-          ? relocation.fromMunicipality
-          : relocation.toMunicipality
+      inflowCategoryValue = relocation.fromMunicipality
+      outflowCategoryValue = relocation.toMunicipality
     } else if (category === 'county') {
-      categoryValue =
-        measure === 'inflow' ? relocation.fromCounty : relocation.toCounty
+      inflowCategoryValue = relocation.fromCounty
+      outflowCategoryValue = relocation.toCounty
     } else {
-      categoryValue = relocation[category]
+      inflowCategoryValue = relocation[category]
+      outflowCategoryValue = relocation[category]
     }
 
     let result: {
@@ -88,22 +86,22 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
       const inflowResult = await db
         .select({
           year: relocation.relocationYear,
-          category: categoryValue,
+          category: inflowCategoryValue,
           value: count(),
         })
         .from(relocation)
         .where(whereInflow)
-        .groupBy(relocation.relocationYear, categoryValue)
+        .groupBy(relocation.relocationYear, inflowCategoryValue)
 
       const outflowResult = await db
         .select({
           year: relocation.relocationYear,
-          category: categoryValue,
+          category: outflowCategoryValue,
           value: count(),
         })
         .from(relocation)
         .where(whereOutflow)
-        .groupBy(relocation.relocationYear, categoryValue)
+        .groupBy(relocation.relocationYear, outflowCategoryValue)
 
       const keysInflow = inflowResult.map((r) => `${r.year}+${r.category}`)
       const keysOutflow = outflowResult.map((r) => `${r.year}+${r.category}`)
@@ -136,6 +134,9 @@ export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
         outflow: relocation.fromLocation,
         netflow: null,
       }[measure]
+
+      const categoryValue =
+        measure === 'inflow' ? inflowCategoryValue : outflowCategoryValue
 
       const where = and(
         ...filters.map((f) =>
