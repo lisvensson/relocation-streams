@@ -1,13 +1,7 @@
 import { Form, redirect, useSearchParams } from 'react-router'
 import { Button } from '~/components/ui/button'
 import { db } from '~/shared/database'
-import {
-  charts,
-  relocation,
-  reports,
-  sharedReports,
-} from '~/shared/database/schema'
-import { union } from 'drizzle-orm/pg-core'
+import { charts, reports, sharedReports } from '~/shared/database/schema'
 import { useState } from 'react'
 import { LocationSelector } from '~/components/reports/LocationSelector'
 import { FilterSelector } from '~/components/reports/FilterSelector'
@@ -43,6 +37,7 @@ import {
 import { Badge } from '~/components/ui/badge'
 import { buildSharedReportSnapshot } from '~/lib/buildSharedReportSnapshot'
 import { toast } from 'sonner'
+import { getLocations } from '~/lib/getLocations'
 
 export async function loader({ params, request, context }: Route.LoaderArgs) {
   const start = performance.now()
@@ -78,54 +73,10 @@ export async function loader({ params, request, context }: Route.LoaderArgs) {
     .where(eq(charts.reportId, params.reportId))
     .orderBy(charts.id)
 
-  const postalAreasQuery = await union(
-    db.selectDistinct({ location: relocation.toPostalArea }).from(relocation),
-    db.selectDistinct({ location: relocation.fromPostalArea }).from(relocation)
-  )
-
-  const municipalitiesQuery = await union(
-    db.selectDistinct({ location: relocation.toMunicipality }).from(relocation),
-    db
-      .selectDistinct({ location: relocation.fromMunicipality })
-      .from(relocation)
-  )
-
-  const countiesQuery = await union(
-    db.selectDistinct({ location: relocation.toCounty }).from(relocation),
-    db.selectDistinct({ location: relocation.fromCounty }).from(relocation)
-  )
-
-  const postalAreas = Array.from(
-    new Set(
-      postalAreasQuery
-        .map((r) => r.location)
-        .filter((loc): loc is string => typeof loc === 'string')
-    )
-  ).sort((a, b) => a.localeCompare(b))
-
-  const municipalities = Array.from(
-    new Set(
-      municipalitiesQuery
-        .map((r) => r.location)
-        .filter((loc): loc is string => typeof loc === 'string')
-    )
-  ).sort((a, b) => a.localeCompare(b))
-
-  const counties = Array.from(
-    new Set(
-      countiesQuery
-        .map((r) => r.location)
-        .filter((loc): loc is string => typeof loc === 'string')
-    )
-  ).sort((a, b) => a.localeCompare(b))
+  const locations = await getLocations()
 
   const filterOptions = {
-    locations: {
-      postalAreas,
-      municipalities,
-      counties,
-    },
-
+    locations,
     years: [
       2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025,
     ],
