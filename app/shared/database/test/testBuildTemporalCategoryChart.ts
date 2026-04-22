@@ -24,16 +24,16 @@ const chartConfig: TemporalCategoryChartConfig = {
   title: 'Utveckling per kategori över tid',
   description: '',
   measure: 'outflow',
-  uiSettings: {
-    containerSize: 'medium',
-    legendPlacement: 'bottom',
-    tablePlacement: 'hidden',
-  },
   category: 'municipality',
   maxNumberOfCategories: 5,
   combineRemainingCategories: true,
   excludeSelectedArea: true,
   measureCalculation: 'volume', //volume eller percent
+  uiSettings: {
+    containerSize: '50',
+    legendPlacement: 'bottom',
+    tablePlacement: 'hidden',
+  },
 }
 
 async function testBuildTemporalCategoryChart() {

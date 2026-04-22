@@ -15,23 +15,37 @@ import {
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData()
-  const email = formData.get('email') as string
+  const email = formData.get('email')
 
-  const existingUser = await db.select().from(user).where(eq(user.email, email))
-
-  if (existingUser.length === 0) {
-    return redirect(`/signin/otp?email=${email}`)
+  if (typeof email !== 'string' || email.trim() === '') {
+    return new Response('Ogiltig e-postadress.', { status: 400 })
   }
 
-  const response = await auth.api.sendVerificationOTP({
-    body: { email, type: 'sign-in' },
-    asResponse: true,
-  })
+  try {
+    const [existingUser] = await db
+      .select()
+      .from(user)
+      .where(eq(user.email, email))
 
-  if (response.ok) {
-    return redirect(`/signin/otp?email=${email}`, {
-      headers: response.headers,
+    if (!existingUser) {
+      return redirect(`/logga-in/kod?email=${encodeURIComponent(email)}`)
+    }
+
+    const response = await auth.api.sendVerificationOTP({
+      body: { email, type: 'sign-in' },
+      asResponse: true,
     })
+
+    if (response.ok) {
+      return redirect(`/logga-in/kod?email=${encodeURIComponent(email)}`, {
+        headers: response.headers,
+      })
+    }
+
+    return new Response('Kunde inte skicka OTP.', { status: 500 })
+  } catch (error) {
+    console.error('Failed to sign in:', error)
+    return new Response('Ett fel uppstod vid inloggning.', { status: 500 })
   }
 }
 

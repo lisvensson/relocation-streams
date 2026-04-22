@@ -6,8 +6,8 @@ import {
 } from '@react-router/dev/routes'
 
 export default [
-  route('signin', './routes/SignIn.tsx'),
-  route('signin/otp', './routes/SignInOtp.tsx'),
+  route('logga-in', './routes/SignIn.tsx'),
+  route('logga-in/kod', './routes/SignInOtp.tsx'),
   route('api/auth/*', 'routes/auth.ts'),
   route('delad-rapport/:sharedId/', './routes/ReportShared.tsx'),
   layout('./routes/shell.tsx', [

@@ -9,51 +9,44 @@ export function generateChartTitle({
   measureCalculation?: string | null
   category?: string | null
 }) {
-  const measureWord =
-    measure === 'inflow'
-      ? 'Inflytt'
-      : measure === 'outflow'
-        ? 'Utflytt'
-        : measure === 'netflow'
-          ? 'Nettoflytt'
-          : 'Mätvärde'
+  const measureWords: Record<string, string> = {
+    inflow: 'Inflytt',
+    outflow: 'Utflytt',
+    netflow: 'Nettoflytt',
+  }
+
+  const categoryLabels: Record<string, string> = {
+    employeeRange: 'antal anställda',
+    industryCluster: 'kluster',
+    companyType: 'företagsform',
+    postalArea: 'postområde',
+    municipality: 'kommun',
+    county: 'län',
+  }
+
+  const measureWord = measureWords[measure ?? ''] ?? 'Mätvärde'
+
+  const categoryLabel = categoryLabels[category ?? ''] ?? 'kategori'
 
   const calculation = measureCalculation === 'percent' ? '(procent)' : '(volym)'
 
-  const categoryLabel =
-    category === 'employeeRange'
-      ? 'antal anställda'
-      : category === 'industryCluster'
-        ? 'kluster'
-        : category === 'companyType'
-          ? 'företagsform'
-          : category === 'postalArea'
-            ? 'postområde'
-            : category === 'municipality'
-              ? 'kommun'
-              : category === 'county'
-                ? 'län'
-                : 'kategori'
+  switch (type) {
+    case 'temporal':
+      return `${measureWord} över tid ${calculation}`
 
-  if (type === 'temporal') {
-    return `${measureWord} över tid ${calculation}`
+    case 'category':
+      return `${measureWord} per ${categoryLabel} ${calculation}`
+
+    case 'temporal+category':
+      return `${measureWord} per ${categoryLabel} över tid ${calculation}`
+
+    case 'netflow+category':
+      if (category === 'relocationYear') {
+        return `Nettoflytt över tid ${calculation}`
+      }
+      return `Nettoflytt per ${categoryLabel} ${calculation}`
+
+    default:
+      return 'Diagram saknar titel'
   }
-
-  if (type === 'category') {
-    return `${measureWord} per ${categoryLabel} ${calculation}`
-  }
-
-  if (type === 'temporal+category') {
-    return `${measureWord} per ${categoryLabel} över tid ${calculation}`
-  }
-
-  if (type === 'netflow+category' && category === 'relocationYear') {
-    return `Nettoflytt över tid ${calculation}`
-  }
-
-  if (type === 'netflow+category') {
-    return `Nettoflytt per ${categoryLabel} ${calculation}`
-  }
-
-  return 'Diagram saknar titel'
 }

@@ -10,6 +10,7 @@ import {
 import type { Route } from './+types/root'
 import './app.css'
 import { Toaster } from './components/ui/sonner'
+import { Button } from './components/ui/button'
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -52,30 +53,55 @@ export default function App() {
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = 'Oops!'
-  let details = 'An unexpected error occurred.'
+  let message = 'Ett fel uppstod'
+  let details = 'Något gick fel. Försök igen senare.'
   let stack: string | undefined
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? '404' : 'Error'
-    details =
-      error.status === 404
-        ? 'The requested page could not be found.'
-        : error.statusText || details
-  } else if (import.meta.env.DEV && error && error instanceof Error) {
+    const detailInfo = error.data?.toString().trim() || null
+    message = `Fel ${error.status}`
+
+    if (detailInfo) {
+      details = detailInfo
+    } else {
+      switch (error.status) {
+        case 404:
+          details = 'Sidan kunde inte hittas.'
+          break
+        case 403:
+          details = 'Åtkomst nekad.'
+          break
+        case 500:
+          details = 'Ett serverfel uppstod.'
+          break
+        default:
+          details = 'Något gick fel. Försök igen senare.'
+      }
+    }
+  } else if (import.meta.env.DEV && error instanceof Error) {
+    message = 'Oväntat fel'
     details = error.message
     stack = error.stack
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
-      )}
+    <main className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
+      <div className="max-w-3xl w-full space-y-6">
+        <h1 className="text-4xl font-bold">{message}</h1>
+        <p className="text-lg text-muted-foreground">{details}</p>
+
+        <div className="pt-4">
+          <Button asChild>
+            <a href="/rapporter">Till rapporter</a>
+          </Button>
+        </div>
+
+        {stack && (
+          <pre className="mt-8 p-6 bg-muted rounded-md text-left overflow-auto text-sm max-h-[50vh]">
+            <code>{stack}</code>
+          </pre>
+        )}
+      </div>
     </main>
   )
 }

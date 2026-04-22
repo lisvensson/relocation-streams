@@ -8,12 +8,10 @@ import 'dotenv/config'
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export const auth = betterAuth({
+  secret: process.env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: 'pg',
   }),
-  emailAndPassword: {
-    enabled: true,
-  },
   plugins: [
     emailOTP({
       async sendVerificationOTP({ email, otp, type }) {
@@ -28,7 +26,7 @@ export const auth = betterAuth({
               <p><strong>Din engångskod för inloggning är:</strong> ${otp}</p>
             </div>
           `
-          console.log(`Engångskod för inloggning har skickats till ${email}`)
+          console.log(`Engångskod för inloggning har skickats.`)
         }
         const { data, error } = await resend.emails.send({
           from: `${process.env.SEND_OTP_EMAIL_FROM}`,

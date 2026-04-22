@@ -12,22 +12,33 @@ import {
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData()
-  const email = formData.get('email') as string
-  const otp = formData.get('otp') as string
+  const email = formData.get('email')
+  const otp = formData.get('otp')
 
-  const response = await auth.api.signInEmailOTP({
-    body: { email, otp },
-    asResponse: true,
-  })
-
-  if (response.ok) {
-    return redirect('/', {
-      headers: response.headers,
-    })
+  if (typeof email !== 'string' || typeof otp !== 'string') {
+    return { error: 'Ogiltiga indata' }
   }
 
-  if (response.status === 400) {
-    return { error: 'Fel kod. Försök igen.' }
+  try {
+    const response = await auth.api.signInEmailOTP({
+      body: { email, otp },
+      asResponse: true,
+    })
+
+    if (response.ok) {
+      return redirect('/', {
+        headers: response.headers,
+      })
+    }
+
+    if (response.status === 400) {
+      return { error: 'Fel kod. Försök igen.' }
+    }
+
+    return { error: 'Kunde inte verifiera koden. Försök igen senare.' }
+  } catch (error) {
+    console.error('OTP sign-in error:', error)
+    return { error: 'Ett oväntat fel uppstod. Försök igen.' }
   }
 }
 
@@ -49,7 +60,9 @@ export default function SignInOTP({ actionData }: Route.ComponentProps) {
             </FieldDescription>
           </div>
           {actionData?.error && (
-            <div className="text-red-600 text-sm">{actionData.error}</div>
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+              {actionData.error}
+            </p>
           )}
           <Form method="post" className="flex flex-col gap-4 items-center">
             <input type="hidden" name="email" value={email} />

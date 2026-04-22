@@ -16,8 +16,6 @@ type BuildTemporalCategoryChartFunction = (
 
 export const buildTemporalCategoryChart: BuildTemporalCategoryChartFunction =
   async (area, filters, chartConfig) => {
-    console.log({ area, filters, chartConfig })
-
     const {
       measure,
       category,

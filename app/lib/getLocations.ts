@@ -2,16 +2,18 @@ import { db } from '~/shared/database'
 import { relocation } from '~/shared/database/schema'
 import { union } from 'drizzle-orm/pg-core'
 
-let locations: {
+export type Locations = {
   postalAreas: string[]
   municipalities: string[]
   counties: string[]
-} | null = null
+}
+
+let locations: Locations | null = null
 
 let lastFetch = 0
 const duration = 1000 * 60 * 60 * 24
 
-export async function getLocations() {
+export async function getLocations(): Promise<Locations> {
   const now = Date.now()
 
   if (locations && now - lastFetch < duration) {

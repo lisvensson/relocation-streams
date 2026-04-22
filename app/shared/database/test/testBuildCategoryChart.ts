@@ -21,16 +21,16 @@ const chartConfig: CategoryChartConfig = {
   type: 'category',
   description: '',
   measure: 'outflow',
-  uiSettings: {
-    containerSize: 'medium',
-    legendPlacement: 'bottom',
-    tablePlacement: 'hidden',
-  },
   category: 'municipality',
   maxNumberOfCategories: 5,
   combineRemainingCategories: true,
   excludeSelectedArea: false,
-  chartType: 'bar', // pie eller bar
+  chartType: 'bar', // pie eller bar,
+  uiSettings: {
+    containerSize: '50',
+    legendPlacement: 'bottom',
+    tablePlacement: 'hidden',
+  },
 }
 
 async function testBuildCategoryChart() {

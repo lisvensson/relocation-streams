@@ -23,10 +23,16 @@ const chartConfig: NetFlowCategoryChartConfig = {
   type: 'netflow+category',
   title: 'Nettoflytt per kategori',
   description: '',
+  chartType: 'bar',
   category: 'municipality',
   maxNumberOfCategories: 5,
   combineRemainingCategories: true,
   excludeSelectedArea: true,
+  uiSettings: {
+    containerSize: '50',
+    legendPlacement: 'bottom',
+    tablePlacement: 'hidden',
+  },
 }
 
 async function testBuildNetFlowCategoryChart() {

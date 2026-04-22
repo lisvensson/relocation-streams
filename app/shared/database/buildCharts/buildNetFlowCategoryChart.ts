@@ -16,8 +16,6 @@ type BuildNetFlowCategoryChartFunction = (
 
 export const buildNetFlowCategoryChart: BuildNetFlowCategoryChartFunction =
   async (area, filters, chartConfig) => {
-    console.log({ area, filters, chartConfig })
-
     const inflowValue = relocation.toLocation
     const outflowValue = relocation.fromLocation
 

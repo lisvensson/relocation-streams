@@ -3,20 +3,34 @@ import { eq } from 'drizzle-orm'
 import { sharedReports } from '~/shared/database/schema'
 import type { Route } from './+types/ReportShared'
 import ChartRenderer from '~/components/charts/ChartRenderer'
+import type { ChartModel } from '~/shared/database/models/chartModels'
 
 export async function loader({ params }: Route.LoaderArgs) {
   const id = params.sharedId
-
-  const [sharedReport] = await db
-    .select()
-    .from(sharedReports)
-    .where(eq(sharedReports.id, id))
-
-  if (!sharedReport) {
-    throw new Response('Delad rapport hittades inte', { status: 404 })
+  if (!id) {
+    throw new Response('Ogiltig delad rapport-länk', { status: 400 })
   }
 
-  return { sharedReport }
+  try {
+    const [sharedReport] = await db
+      .select()
+      .from(sharedReports)
+      .where(eq(sharedReports.id, id))
+
+    if (!sharedReport) {
+      throw new Response('Delad rapport hittades inte.', { status: 404 })
+    }
+
+    return {
+      sharedReport: {
+        ...sharedReport,
+        charts: sharedReport.charts as ChartModel[],
+      },
+    }
+  } catch (error) {
+    console.error('Failed to load shared report:', error)
+    throw new Response('Kunde inte ladda delad rapport.', { status: 500 })
+  }
 }
 
 export default function ReportShared({ loaderData }: Route.ComponentProps) {

@@ -19,8 +19,6 @@ export const buildTemporalChart: BuildTemporalChartFunction = async (
   filters,
   chartConfig
 ) => {
-  console.log({ area, filters, chartConfig })
-
   const { measure } = chartConfig
 
   if (!measure) {

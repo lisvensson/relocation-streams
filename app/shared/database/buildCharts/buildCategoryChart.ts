@@ -19,8 +19,6 @@ export const buildCategoryChart: buildCategoryChartFunction = async (
   filters,
   chartConfig
 ) => {
-  console.log({ area, filters, chartConfig })
-
   const {
     measure,
     category,

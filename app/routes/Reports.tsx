@@ -36,158 +36,178 @@ import { CreateReport } from '~/components/reports/CreateReport'
 import { userSessionContext } from '~/context/userSessionContext'
 import { Badge } from '~/components/ui/badge'
 import { buildSharedReportSnapshot } from '~/lib/buildSharedReportSnapshot'
+import type { ChartConfig } from '~/shared/database/models/chartModels'
 
 export async function loader({ context }: Route.LoaderArgs) {
   const userSession = context.get(userSessionContext)
-  if (!userSession) throw new Error('Användare saknas')
+  if (!userSession) throw redirect('/logga-in')
 
-  const report = await db
-    .select({
-      id: reports.id,
-      title: reports.title,
-      createdAt: reports.createdAt,
-      sharedId: sharedReports.id,
-    })
-    .from(reports)
-    .leftJoin(sharedReports, eq(sharedReports.reportId, reports.id))
-    .where(eq(reports.userId, userSession.user.id))
-    .orderBy(desc(reports.createdAt))
+  try {
+    const allReports = await db
+      .select({
+        id: reports.id,
+        title: reports.title,
+        createdAt: reports.createdAt,
+        sharedId: sharedReports.id,
+      })
+      .from(reports)
+      .leftJoin(sharedReports, eq(sharedReports.reportId, reports.id))
+      .where(eq(reports.userId, userSession.user.id))
+      .orderBy(desc(reports.createdAt))
 
-  return { report }
+    return { reports: allReports }
+  } catch (error) {
+    console.error('Failed to load reports:', error)
+    throw new Response('Kunde inte ladda rapporter.', { status: 500 })
+  }
 }
 
 export async function action({ context, request }: Route.ActionArgs) {
   const userSession = context.get(userSessionContext)
-  if (!userSession) throw new Error('Användare saknas')
+  if (!userSession) throw redirect('/logga-in')
 
   const formData = await request.formData()
+  const reportId = formData.get('id') as string
   const intent = formData.get('intent')
 
-  if (intent === 'createReport') {
-    const [report] = await db
-      .insert(reports)
-      .values({
-        userId: userSession.user.id,
-        title: '',
-        description: '',
-      })
-      .returning({ id: reports.id })
+  try {
+    switch (intent) {
+      case 'createReport': {
+        const [report] = await db
+          .insert(reports)
+          .values({
+            userId: userSession.user.id,
+            title: '',
+            description: '',
+          })
+          .returning({ id: reports.id })
 
-    return redirect(`/rapport/${report.id}`)
+        return redirect(`/rapport/${report.id}`)
+      }
+
+      case 'shareReport': {
+        const [report] = await db
+          .select()
+          .from(reports)
+          .where(eq(reports.id, reportId))
+
+        if (!report) {
+          throw new Response('Rapporten hittades inte.', { status: 404 })
+        }
+
+        const snapshot = await buildSharedReportSnapshot(reportId)
+
+        const existing = await db
+          .select()
+          .from(sharedReports)
+          .where(eq(sharedReports.reportId, reportId))
+
+        if (existing.length > 0) {
+          const [updated] = await db
+            .update(sharedReports)
+            .set({
+              title: snapshot.report.title,
+              description: snapshot.report.description,
+              charts: snapshot.charts,
+            })
+            .where(eq(sharedReports.reportId, reportId))
+            .returning()
+
+          return { sharedReportId: updated.id }
+        }
+
+        const [shared] = await db
+          .insert(sharedReports)
+          .values({
+            title: snapshot.report.title,
+            description: snapshot.report.description,
+            reportId,
+            charts: snapshot.charts,
+          })
+          .returning()
+
+        return { sharedReportId: shared.id }
+      }
+
+      case 'duplicateReport': {
+        const [report] = await db
+          .select()
+          .from(reports)
+          .where(
+            and(
+              eq(reports.id, reportId),
+              eq(reports.userId, userSession.user.id)
+            )
+          )
+
+        if (!report) {
+          throw new Response('Rapporten hittades inte.', { status: 404 })
+        }
+
+        const [newReport] = await db
+          .insert(reports)
+          .values({
+            userId: userSession.user.id,
+            title: report.title ? `${report.title} (kopia)` : 'Kopia',
+            description: report.description,
+            location: report.location,
+            filters: report.filters,
+          })
+          .returning({ id: reports.id })
+
+        const chartsFromReport = await db
+          .select()
+          .from(charts)
+          .where(eq(charts.reportId, reportId))
+          .orderBy(charts.id)
+
+        for (const chart of chartsFromReport) {
+          await db.insert(charts).values({
+            reportId: newReport.id,
+            config: chart.config as ChartConfig,
+          })
+        }
+
+        return null
+      }
+
+      case 'deleteReport': {
+        const [report] = await db
+          .select()
+          .from(reports)
+          .where(
+            and(
+              eq(reports.id, reportId),
+              eq(reports.userId, userSession.user.id)
+            )
+          )
+
+        if (!report) {
+          throw new Response(
+            'Du har inte behörighet att radera denna rapport.',
+            {
+              status: 403,
+            }
+          )
+        }
+
+        await db.delete(reports).where(eq(reports.id, reportId))
+        return null
+      }
+
+      default:
+        return null
+    }
+  } catch (error) {
+    console.error('Action error:', error)
+    throw new Response('Ett fel uppstod vid hantering av rapporten.', {
+      status: 500,
+    })
   }
-
-  if (intent === 'shareReport') {
-    const reportId = formData.get('id') as string
-
-    const [report] = await db
-      .select()
-      .from(reports)
-      .where(eq(reports.id, reportId))
-
-    if (!report) {
-      throw new Response('Rapporten hittades inte', { status: 404 })
-    }
-
-    const snapshot = await buildSharedReportSnapshot(reportId)
-
-    const existing = await db
-      .select()
-      .from(sharedReports)
-      .where(eq(sharedReports.reportId, report.id))
-
-    if (existing.length > 0) {
-      const [updated] = await db
-        .update(sharedReports)
-        .set({
-          title: snapshot.report.title,
-          description: snapshot.report.description,
-          charts: snapshot.charts,
-        })
-        .where(eq(sharedReports.reportId, reportId))
-        .returning()
-
-      return { sharedReportId: updated.id }
-    }
-
-    await db
-      .insert(sharedReports)
-      .values({
-        title: snapshot.report.title,
-        description: snapshot.report.description,
-        reportId: reportId,
-        charts: snapshot.charts,
-      })
-      .returning()
-
-    return null
-  }
-
-  if (intent === 'duplicateReport') {
-    const reportId = formData.get('id') as string
-
-    const [report] = await db
-      .select()
-      .from(reports)
-      .where(
-        and(eq(reports.id, reportId), eq(reports.userId, userSession.user.id))
-      )
-
-    if (!report) {
-      throw new Response('Rapporten hittades inte', { status: 404 })
-    }
-
-    const [newReport] = await db
-      .insert(reports)
-      .values({
-        userId: userSession.user.id,
-        title: report.title ? `${report.title} (kopia)` : 'Kopia',
-        description: report.description,
-        location: report.location,
-        filters: report.filters,
-      })
-      .returning({ id: reports.id })
-
-    const chartsFromReport = await db
-      .select()
-      .from(charts)
-      .where(eq(charts.reportId, reportId))
-      .orderBy(charts.id)
-
-    for (const chart of chartsFromReport) {
-      await db.insert(charts).values({
-        reportId: newReport.id,
-        config: chart.config as any,
-      })
-    }
-
-    return null
-  }
-
-  if (intent === 'deleteReport') {
-    const reportId = formData.get('id') as string
-
-    const [report] = await db
-      .select()
-      .from(reports)
-      .where(
-        and(eq(reports.id, reportId), eq(reports.userId, userSession.user.id))
-      )
-
-    if (!report) {
-      throw new Response('Du har inte behörighet att radera denna rapport', {
-        status: 403,
-      })
-    }
-
-    await db.delete(reports).where(eq(reports.id, reportId))
-    return null
-  }
-
-  return null
 }
 
 export default function Reports({ loaderData }: Route.ComponentProps) {
-  const { report } = loaderData
+  const { reports } = loaderData
 
   return (
     <div className="space-y-10">
@@ -206,7 +226,7 @@ export default function Reports({ loaderData }: Route.ComponentProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {report.map((r) => (
+          {reports.map((r) => (
             <TableRow key={r.id}>
               <TableCell className="font-medium">
                 <Link to={`/rapport/${r.id}`} className="hover:underline">

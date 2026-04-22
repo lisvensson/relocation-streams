@@ -9,40 +9,39 @@ import { user } from '~/shared/database/schema'
 
 export const middleware: Route.MiddlewareFunction[] = [requireUserMiddleware]
 
-export async function loader({ context }: { context: any }) {
+export async function loader({ context }: Route.LoaderArgs) {
   const userSession = context.get(userSessionContext)
 
-  let isLoggedIn = false
-  let userData = null
+  if (!userSession?.user?.email) {
+    return { isLoggedIn: false, user: null }
+  }
 
-  if (userSession.user?.email) {
+  try {
     const [existingUser] = await db
-      .select()
+      .select({
+        name: user.name,
+        email: user.email,
+      })
       .from(user)
       .where(eq(user.email, userSession.user.email))
 
-    if (existingUser) {
-      isLoggedIn = true
-      userData = {
-        name: existingUser.name,
-        email: existingUser.email,
-      }
+    if (!existingUser) {
+      return { isLoggedIn: false, user: null }
     }
-  }
 
-  return { isLoggedIn, user: userData }
+    return {
+      isLoggedIn: true,
+      user: existingUser,
+    }
+  } catch (error) {
+    console.error('Failed to load user in shell:', error)
+    return { isLoggedIn: false, user: null }
+  }
 }
 
-export default function Shell({
-  loaderData,
-}: {
-  loaderData: {
-    isLoggedIn: boolean
-    user: { name: string; email: string } | null
-  }
-}) {
+export default function Shell({ loaderData }: Route.ComponentProps) {
+  const { isLoggedIn, user } = loaderData
   const location = useLocation()
-
   const hideNavbar =
     location.pathname.startsWith('/rapport/') ||
     location.pathname.startsWith('/skapa-rapport/') ||
@@ -50,9 +49,7 @@ export default function Shell({
 
   return (
     <div className="min-h-screen flex">
-      {!hideNavbar && (
-        <Navbar isLoggedIn={loaderData.isLoggedIn} user={loaderData.user} />
-      )}
+      {!hideNavbar && <Navbar isLoggedIn={isLoggedIn} user={user} />}
       <main className="flex-1 p-6">
         <Outlet />
       </main>

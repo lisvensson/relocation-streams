@@ -5,12 +5,8 @@ import { charts, reports, sharedReports } from '~/shared/database/schema'
 import { useState } from 'react'
 import { LocationSelector } from '~/components/reports/LocationSelector'
 import { FilterSelector } from '~/components/reports/FilterSelector'
-import type { Filter } from '~/shared/database/models/chartModels'
+import type { ChartConfig, Filter } from '~/shared/database/models/chartModels'
 import { ChartBuilder } from '~/components/charts/ChartBuilder'
-import { buildNetFlowCategoryChart } from '~/shared/database/buildCharts/buildNetFlowCategoryChart'
-import { buildTemporalChart } from '~/shared/database/buildCharts/buildTemporalChart'
-import { buildCategoryChart } from '~/shared/database/buildCharts/buildCategoryChart'
-import { buildTemporalCategoryChart } from '~/shared/database/buildCharts/buildTemporalCategoryChart'
 import ChartRenderer from '~/components/charts/ChartRenderer'
 import { eq, and } from 'drizzle-orm'
 import type { Route } from './+types/Report'
@@ -38,219 +34,143 @@ import { Badge } from '~/components/ui/badge'
 import { buildSharedReportSnapshot } from '~/lib/buildSharedReportSnapshot'
 import { toast } from 'sonner'
 import { getLocations } from '~/lib/getLocations'
+import { getFilterOptions } from '~/lib/getFilterOptions'
+import { buildChartByType } from '~/lib/buildChartsByType'
+import { buildChartConfig } from '~/lib/buildChartConfig'
+import { saveReportFilters } from '~/lib/saveReportFilters'
+import { updateSharedSnapshot } from '~/lib/updateSharedSnapshot'
 
 export async function loader({ params, request, context }: Route.LoaderArgs) {
-  const start = performance.now()
-
   const userSession = context.get(userSessionContext)
-  if (!userSession) throw new Error('Användare saknas')
+  if (!userSession) throw redirect('/logga-in')
 
-  const [report] = await db
-    .select({
-      id: reports.id,
-      title: reports.title,
-      description: reports.description,
-      createdAt: reports.createdAt,
-      location: reports.location,
-      filters: reports.filters,
-      sharedId: sharedReports.id,
-    })
-    .from(reports)
-    .leftJoin(sharedReports, eq(sharedReports.reportId, reports.id))
-    .where(
-      and(
-        eq(reports.id, params.reportId),
-        eq(reports.userId, userSession.user.id)
+  try {
+    const [report] = await db
+      .select({
+        id: reports.id,
+        title: reports.title,
+        description: reports.description,
+        createdAt: reports.createdAt,
+        location: reports.location,
+        filters: reports.filters,
+        sharedId: sharedReports.id,
+      })
+      .from(reports)
+      .leftJoin(sharedReports, eq(sharedReports.reportId, reports.id))
+      .where(
+        and(
+          eq(reports.id, params.reportId),
+          eq(reports.userId, userSession.user.id)
+        )
+      )
+    if (!report) {
+      throw new Response('Rapporten hittades inte', { status: 404 })
+    }
+
+    const savedCharts = await db
+      .select()
+      .from(charts)
+      .where(eq(charts.reportId, params.reportId))
+      .orderBy(charts.id)
+
+    const locations = await getLocations()
+    const filterOptions = getFilterOptions(locations)
+
+    const url = new URL(request.url)
+    const searchParams = url.searchParams
+
+    const hasFilters =
+      searchParams.has('location') ||
+      searchParams.has('years') ||
+      searchParams.has('employeeRanges') ||
+      searchParams.has('companyTypes') ||
+      searchParams.has('industryClusters')
+
+    if (
+      !hasFilters &&
+      Array.isArray(report.filters) &&
+      report.filters.length > 0
+    ) {
+      if (report.location) {
+        searchParams.set('location', report.location)
+      }
+
+      for (const filter of report.filters) {
+        const values = Array.isArray(filter.value)
+          ? filter.value
+          : [filter.value]
+
+        if (filter.key === 'relocationYear') {
+          for (const value of values) searchParams.append('years', value)
+        }
+
+        if (filter.key === 'employeeRange') {
+          for (const value of values)
+            searchParams.append('employeeRanges', value)
+        }
+
+        if (filter.key === 'companyType') {
+          for (const value of values) searchParams.append('companyTypes', value)
+        }
+
+        if (filter.key === 'industryCluster') {
+          for (const value of values)
+            searchParams.append('industryClusters', value)
+        }
+      }
+
+      return redirect(url.toString())
+    }
+
+    const location = searchParams.get('location') ?? undefined
+    const years = searchParams.getAll('years').map(Number)
+    const employeeRanges = searchParams.getAll('employeeRanges')
+    const companyTypes = searchParams.getAll('companyTypes')
+    const industryClusters = searchParams.getAll('industryClusters')
+
+    const filters: Filter[] = []
+    if (years.length)
+      filters.push({ key: 'relocationYear', operator: 'in', value: years })
+    if (employeeRanges.length)
+      filters.push({
+        key: 'employeeRange',
+        operator: 'in',
+        value: employeeRanges,
+      })
+    if (companyTypes.length)
+      filters.push({ key: 'companyType', operator: 'in', value: companyTypes })
+    if (industryClusters.length)
+      filters.push({
+        key: 'industryCluster',
+        operator: 'in',
+        value: industryClusters,
+      })
+
+    const buildCharts = await Promise.all(
+      savedCharts.map((chart) =>
+        buildChartByType(
+          chart.id,
+          location,
+          filters,
+          chart.config as ChartConfig
+        )
       )
     )
-  if (!report) {
-    throw new Response('Rapporten hittades inte', { status: 404 })
-  }
 
-  const savedCharts = await db
-    .select()
-    .from(charts)
-    .where(eq(charts.reportId, params.reportId))
-    .orderBy(charts.id)
-
-  const locations = await getLocations()
-
-  const filterOptions = {
-    locations,
-    years: [
-      2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025,
-    ],
-    employeeRanges: [
-      '0',
-      '1-4',
-      '5-9',
-      '10-19',
-      '20-49',
-      '50-99',
-      '100-199',
-      '200-499',
-      '500-999',
-      '1000-1499',
-      '1500-1999',
-      '2000-2999',
-      '3000-3999',
-    ],
-    companyTypes: ['Offentlig sektor', 'Privat sektor', 'Övrigt'],
-    industryClusters: [
-      'Bank/Finans',
-      'Bil/Motor',
-      'Bygg',
-      'Dagligvaruhandel',
-      'Data/IT',
-      'Djur/Natur',
-      'Energi/Återvinning',
-      'Fastighet',
-      'HR',
-      'Hushållsnära tjänster',
-      'Huvudkontorsverksamhet',
-      'Infrastruktur',
-      'Internationellt',
-      'Juridik',
-      'Konsult/Kontorstjänster',
-      'Kultur/Nöje',
-      'Life science',
-      'Logistik/Gods',
-      'Mat/Dryck/Logi',
-      'Media/Reklam/Design',
-      'Offentlig sektor',
-      'Partihandel',
-      'Säkerhet',
-      'Sällanköpshandel',
-      'Tillverkning',
-      'Träning/Sport',
-      'Utbildning',
-      'Vård',
-    ],
-  }
-
-  const url = new URL(request.url)
-  const searchParams = url.searchParams
-
-  const hasFilters =
-    searchParams.has('location') ||
-    searchParams.has('years') ||
-    searchParams.has('employeeRanges') ||
-    searchParams.has('companyTypes') ||
-    searchParams.has('industryClusters')
-
-  if (
-    !hasFilters &&
-    Array.isArray(report.filters) &&
-    report.filters.length > 0
-  ) {
-    if (report.location) {
-      searchParams.set('location', report.location)
+    return {
+      report,
+      filterOptions,
+      filters,
+      charts: buildCharts,
     }
-
-    for (const filter of report.filters) {
-      const values = Array.isArray(filter.value) ? filter.value : [filter.value]
-
-      if (filter.key === 'relocationYear') {
-        for (const value of values) {
-          searchParams.append('years', value)
-        }
-      }
-
-      if (filter.key === 'employeeRange') {
-        for (const value of values) {
-          searchParams.append('employeeRanges', value)
-        }
-      }
-
-      if (filter.key === 'companyType') {
-        for (const value of values) {
-          searchParams.append('companyTypes', value)
-        }
-      }
-
-      if (filter.key === 'industryCluster') {
-        for (const value of values) {
-          searchParams.append('industryClusters', value)
-        }
-      }
-    }
-
-    return redirect(url.toString())
-  }
-
-  const location = searchParams.get('location')
-  const years = searchParams.getAll('years').map(Number)
-  const employeeRanges = searchParams.getAll('employeeRanges')
-  const companyTypes = searchParams.getAll('companyTypes')
-  const industryClusters = searchParams.getAll('industryClusters')
-
-  const filters: Filter[] = []
-  if (years.length)
-    filters.push({ key: 'relocationYear', operator: 'in', value: years })
-  if (employeeRanges.length)
-    filters.push({
-      key: 'employeeRange',
-      operator: 'in',
-      value: employeeRanges,
-    })
-  if (companyTypes.length)
-    filters.push({ key: 'companyType', operator: 'in', value: companyTypes })
-  if (industryClusters.length)
-    filters.push({
-      key: 'industryCluster',
-      operator: 'in',
-      value: industryClusters,
-    })
-
-  const buildCharts = await Promise.all(
-    savedCharts.map(async (chart) => {
-      const config = chart.config
-      if (config.type === 'netflow+category') {
-        const buildChart = await buildNetFlowCategoryChart(
-          location,
-          filters,
-          config
-        )
-        return { id: chart.id, ...buildChart, config }
-      }
-
-      if (config.type === 'temporal') {
-        const buildChart = await buildTemporalChart(location, filters, config)
-        return { id: chart.id, ...buildChart, config }
-      }
-
-      if (config.type === 'category') {
-        const buildChart = await buildCategoryChart(location, filters, config)
-        return { id: chart.id, ...buildChart, config }
-      }
-
-      if (config.type === 'temporal+category') {
-        const buildChart = await buildTemporalCategoryChart(
-          location,
-          filters,
-          config
-        )
-        return { id: chart.id, ...buildChart, config }
-      }
-
-      return null
-    })
-  )
-
-  const end = performance.now()
-  console.log(`Loader time: ${(end - start).toFixed(2)} ms`)
-
-  return {
-    report,
-    filterOptions,
-    filters,
-    charts: buildCharts,
+  } catch (error) {
+    throw new Response('Rapporten hittades inte.', { status: 404 })
   }
 }
 
 export async function action({ request, params, context }: Route.ActionArgs) {
   const userSession = context.get(userSessionContext)
-  if (!userSession) throw new Error('Användare saknas')
+  if (!userSession) throw redirect('/logga-in')
 
   const formData = await request.formData()
   const reportId = params.reportId
@@ -266,258 +186,152 @@ export async function action({ request, params, context }: Route.ActionArgs) {
       status: 403,
     })
   }
+
   const intent = formData.get('intent')
+  const chartId = formData.get('id') as string
 
-  if (intent === 'addChart') {
-    const config = {
-      type: formData.get('type'),
-      title: formData.get('chartTitle'),
-      description: formData.get('chartDescription'),
-      measure: formData.get('measure'),
-      category: formData.get('category'),
-      excludeSelectedArea: formData.get('excludeSelectedArea') === 'on',
-      maxNumberOfCategories: Number(formData.get('maxNumberOfCategories')),
-      combineRemainingCategories:
-        formData.get('combineRemainingCategories') === 'on',
-      chartType: formData.get('chartType'),
-      measureCalculation: formData.get('measureCalculation'),
-      uiSettings: {
-        containerSize: formData.get('containerSize'),
-        legendPlacement: formData.get('legendPlacement'),
-        tablePlacement: formData.get('tablePlacement'),
-      },
+  switch (intent) {
+    case 'addChart': {
+      const config = buildChartConfig(formData)
+      await db.insert(charts).values({ reportId, config })
+      return null
     }
 
-    await db.insert(charts).values({
-      reportId,
-      config,
-    })
-
-    return null
-  }
-
-  if (intent === 'updateChart') {
-    const chartId = formData.get('id') as string
-
-    const config = {
-      type: formData.get('type'),
-      title: formData.get('chartTitle'),
-      description: formData.get('chartDescription'),
-      measure: formData.get('measure'),
-      category: formData.get('category'),
-      excludeSelectedArea: formData.get('excludeSelectedArea') === 'on',
-      maxNumberOfCategories: Number(formData.get('maxNumberOfCategories')),
-      combineRemainingCategories:
-        formData.get('combineRemainingCategories') === 'on',
-      chartType: formData.get('chartType'),
-      measureCalculation: formData.get('measureCalculation'),
-      uiSettings: {
-        containerSize: formData.get('containerSize'),
-        legendPlacement: formData.get('legendPlacement'),
-        tablePlacement: formData.get('tablePlacement'),
-      },
+    case 'updateChart': {
+      const config = buildChartConfig(formData)
+      await db.update(charts).set({ config }).where(eq(charts.id, chartId))
+      return null
     }
 
-    await db.update(charts).set({ config }).where(eq(charts.id, chartId))
+    case 'duplicateChart': {
+      const [chart] = await db
+        .select()
+        .from(charts)
+        .where(eq(charts.id, chartId))
+      if (!chart) throw new Response('Diagrammet finns inte', { status: 404 })
 
-    return null
-  }
-
-  if (intent === 'duplicateChart') {
-    const chartId = formData.get('id') as string
-
-    const [chart] = await db.select().from(charts).where(eq(charts.id, chartId))
-
-    if (!chart) {
-      throw new Response('Diagrammet finns inte', { status: 404 })
+      await db.insert(charts).values({ reportId, config: chart.config })
+      return null
     }
 
-    await db.insert(charts).values({
-      reportId,
-      config: {
-        ...(chart.config as any),
-      },
-    })
-
-    return null
-  }
-
-  if (intent === 'deleteChart') {
-    const chartId = formData.get('id') as string
-
-    await db.delete(charts).where(eq(charts.id, chartId))
-
-    return null
-  }
-
-  if (intent === 'updateChartTitle') {
-    const chartId = formData.get('id') as string
-    const title = formData.get('chartTitle') as string
-
-    const [chart] = await db.select().from(charts).where(eq(charts.id, chartId))
-
-    const updatedConfig = {
-      ...chart.config,
-      title,
+    case 'deleteChart': {
+      await db.delete(charts).where(eq(charts.id, chartId))
+      return null
     }
 
-    await db
-      .update(charts)
-      .set({ config: updatedConfig })
-      .where(eq(charts.id, chartId))
+    case 'updateChartTitle': {
+      const title = formData.get('chartTitle') as string
+      const [chart] = await db
+        .select()
+        .from(charts)
+        .where(eq(charts.id, chartId))
 
-    return null
-  }
+      const updatedConfig = chart.config as ChartConfig
 
-  if (intent === 'updateChartDescription') {
-    const chartId = formData.get('id') as string
-    const description = formData.get('chartDescription') as string
+      await db
+        .update(charts)
+        .set({ config: { ...updatedConfig, title } })
+        .where(eq(charts.id, chartId))
 
-    const [chart] = await db.select().from(charts).where(eq(charts.id, chartId))
-
-    const updatedConfig = {
-      ...chart.config,
-      description,
+      return null
     }
 
-    await db
-      .update(charts)
-      .set({ config: updatedConfig })
-      .where(eq(charts.id, chartId))
+    case 'updateChartDescription': {
+      const description = formData.get('chartDescription') as string
+      const [chart] = await db
+        .select()
+        .from(charts)
+        .where(eq(charts.id, chartId))
 
-    return null
-  }
+      const updatedConfig = chart.config as ChartConfig
 
-  if (intent === 'updateReportTitle') {
-    const title = formData.get('reportTitle') as string
+      await db
+        .update(charts)
+        .set({ config: { ...updatedConfig, description } })
+        .where(eq(charts.id, chartId))
 
-    await db.update(reports).set({ title }).where(eq(reports.id, reportId))
-
-    return null
-  }
-
-  if (intent === 'updateReportDescription') {
-    const description = formData.get('reportDescription') as string
-
-    await db
-      .update(reports)
-      .set({ description })
-      .where(eq(reports.id, reportId))
-
-    return null
-  }
-
-  if (intent === 'saveReport') {
-    const location = formData.get('location') as string | null
-    const filters = formData.get('filters') as string | null
-
-    const parsedFilters = filters ? JSON.parse(filters) : []
-
-    await db
-      .update(reports)
-      .set({ location, filters: parsedFilters })
-      .where(eq(reports.id, reportId))
-
-    const existing = await db
-      .select()
-      .from(sharedReports)
-      .where(eq(sharedReports.reportId, reportId))
-
-    if (existing.length === 0) {
-      return redirect(`/rapporter`)
+      return null
     }
 
-    const snapshot = await buildSharedReportSnapshot(reportId)
+    case 'updateReportTitle': {
+      const title = formData.get('reportTitle') as string
+      await db.update(reports).set({ title }).where(eq(reports.id, reportId))
+      return null
+    }
 
-    await db
-      .update(sharedReports)
-      .set({
-        title: snapshot.report.title,
-        description: snapshot.report.description,
-        charts: snapshot.charts,
-      })
-      .where(eq(sharedReports.reportId, reportId))
+    case 'updateReportDescription': {
+      const description = formData.get('reportDescription') as string
+      await db
+        .update(reports)
+        .set({ description })
+        .where(eq(reports.id, reportId))
+      return null
+    }
 
-    return redirect(`/rapporter`)
-  }
+    case 'saveReport': {
+      await saveReportFilters(reportId, formData)
 
-  if (intent === 'saveAndViewReport') {
-    const location = formData.get('location') as string | null
-    const filters = formData.get('filters') as string | null
+      const existing = await db
+        .select()
+        .from(sharedReports)
+        .where(eq(sharedReports.reportId, reportId))
 
-    const parsedFilters = filters ? JSON.parse(filters) : []
+      if (existing.length === 0) return redirect('/rapporter')
 
-    await db
-      .update(reports)
-      .set({ location, filters: parsedFilters })
-      .where(eq(reports.id, reportId))
+      await updateSharedSnapshot(reportId)
+      return redirect('/rapporter')
+    }
 
-    const existing = await db
-      .select()
-      .from(sharedReports)
-      .where(eq(sharedReports.reportId, reportId))
+    case 'saveAndViewReport': {
+      await saveReportFilters(reportId, formData)
 
-    if (existing.length === 0) {
+      const existing = await db
+        .select()
+        .from(sharedReports)
+        .where(eq(sharedReports.reportId, reportId))
+
+      if (existing.length === 0) return redirect(`/visa-rapport/${reportId}`)
+
+      await updateSharedSnapshot(reportId)
       return redirect(`/visa-rapport/${reportId}`)
     }
 
-    const snapshot = await buildSharedReportSnapshot(reportId)
+    case 'saveAndShareReport': {
+      await saveReportFilters(reportId, formData)
 
-    await db
-      .update(sharedReports)
-      .set({
-        title: snapshot.report.title,
-        description: snapshot.report.description,
-        charts: snapshot.charts,
-      })
-      .where(eq(sharedReports.reportId, reportId))
+      const snapshot = await buildSharedReportSnapshot(reportId)
 
-    return redirect(`/visa-rapport/${reportId}`)
-  }
+      const existing = await db
+        .select()
+        .from(sharedReports)
+        .where(eq(sharedReports.reportId, reportId))
 
-  if (intent === 'saveAndShareReport') {
-    const location = formData.get('location') as string | null
-    const filters = formData.get('filters') as string | null
+      if (existing.length > 0) {
+        const [updated] = await db
+          .update(sharedReports)
+          .set({
+            title: snapshot.report.title,
+            description: snapshot.report.description,
+            charts: snapshot.charts,
+          })
+          .where(eq(sharedReports.reportId, reportId))
+          .returning()
 
-    const parsedFilters = filters ? JSON.parse(filters) : []
+        return { sharedReportId: updated.id }
+      }
 
-    await db
-      .update(reports)
-      .set({ location, filters: parsedFilters })
-      .where(eq(reports.id, reportId))
-
-    const snapshot = await buildSharedReportSnapshot(reportId)
-
-    const existing = await db
-      .select()
-      .from(sharedReports)
-      .where(eq(sharedReports.reportId, reportId))
-
-    if (existing.length > 0) {
-      const [updated] = await db
-        .update(sharedReports)
-        .set({
+      const [sharedReport] = await db
+        .insert(sharedReports)
+        .values({
           title: snapshot.report.title,
           description: snapshot.report.description,
+          reportId,
           charts: snapshot.charts,
         })
-        .where(eq(sharedReports.reportId, reportId))
         .returning()
 
-      return { sharedReportId: updated.id }
+      return { sharedReportId: sharedReport.id }
     }
-
-    const [sharedReport] = await db
-      .insert(sharedReports)
-      .values({
-        title: snapshot.report.title,
-        description: snapshot.report.description,
-        reportId,
-        charts: snapshot.charts,
-      })
-      .returning()
-
-    return { sharedReportId: sharedReport.id }
   }
 
   return null

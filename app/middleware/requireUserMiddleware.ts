@@ -9,11 +9,16 @@ export async function requireUserMiddleware({
   request: any
   context: any
 }) {
-  const userSession = await auth.api.getSession(request)
+  try {
+    const userSession = await auth.api.getSession(request)
 
-  if (!userSession?.user) {
-    throw redirect('/signin')
+    if (!userSession?.user) {
+      throw redirect('/logga-in')
+    }
+
+    context.set(userSessionContext, userSession)
+  } catch (error) {
+    if (error instanceof Response) throw error
+    throw redirect('/logga-in')
   }
-
-  context.set(userSessionContext, userSession)
 }

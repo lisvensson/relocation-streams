@@ -22,7 +22,7 @@ const chartConfig: TemporalChartConfig = {
   description: '',
   measure: 'inflow',
   uiSettings: {
-    containerSize: 'medium',
+    containerSize: '50',
     legendPlacement: 'bottom',
     tablePlacement: 'hidden',
   },

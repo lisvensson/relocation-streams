@@ -2,79 +2,60 @@ import { eq } from 'drizzle-orm'
 import { db } from '~/shared/database'
 import type { Route } from './+types/ReportView'
 import { charts, reports, sharedReports } from '~/shared/database/schema'
-import { buildNetFlowCategoryChart } from '~/shared/database/buildCharts/buildNetFlowCategoryChart'
-import { buildTemporalChart } from '~/shared/database/buildCharts/buildTemporalChart'
-import { buildCategoryChart } from '~/shared/database/buildCharts/buildCategoryChart'
-import { buildTemporalCategoryChart } from '~/shared/database/buildCharts/buildTemporalCategoryChart'
 import ChartRenderer from '~/components/charts/ChartRenderer'
 import { XIcon } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { Link } from 'react-router'
+import { buildChartByType } from '~/lib/buildChartsByType'
+import type { ChartConfig, Filter } from '~/shared/database/models/chartModels'
 
 export async function loader({ params }: Route.LoaderArgs) {
-  const [report] = await db
-    .select({
-      id: reports.id,
-      title: reports.title,
-      description: reports.description,
-      createdAt: reports.createdAt,
-      location: reports.location,
-      filters: reports.filters,
-      sharedId: sharedReports.id,
-    })
-    .from(reports)
-    .leftJoin(sharedReports, eq(sharedReports.reportId, reports.id))
-    .where(eq(reports.id, params.reportId))
-
-  if (!report) {
-    throw new Response('Rapporten hittades inte', { status: 404 })
+  const reportId = params.reportId
+  if (!reportId) {
+    throw new Response('Ogiltig rapportlänk.', { status: 400 })
   }
 
-  const location = report.location?.toLowerCase()
-  const filters = report.filters
+  try {
+    const [report] = await db
+      .select({
+        id: reports.id,
+        title: reports.title,
+        description: reports.description,
+        createdAt: reports.createdAt,
+        location: reports.location,
+        filters: reports.filters,
+        sharedId: sharedReports.id,
+      })
+      .from(reports)
+      .leftJoin(sharedReports, eq(sharedReports.reportId, reports.id))
+      .where(eq(reports.id, reportId))
 
-  const savedCharts = await db
-    .select()
-    .from(charts)
-    .where(eq(charts.reportId, params.reportId))
-    .orderBy(charts.id)
+    if (!report) {
+      throw new Response('Rapporten hittades inte.', { status: 404 })
+    }
 
-  const buildCharts = await Promise.all(
-    savedCharts.map(async (chart) => {
-      const config = chart.config
-      if (config.type === 'netflow+category') {
-        const buildChart = await buildNetFlowCategoryChart(
-          location,
-          filters,
-          config
+    const savedCharts = await db
+      .select()
+      .from(charts)
+      .where(eq(charts.reportId, reportId))
+      .orderBy(charts.id)
+
+    const buildCharts = await Promise.all(
+      savedCharts.map((chart) =>
+        buildChartByType(
+          chart.id,
+          report.location ?? undefined,
+          (report.filters ?? []) as Filter[],
+          chart.config as ChartConfig
         )
-        return { id: chart.id, ...buildChart, config }
-      }
+      )
+    )
 
-      if (config.type === 'temporal') {
-        const buildChart = await buildTemporalChart(location, filters, config)
-        return { id: chart.id, ...buildChart, config }
-      }
-
-      if (config.type === 'category') {
-        const buildChart = await buildCategoryChart(location, filters, config)
-        return { id: chart.id, ...buildChart, config }
-      }
-
-      if (config.type === 'temporal+category') {
-        const buildChart = await buildTemporalCategoryChart(
-          location,
-          filters,
-          config
-        )
-        return { id: chart.id, ...buildChart, config }
-      }
-
-      return null
-    })
-  )
-
-  return { report, charts: buildCharts }
+    return { report, charts: buildCharts }
+  } catch (error) {
+    console.error('Failed to load report view:', error)
+    throw new Response('Kunde inte ladda rapporten.', { status: 500 })
+  }
 }
 
 export default function ReportView({ loaderData }: Route.ComponentProps) {
