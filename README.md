@@ -1,69 +1,131 @@
-# Projekt: Flyttströmmar – Intern analysportal
+# 🧭 Flyttströmmar
 
-## Syfte
+Ett internt analysverktyg för att visualisera företagsflyttar i Sverige.
 
-Projektet handlar om att bygga en privat webbtjänst där inloggade användare kan se och analysera företagsflyttar i Sverige.  
-Tjänsten ska visa olika typer av diagram som beskriver flyttströmmar mellan olika geografiska områden, exempelvis hur många företag som har flyttat till Gävle kommun ett visst år.
-
-Användaren ska kunna filtrera vilka flyttar som ligger till grund för diagrammen, t.ex. genom att välja:
-
-- Flyttår (flerval)  
-- Antal anställda (flerval, fasta intervall)  
-- Bolagsformer (flerval)  
-- Branschkluster (flerval)  
-- Ett geografiskt område (län, kommun, stad, område)  
+Flyttströmmar gör det möjligt att snabbt filtrera, generera och spara rapporter baserade på företagsflyttar, branschkluster, anställdas storlek, årtal och geografiska områden.
 
 ---
 
-## Teknisk miljö
+## 📚 Innehållsförteckning (uppdaterad)
 
-- React Router v7 (routing och layout)  
-- Drizzle ORM (PostgreSQL-databas)  
-- Better Auth (inloggning)  
-- shadcn/ui + TailwindCSS (komponentbibliotek)  
-
----
-
-## Målbild
-
-> En inloggad användare kan välja filter och se ett stapeldiagram som visar totalt antal företagsflyttar till valt område per år.
-
-Tjänsten ska på sikt kunna visa många olika diagram.  
-Varje diagram bör vara en självständig enhet som:
-
-- Har en rubrikmall (t.ex. “Flyttar till {valt område}”)  
-- Vet vilken diagramtyp som ska användas (t.ex. stapeldiagram, linjediagram, etc.)  
-- Vet vilken databasfråga som behövs för att beräkna sitt data  
-
-Strukturen ska göra det enkelt att lägga till nya diagram i framtiden utan att ändra övrig kod.
+- [🚀 Kom igång](#-kom-igång)
+- [🧱 Arkitektur](#-arkitektur)
+- [🧭 Vad kan man göra i verktyget?](#-vad-kan-man-göra-i-verktyget)
+- [💻 Tech Stack](#-tech-stack)
 
 ---
 
-## Arbetssteg – Från databas till första diagram
+## 🚀 Kom igång
 
-1. **Skapa databasmodellen för företagsflyttar**  
-   - Skapa en ny tabell som representerar företagsflyttar.  
-   - Tabellen ska innehålla uppgifter som möjliggör filtrering efter flyttår, antal anställda, bolagsform, branschkluster och geografiskt område.  
-   - Lägg till både från-område och till-område för varje flytt och stöd för olika nivåer (län, kommun etc.).  
-   - Ska bara vara **en tabell** (`relocation` föreslaget namn).  
+**Innan du börjar behöver du:**
 
-2. **Fylla databasen**  
-   - Skapa ett script eller kommando som fyller tabellen med fejkade företagsflyttar.  
-   - Testdatat ska innehålla realistiska värden (kommunnamn, årtal, antal anställda osv.).  
-   - Det ska finnas tillräckligt mycket data för att kunna visa skillnader i diagrammen (flera hundra eller tusen rader).  
-   - Syftet är att snabbt kunna testa filtrering och visualisering utan att behöva riktig data.  
+- Node.js 18 eller senare
+- En PostgreSQL‑databas — skapa ett projekt på [neon.tech](https://neon.tech), eller kör `docker-compose up -d` för en lokal databas med den medföljande Docker Compose‑filen
 
-3. **Skapa gränssnitt för filter**  
-   - Bygg ett panel- eller formulärliknande gränssnitt där användaren kan välja filter.  
-   - Filtren ska motsvara de fält som finns i databasen.  
-   - Filtren ska vara interaktiva och kunna kombineras.  
-   - Filtreringsvalen ska lagras i URL:en (via React Router) så att användaren kan dela eller återkomma till samma vy.  
+### 1. Klona projektet
 
-4. **Skapa och visa diagrammet**  
-   - Skapa en struktur för att definiera ett diagram med:  
-     - en titelmall (som ändras beroende på valda filter)  
-     - funktion som hämtar och beräknar data från databasen  
-     - diagramtyp (t.ex. stapeldiagram)  
-   - Skapa en komponent eller sektion i gränssnittet där diagrammet visas.  
-   - Säkerställ att det uppdateras när filtren ändras.  
-   - Presentera data tydligt med axlar, etiketter och tooltip.  
+```bash
+git clone <repo-url>
+cd flyttstrommar
+```
+
+### 2. Installera beroenden
+
+```bash
+npm install
+```
+
+### 3. Skapa miljöfil
+
+```bash
+cp .env.example .env
+```
+
+Fyll sedan i följande variabler:
+
+| Variabel              | Beskrivning                                     |
+| --------------------- | ----------------------------------------------- |
+| `DATABASE_URL`        | PostgreSQL‑anslutningssträng                    |
+| `BETTER_AUTH_SECRET`  | Hemlig nyckel för att signera användarsessioner |
+| `BETTER_AUTH_URL`     | Appens bas‑URL (t.ex. `http://localhost:5173`)  |
+| `RESEND_API_KEY`      | API‑nyckel för e‑posttjänsten Resend            |
+| `SEND_OTP_EMAIL_FROM` | Avsändaradress för inloggningsmail              |
+
+### 4. Migrera databasen
+
+```bash
+npm run db:migrate
+```
+
+> Under utveckling kan `npm run db:push` användas för att synka schemaändringar direkt utan att generera migreringsfiler.
+>
+> För att bläddra i databasen visuellt: `npm run db:studio`
+
+### 5. Starta utvecklingsservern
+
+```bash
+npm run dev
+```
+
+Applikationen körs på:  
+http://localhost:5173
+
+---
+
+## 🧱 Arkitektur
+
+Applikationen följer ett klassiskt fullstack-mönster där varje sida (route) ansvarar för både dataladdning och rendering.
+
+```
+app/
+├── routes/         # Sidor: hem, rapporter, rapport, inloggning, delad vy
+├── lib/            # Serverlogik: bygga diagram, hantera filter, dela rapporter
+├── components/     # Delade UI-komponenter
+├── middleware/     # Autentiseringsskydd för inloggade sidor
+└── shared/
+    ├── auth/       # Konfiguration av Better Auth och OTP-utskick
+    └── database/   # Databasuppkoppling, schema och diagrambyggare
+```
+
+Rapportdata lagras i PostgreSQL med fyra huvudtabeller: `reports`, `charts`, `shared_reports` och `relocation`. Kärntabellen `relocation` innehåller alla företagsflyttar och är indexerad för snabba frågor.
+
+Delade rapporter är frysta snapshots — de uppdateras inte automatiskt när originalrapporten ändras. Innehållet fryses vid delningstillfället och uppdateras bara om ägaren sparar rapporten på nytt.
+
+---
+
+## 🧭 Vad kan man göra i verktyget?
+
+- Skapa rapporter med valfritt namn och beskrivning
+- Filtrera data på år, företagsstorlek, företagstyp och branschkluster
+- Lägga till interaktiva diagram: tidsserie, kategorifördelning, nettoflöde och kombinerade vyer
+- Förhandsgranska rapporten i ett låst läsläge
+- Dela rapporten via en publik länk — mottagaren behöver inte logga in
+- Hantera alla sina rapporter från en samlad översikt
+
+---
+
+## 💻 Tech Stack
+
+### 🧩 Framework & UI
+
+- **React Router v7**
+- **React**
+- **Tailwind CSS**
+- **shadcn/ui**
+
+### 🗄️ Data & Server
+
+- **Drizzle ORM**
+- **PostgreSQL**
+
+### 🔐 Autentisering
+
+- **Better Auth**
+
+### 🛠️ Dev Experience
+
+- **TypeScript**
+- **ESLint & Prettier**
+- **Vite**
+
+---
