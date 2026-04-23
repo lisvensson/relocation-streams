@@ -165,7 +165,7 @@ export function ChartBuilder() {
                 </div>
               )}
               {type === 'netflow+category' && (
-                <input type="hidden" name="measure" value="inflow" />
+                <input type="hidden" name="measure" value="netflow" />
               )}
 
               {/* category */}
